@@ -1,0 +1,20 @@
+---
+import VizIsland from './VizIsland.tsx';
+import { VIZ } from '../viz/registry.js';
+
+interface Props { id: keyof typeof VIZ }
+const { id } = Astro.props;
+const entry = VIZ[id];
+if (!entry) throw new Error(`Viz: unknown id "${id}". Add it to src/viz/registry.ts.`);
+---
+
+<figure class="viz">
+  <VizIsland id={id} client:visible />
+  <noscript>
+    <p>
+      <strong>{entry.label}.</strong>
+      The interactive step-by-step version of this diagram needs JavaScript.
+      The explanation below covers the same material.
+    </p>
+  </noscript>
+</figure>
