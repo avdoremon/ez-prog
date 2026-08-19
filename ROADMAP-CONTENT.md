@@ -17,6 +17,70 @@ depends on; only `ArrayView` exists today (see `docs/AUTHORING.md` §0) — ever
 renderer column value is an **engine change**, not a routine content addition, and must
 be scoped and reported as such before work starts, not discovered mid-PR.
 
+## The measurement (Task 20, step 5) — and why it does not set the count
+
+Insertion sort (row 12) was built as the fourth-lesson test on 2026-08-19,
+working only from `docs/AUTHORING.md`. **Elapsed authoring time: 3 minutes 36
+seconds.**
+
+**Do not set Phase 1's lesson count from that number.** The plan asks how long
+*one person* takes; this run was executed by an AI agent, and 3m36s is a
+measurement of the agent, not of the human authoring cost the schedule depends
+on. Treat it as an upper bound on how much *the documentation* gets in the way,
+not as a per-lesson cost. What it does establish, and what is genuinely
+reusable:
+
+- `docs/AUTHORING.md` is sufficient on its own. No step required reading the
+  implementation plan or reverse-engineering the engine.
+- The §0 promise held for content: the lesson needed **no edit to any file that
+  already existed under `packages/`**. It added a generator, a conformance test,
+  three language samples, a registry entry, and the lesson — all new files.
+- The prose budget is the real constraint. The first draft came in at 757 words
+  against a 700-word limit and took two trimming passes. Budget for that.
+
+**Until a human runs the same test, Phase 1's count stays unset.** The
+`IMPLEMENTATION_PLAN.md` §14 guess of ~35 lessons is neither confirmed nor
+refuted by this run. Re-run the test with a human author before committing to a
+number; the rows below stay backlog until then.
+
+### Engine gaps the test surfaced
+
+The lesson itself needed no engine change, but exercising it end to end exposed
+three pre-existing defects that affected **all three previously shipped
+lessons** and that no gate caught. All three are fixed, each with the check that
+would have caught it:
+
+1. **The code panel had no CSS.** Its `white-space: pre` content pushed the
+   whole document sideways at 360px (110px of overflow on bubble sort),
+   violating the Definition of Done's 360px item. Fixed by confining the scroll
+   to the panel; the panel is now focusable, since a scroll region that cannot
+   be reached by keyboard is a WCAG 2.1.1 failure.
+2. **Run/Reset did not restart the player.** A learner who stepped forward and
+   then ran new input landed mid-run in a run they never saw start —
+   contradicting `docs/AUTHORING.md` §4.7, which documents frame 0.
+3. **The visualization island shifted the page by 0.307 CLS** on hydration,
+   costing ~15 Lighthouse performance points (79 → 97 once fixed).
+
+The gate now includes Playwright coverage for all four lessons: axe
+(wcag2a/wcag2aa), no horizontal scroll at 360px, and a 0.1 CLS budget.
+
+### One exit-gate item is not met
+
+**The site is unreadable in dark mode.** With `prefers-color-scheme: dark`,
+Starlight sets `data-theme="dark"` and switches its text to white, while
+`apps/web/src/styles/tokens.css` pins the background to the light `--paper`
+(#F7F5F0) unconditionally. Headings, `<summary>` elements, pagination links and
+inline `<code>` render at contrast ratios of 1.08–1.61 against WCAG AA's
+required 4.5. Lighthouse's mobile run scores Accessibility 97 because of it.
+
+This is pre-existing (Task 16) and affects every page, not just the new lesson.
+It was invisible to the automated gates because the Playwright axe run uses
+Chromium's default light scheme. Resolving it is a design decision — either
+author a dark palette for the project's tokens, or disable Starlight's theme
+switcher and commit to the single light "Trace" palette that
+`IMPLEMENTATION_PLAN.md` §8 actually specifies — and is deliberately left open
+rather than decided inside this task.
+
 ## On the total count
 
 `IMPLEMENTATION_PLAN.md` §14 guesses "~35 lessons" for Phase 1 before a single lesson
@@ -27,8 +91,11 @@ one person, working only from `docs/AUTHORING.md` and forbidden from touching
 `packages/`, takes to ship a fourth lesson (insertion sort) reusing the existing
 `ArrayView` renderer. That measured per-lesson cost — not a guess made before any
 lesson existed — is what sets how many rows below this project can actually afford to
-ship in Phase 1. Until that number lands, treat every `planned` row as backlog, not a
-promise.
+ship in Phase 1.
+
+That test has now been **run, but by an agent rather than a person** (see "The
+measurement" above), so the human per-lesson cost the schedule needs is still
+unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 
 ## Shipped
 
@@ -37,6 +104,7 @@ promise.
 | 0a | `/algorithms/binary-search` | Binary Search | 220 | ArrayView | `binary-search` | done |
 | 0b | `/algorithms/bubble-sort` | Bubble Sort | 221 | ArrayView | `bubble-sort` | done |
 | 0c | `/complexity/big-o` | How Fast Is Fast? | 230 | ArrayView | `linear-search` (+ reuses `binary-search`) | done |
+| 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | done |
 
 The `linear-search` generator, code samples, and registry entry already exist
 (`packages/viz-core/src/algorithms/linear-search.ts`,
@@ -65,7 +133,7 @@ generator required.
 | # | Slug | Title | `order` | Renderer needed | Viz id | Status |
 |---|---|---|---|---|---|---|
 | 11 | `/algorithms/selection-sort` | Selection Sort | 222 | ArrayView | `selection-sort` | planned |
-| 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | planned — this is Task 20's fourth-lesson exercise |
+| 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | **done** — was Task 20's fourth-lesson test (see Shipped) |
 | 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | planned |
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | planned |
 | 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView (viz already registered — see Shipped) | `linear-search` | planned — content only, viz reused from row 0c |
