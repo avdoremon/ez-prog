@@ -1,0 +1,23 @@
+# Editors
+.idea/
+.vscode/
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+.astro/
+apps/web/public/pyodide/
+apps/web/public/fonts/*.woff2
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Test / tooling
+coverage/
+test-results/
+playwright-report/
