@@ -1,0 +1,109 @@
+---
+title: Binary Search
+description: Find a value in a sorted array by repeatedly discarding half of it.
+order: 220
+difficulty: beginner
+estimatedMinutes: 6
+viz: binary-search
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Looking for a name in a sorted list, you do not start at the top. You open
+somewhere near the middle and decide which half to keep. Binary search is
+that instinct, written down.
+
+<Viz id="binary-search" />
+
+Each step compares the target against the midpoint and throws away the half
+that cannot contain it. The array **must** be sorted — that is the entire
+source of the speedup. The highlighted band above is the range still worth
+checking; it shrinks by half on every step, and the cursor marks the
+midpoint being tested right now.
+
+## How it works
+
+Start with the whole array as the search range. Look at its midpoint. If the
+midpoint holds the target, you are done. If the midpoint is too small, the
+target — if it exists — must be to the right, so discard the left half,
+midpoint included. If the midpoint is too large, discard the right half
+instead. Repeat on whichever half remains until the range is empty or the
+target turns up. Because the range halves every step, a million-value array
+never needs more than about twenty comparisons.
+
+## Try it
+
+```js
+function binarySearch(arr, target) {
+  let lo = 0, hi = arr.length - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    if (arr[mid] === target) return mid;
+    if (arr[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return -1;
+}
+```
+
+## Trade-offs
+
+Use it when the data is already sorted and you search it often. Avoid it
+when the data changes constantly: keeping an array sorted costs more than
+the searches save. A hash map beats it for pure lookups; binary search wins
+when you also need order, like finding the closest value or a range of
+matches.
+
+## Check your understanding
+
+1. **The array `[3, 7, 7, 7, 12]` is searched for `7`. Which index can binary
+   search return?**
+   - Only index 1
+   - Only index 3
+   - Index 1, 2, or 3, depending on which midpoint it lands on first
+   - Index 0
+
+   <details>
+   <summary>Answer</summary>
+
+   Index 1, 2, or 3. Duplicate values give binary search several correct
+   stopping points — it returns whichever one its sequence of midpoints
+   happens to test first, not necessarily the first occurrence. Index 0
+   holds `3`, not `7`, so it is never a valid answer.
+   </details>
+
+2. **Why does binary search require a sorted array?**
+   - It does not — it works on any array
+   - Sorting lets each comparison rule out an entire half instead of one value
+   - Sorting makes the array shorter
+   - It only matters for arrays larger than 1000 elements
+
+   <details>
+   <summary>Answer</summary>
+
+   Sorting lets each comparison rule out an entire half. On an unsorted
+   array, a midpoint smaller than the target tells you nothing about which
+   side the target is on, so the halving trick breaks down completely.
+   Array length is unaffected by sorting, and the requirement holds at any
+   size, not just large ones.
+   </details>
+
+3. **An array holds 1,000,000 sorted values. Roughly how many comparisons
+   does binary search need in the worst case?**
+   - About 1,000,000
+   - About 1,000
+   - About 20
+   - About 2
+
+   <details>
+   <summary>Answer</summary>
+
+   About 20 — 2²⁰ is roughly one million, and each comparison halves the
+   remaining range. 1,000,000 is what linear search would need instead;
+   1,000 and 2 do not match log₂ of the input size.
+   </details>
+
+## Practice
+
+Try [Binary Search on LeetCode](https://leetcode.com/problems/binary-search/).

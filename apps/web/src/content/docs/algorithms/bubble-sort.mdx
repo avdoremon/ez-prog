@@ -1,0 +1,118 @@
+---
+title: Bubble Sort
+description: Sort an array by repeatedly swapping neighbours that are out of order.
+order: 221
+difficulty: beginner
+estimatedMinutes: 6
+viz: bubble-sort
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Bubble sort is rarely the sort you should reach for, but it is the shortest
+correct one — a single nested loop, no extra memory — which makes it the
+easiest place to watch "number of comparisons" turn into something you can
+actually count.
+
+<Viz id="bubble-sort" />
+
+Each pass walks the array left to right, comparing neighbours and swapping
+any pair that is out of order. The largest unsorted value always "bubbles"
+to its final position by the end of a pass, so every later pass can stop one
+element earlier than the one before it.
+
+## How it works
+
+On pass one, compare every adjacent pair and swap when the left value is
+bigger. By the time the pass ends, the largest value sits at the very end —
+it can never move left again. Pass two repeats the same walk but stops one
+step earlier, since the last slot is already settled. This continues until a
+full pass makes no swaps at all, which means the rest of the array is
+already sorted, and the algorithm stops early instead of grinding through
+every remaining pass regardless.
+
+Watch the visualization step through the array above: each pass mutates the
+array in place, and every frame you see is a snapshot of that array frozen
+at one instant — not a live view of a variable still changing underneath
+you.
+
+## Try it
+
+```js
+function bubbleSort(arr) {
+  arr = [...arr];
+  for (let i = 0; i < arr.length - 1; i++) {
+    let swapped = false;
+    for (let j = 0; j < arr.length - 1 - i; j++) {
+      if (arr[j] > arr[j + 1]) {
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        swapped = true;
+      }
+    }
+    if (!swapped) break;
+  }
+  return arr;
+}
+```
+
+## Trade-offs
+
+Use it for teaching, for tiny arrays, or when the array is already nearly
+sorted — the early exit makes that case fast. Avoid it for everything else:
+with *n* values it makes roughly *n*² comparisons in the worst case, so any
+real dataset will be far outperformed by a language's built-in sort.
+
+## Check your understanding
+
+1. **After the first full pass over `[5, 2, 9, 1, 7, 3]`, which value is
+   guaranteed to be in its final position?**
+   - 5, at the front
+   - 9, at the back
+   - 1, at the front
+   - None — position is only settled once the whole sort finishes
+
+   <details>
+   <summary>Answer</summary>
+
+   9, at the back. Each pass carries the largest remaining value rightward
+   through a chain of swaps, so it lands in its final slot after exactly one
+   pass — well before the rest of the array is sorted.
+   </details>
+
+2. **The array `[1, 2, 3, 4, 5]` is already sorted. What does bubble sort
+   do?**
+   - Nothing — it detects the array is sorted before starting
+   - It still runs every possible pass
+   - It runs exactly one pass, makes no swaps, and stops
+   - It throws an error, since sorted input is invalid
+
+   <details>
+   <summary>Answer</summary>
+
+   It runs exactly one pass, makes no swaps, and stops. The `swapped` flag
+   catches this: a pass with zero swaps means the array is already ordered,
+   so the early exit skips every remaining pass instead of grinding through
+   them for no reason.
+   </details>
+
+3. **Why does the inner loop shrink by one comparison on every pass?**
+   - It doesn't — it's the same length every time
+   - Because the largest unsorted value has already settled at the end
+   - To save memory
+   - Because the array itself gets shorter
+
+   <details>
+   <summary>Answer</summary>
+
+   Because the largest unsorted value has already settled at the end, so
+   re-comparing it is wasted work. The array's length never changes —
+   sorting happens in place — and the shrink is a comparison-count
+   optimization, not a memory one.
+   </details>
+
+## Practice
+
+Try [Sort an Array on LeetCode](https://leetcode.com/problems/sort-an-array/)
+— bubble sort will be too slow to pass its time limit, which is itself the
+lesson the next page makes explicit.
