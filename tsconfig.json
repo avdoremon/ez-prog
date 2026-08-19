@@ -1,0 +1,21 @@
+{
+  // Root project-reference aggregator for `tsc -b`.
+  //
+  // apps/web is intentionally NOT referenced here. Its Starlight-based content
+  // config transitively imports @astrojs/starlight source (Starlight ships raw
+  // .ts, not compiled .d.ts), and one of its internal files
+  // (utils/translations.ts) has a real, upstream type error under a plain
+  // whole-program `tsc` check -- reproduced with both TypeScript 5.9.3 and
+  // 7.0.2, with and without `strict`, independent of any tsconfig setting on
+  // our side. This is a known limitation, not a bug in this repo: see
+  // https://github.com/withastro/starlight/discussions/1891 and the (closed
+  // as not planned) https://github.com/withastro/starlight/issues/1607.
+  // apps/web is typechecked instead via `astro check` (see root
+  // package.json's "typecheck" script), which uses Astro's own diagnostic
+  // pipeline and does not hit this issue.
+  "files": [],
+  "references": [
+    { "path": "./packages/viz-core" },
+    { "path": "./packages/viz-react" }
+  ]
+}

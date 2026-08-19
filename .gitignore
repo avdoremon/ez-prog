@@ -12,6 +12,10 @@ dist/
 apps/web/public/pyodide/
 apps/web/public/fonts/*.woff2
 
+# TypeScript project-reference build artifacts (tsc -b)
+.tsc-out/
+*.tsbuildinfo
+
 # Env & secrets
 .env
 .env.*

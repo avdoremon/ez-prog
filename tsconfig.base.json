@@ -17,7 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "allowJs": false,
     "checkJs": false,
-    "declaration": false,
+    "declaration": true,
     "sourceMap": true,
     "composite": true
   }
