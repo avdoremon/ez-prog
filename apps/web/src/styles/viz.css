@@ -97,6 +97,23 @@
   width: 100%;
 }
 
+/*
+ * The visualization island renders a single "Loading…" line server-side and
+ * grows to roughly 700px once React hydrates, pushing the whole lesson down:
+ * a 0.307 cumulative layout shift, which alone cost ~15 Lighthouse
+ * performance points. Reserving the space up front removes the shift. The
+ * `.js` class (set in astro.config.mjs before first paint) keeps the
+ * reservation away from readers with JavaScript disabled, who see only the
+ * short <noscript> paragraph and would otherwise stare at a blank box.
+ */
+.js .viz {
+  min-height: 44rem;
+}
+
+@media (max-width: 480px) {
+  .js .viz { min-height: 46rem; }
+}
+
 .viz-input-editor {
   margin-top: 1rem;
   border: 2px solid var(--muted);

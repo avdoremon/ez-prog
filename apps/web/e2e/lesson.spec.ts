@@ -56,3 +56,43 @@ for (const path of ALL_LESSONS) {
     expect(overflow).toBeLessThanOrEqual(1);
   });
 }
+
+for (const path of ALL_LESSONS) {
+  /*
+   * The visualization island grows from one line to ~700px when it hydrates.
+   * Unreserved, that shoved each lesson's prose down for a 0.307 cumulative
+   * layout shift — worth ~15 Lighthouse performance points and invisible to
+   * every other gate. Google's "good" CLS threshold is 0.1.
+   */
+  test(`${path} does not shift layout while the visualization hydrates`, async ({ page }) => {
+    await page.goto(path);
+    await page.waitForSelector('[data-testid="note"]');
+    const cls = await page.evaluate(
+      () =>
+        new Promise<number>((resolve) => {
+          let total = 0;
+          new PerformanceObserver((list) => {
+            for (const entry of list.getEntries() as (PerformanceEntry & {
+              value: number;
+              hadRecentInput: boolean;
+            })[]) {
+              if (!entry.hadRecentInput) total += entry.value;
+            }
+          }).observe({ type: 'layout-shift', buffered: true });
+          setTimeout(() => resolve(total), 1000);
+        }),
+    );
+    expect(cls).toBeLessThan(0.1);
+  });
+}
+
+test('a reader with JavaScript disabled gets no reserved blank space', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+  await page.goto('/algorithms/insertion-sort/');
+  const height = await page.evaluate(
+    () => document.querySelector('figure.viz')!.getBoundingClientRect().height,
+  );
+  expect(height).toBeLessThan(400);
+  await context.close();
+});
