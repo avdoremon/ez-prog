@@ -137,6 +137,25 @@ test('a clean lesson produces no errors', async () => {
   expect(await lintContent(fixture('clean'))).toEqual([]);
 });
 
+// Regression test for the file-discovery filter: the original code only
+// matched `.mdx`, so a plain `.md` lesson (a natural choice for a
+// prose-only page -- Starlight serves both extensions) silently skipped
+// every one of the seven rules. scripts/fixtures/bad-prereq-md/lesson.md
+// reuses prerequisite-exists -- the same rule that caught this in the
+// real content directory during review -- to prove `.md` files are now
+// discovered and linted exactly like `.mdx` files.
+test('a .md lesson (not .mdx) is discovered and linted', async () => {
+  const errors = await lintContent(fixture('bad-prereq-md'));
+  expect(errors.map((e) => e.rule)).toContain('prerequisite-exists');
+});
+
+// scripts/fixtures/clean/notes.md sits alongside the .mdx lessons in the
+// same clean fixture, so this also proves mixed .md/.mdx directories
+// produce zero false positives once both extensions are discovered.
+test('a clean lesson with both .md and .mdx files produces no errors', async () => {
+  expect(await lintContent(fixture('clean'))).toEqual([]);
+});
+
 test('every error names a file and is human-readable', async () => {
   const errors = await lintContent(fixture('no-viz'));
   for (const e of errors) {

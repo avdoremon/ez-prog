@@ -59,11 +59,18 @@ export async function lintContent(
   registry: VizRegistry = VIZ,
 ): Promise<LintError[]> {
   const errors: LintError[] = [];
+  // Starlight serves both .md and .mdx content pages; a prose-only lesson
+  // is the natural case for plain .md. Filtering on .mdx alone left the
+  // gate blind to every rule on any .md lesson -- discover both
+  // extensions, and strip whichever one is present when deriving a slug.
+  const CONTENT_EXTENSIONS = ['.mdx', '.md'];
   const files = (await readdir(root, { recursive: true, withFileTypes: true }))
-    .filter((d) => d.isFile() && d.name.endsWith('.mdx'))
+    .filter((d) => d.isFile() && CONTENT_EXTENSIONS.some((ext) => d.name.endsWith(ext)))
     .map((d) => join(d.parentPath, d.name));
 
-  const slugFor = (file: string) => `/${toPosix(relative(root, file)).replace(/\.mdx$/, '')}`;
+  const stripContentExtension = (name: string) =>
+    CONTENT_EXTENSIONS.reduce((acc, ext) => (acc.endsWith(ext) ? acc.slice(0, -ext.length) : acc), name);
+  const slugFor = (file: string) => `/${stripContentExtension(toPosix(relative(root, file)))}`;
   const slugs = new Set(files.map(slugFor));
 
   for (const file of files) {
