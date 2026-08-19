@@ -31,6 +31,21 @@ const registry = {
       })),
     code: () => import('./code/bubble-sort/index.js'),
   },
+  'insertion-sort': {
+    renderer: 'ArrayView',
+    label: 'Array being sorted by inserting each value into the sorted prefix',
+    defaultInput: { arr: [5, 2, 9, 1, 7, 3] },
+    // Quadratic — tighter than the global MAX_FRAMES budget.
+    maxFrames: 400,
+    inputSchema: z.object({
+      arr: z.array(z.number()).min(1).max(24),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/insertion-sort').then((m) => ({
+        default: m.insertionSort,
+      })),
+    code: () => import('./code/insertion-sort/index.js'),
+  },
   'linear-search': {
     renderer: 'ArrayView',
     label: 'Array scanned one value at a time',
