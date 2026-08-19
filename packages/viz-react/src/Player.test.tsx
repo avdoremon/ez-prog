@@ -55,11 +55,15 @@ test('the rail is a slider bound to the frame index', async () => {
   const user = userEvent.setup();
   render(<Player frames={frames} truncated={false} label="demo" />);
   const rail = screen.getByRole('slider', { name: /step/i });
-  // jest-dom reports a NUMBER for range inputs, not a string.
-  expect(rail).toHaveValue(0);
+  // jest-dom reports a STRING for a native <input type="range">'s value
+  // (it reads the DOM `.value`, which is always a string). Only elements
+  // with role="slider"/meter/progressbar/spinbutton get a numeric
+  // toHaveValue() via their aria-valuenow attribute -- that doesn't apply
+  // to a native range input, whose accessible role is implicit.
+  expect(rail).toHaveValue('0');
   expect(rail).toHaveAttribute('aria-valuetext', 'Step 1 of 2');
   await user.click(screen.getByRole('button', { name: /next step/i }));
-  expect(rail).toHaveValue(1);
+  expect(rail).toHaveValue('1');
 });
 
 test('a truncation warning appears only when truncated', () => {
