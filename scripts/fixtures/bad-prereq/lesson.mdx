@@ -1,9 +1,12 @@
 ---
 title: Bad Prereq Lesson
 description: Fixture for the prerequisite-exists rule.
+order: 0
+# prerequisites is deliberately the LAST frontmatter field: this is the
+# regression fixture for the bug where a regex-based parser silently
+# dropped the final field because the closing "---" ate its newline.
 prerequisites:
   - /algorithms/does-not-exist
-order: 0
 ---
 
 This lesson points at a prerequisite slug that has no matching lesson file anywhere in the fixture directory.

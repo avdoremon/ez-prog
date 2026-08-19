@@ -1,6 +1,7 @@
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { parse as parseYaml } from 'yaml';
 import { collect, MAX_FRAMES, parseAnchors, type Frame, type VizAlgorithm } from '@cs/viz-core';
 import { VIZ } from '../apps/web/src/viz/registry.js';
 
@@ -36,77 +37,27 @@ function untaggedCodeFences(body: string): number {
 }
 
 /**
- * Shape rules 5-7 need from a viz registry entry. Both the real production
- * `VIZ` (apps/web/src/viz/registry.ts) and `SYNTHETIC_TEST_VIZ` below
- * satisfy it.
+ * Shape rules 5-7 need from a viz registry entry. The real production `VIZ`
+ * (apps/web/src/viz/registry.ts) satisfies it, and it is the default for
+ * the `registry` parameter below. Tests inject their OWN registry object
+ * with deliberately-broken entries instead of relying on any test-only
+ * entries shipping inside this file: a lesson naming an id that only
+ * "exists" in a test's private registry must still fail `viz-id-exists`
+ * against the real one. See lint-content.test.ts.
  */
-interface ExecutableVizEntry {
+export interface ExecutableVizEntry {
   defaultInput: unknown;
   maxFrames?: number;
   load: () => Promise<{ default: VizAlgorithm<any, any> }>;
   code: () => Promise<{ default: Record<string, string> }>;
 }
 
-/**
- * Synthetic viz entries that exist ONLY so rules 6 (anchor-coverage) and 7
- * (frame-budget) have something genuinely broken to execute in tests.
- *
- * The one entry in the production registry (`binary-search`) is fully
- * correct on purpose (Task 5/6/11 verified every anchor resolves in every
- * language and it never exceeds MAX_FRAMES) -- that is exactly what makes it
- * a bad fixture for these two rules. Rather than injecting a broken
- * generator into `apps/web/src/viz/registry.ts` (which real lesson content
- * could then accidentally reference via `viz:`), the negative-path
- * generators and code samples live only here. `lintContent` checks the real
- * `VIZ` first and falls back to this map only when an id is absent from it,
- * so it can never shadow a real entry, and no real lesson under
- * apps/web/src/content/docs will ever name these synthetic ids.
- */
-const SYNTHETIC_TEST_VIZ: Record<string, ExecutableVizEntry> = {
-  'runaway-generator': {
-    defaultInput: undefined,
-    // Small on purpose: the generator below truly never terminates, so the
-    // cap must still be reached in a handful of iterations for a fast test.
-    maxFrames: 5,
-    load: async () => ({
-      default: function* (): Generator<Frame> {
-        for (;;) {
-          yield { state: undefined, note: 'Looping forever.', line: 'LOOP' };
-        }
-      },
-    }),
-    code: async () => ({
-      default: {
-        js: '// @anchor LOOP\n',
-        c: '// @anchor LOOP\n',
-        py: '# @anchor LOOP\n',
-        cpp: '// @anchor LOOP\n',
-        java: '// @anchor LOOP\n',
-      },
-    }),
-  },
-  'missing-anchor': {
-    defaultInput: undefined,
-    load: async () => ({
-      default: function* (): Generator<Frame> {
-        yield { state: undefined, note: 'Step A happens.', line: 'STEP_A' };
-        yield { state: undefined, note: 'Step B happens.', line: 'STEP_B' };
-      },
-    }),
-    code: async () => ({
-      default: {
-        js: '// @anchor STEP_A\n// @anchor STEP_B\n',
-        // c intentionally omits STEP_B to trip anchor-coverage.
-        c: '// @anchor STEP_A\n',
-        py: '# @anchor STEP_A\n# @anchor STEP_B\n',
-        cpp: '// @anchor STEP_A\n// @anchor STEP_B\n',
-        java: '// @anchor STEP_A\n// @anchor STEP_B\n',
-      },
-    }),
-  },
-};
+export type VizRegistry = Record<string, ExecutableVizEntry>;
 
-export async function lintContent(root: string): Promise<LintError[]> {
+export async function lintContent(
+  root: string,
+  registry: VizRegistry = VIZ,
+): Promise<LintError[]> {
   const errors: LintError[] = [];
   const files = (await readdir(root, { recursive: true, withFileTypes: true }))
     .filter((d) => d.isFile() && d.name.endsWith('.mdx'))
@@ -117,12 +68,17 @@ export async function lintContent(root: string): Promise<LintError[]> {
 
   for (const file of files) {
     const raw = await readFile(file, 'utf8');
-    const fm = /^---\n([\s\S]*?)\n---/.exec(raw);
-    const front = fm?.[1] ?? '';
+    // Real YAML parse, not a hand-rolled regex: a regex that requires a
+    // trailing "\n" after every "- item" line silently drops the LAST
+    // frontmatter field whenever the closing "---" eats its newline first
+    // (`prerequisites:` as the last field previously never matched at all).
+    // YAML parsing has no such positional dependency.
+    const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(raw);
+    const front = (fm?.[1] ? (parseYaml(fm[1]) as Record<string, unknown>) : {}) ?? {};
     const body = raw.slice(fm?.[0].length ?? 0);
     const rel = toPosix(relative(root, file));
 
-    const vizId = /^viz:\s*(\S+)/m.exec(front)?.[1];
+    const vizId = typeof front.viz === 'string' ? front.viz : undefined;
 
     // Rule 1
     if (DSA_PREFIXES.some((p) => rel.startsWith(p)) && !vizId) {
@@ -131,9 +87,9 @@ export async function lintContent(root: string): Promise<LintError[]> {
     }
 
     // Rule 2
-    const prereqBlock = /^prerequisites:\s*\n((?:\s+-\s+.*\n)*)/m.exec(front)?.[1] ?? '';
-    for (const line of prereqBlock.split('\n')) {
-      const slug = /-\s+(\S+)/.exec(line)?.[1];
+    const prerequisites = Array.isArray(front.prerequisites) ? front.prerequisites : [];
+    for (const item of prerequisites) {
+      const slug = typeof item === 'string' ? item : undefined;
       if (slug && !slugs.has(slug.startsWith('/') ? slug : `/${slug}`)) {
         errors.push({ rule: 'prerequisite-exists', file: rel,
           message: `Prerequisite "${slug}" does not match any lesson slug.` });
@@ -155,8 +111,7 @@ export async function lintContent(root: string): Promise<LintError[]> {
 
     // Rules 5-7
     if (vizId) {
-      const entry: ExecutableVizEntry | undefined =
-        (VIZ as Record<string, ExecutableVizEntry | undefined>)[vizId] ?? SYNTHETIC_TEST_VIZ[vizId];
+      const entry: ExecutableVizEntry | undefined = registry[vizId];
       if (!entry) {
         errors.push({ rule: 'viz-id-exists', file: rel,
           message: `viz "${vizId}" is not in src/viz/registry.ts.` });
