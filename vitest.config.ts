@@ -12,6 +12,7 @@ export default defineConfig({
           include: [
             'packages/viz-core/**/*.{test,spec}.{ts,tsx}',
             'scripts/**/*.{test,spec}.ts',
+            'apps/web/**/*.{test,spec}.ts',
           ],
           passWithNoTests: true,
         },
