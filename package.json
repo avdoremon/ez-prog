@@ -1,0 +1,19 @@
+{
+  "name": "cs-learning-platform",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "test": "vitest run",
+    "typecheck": "tsc -b",
+    "lint:content": "tsx scripts/lint-content.ts",
+    "check:offline": "tsx scripts/check-offline.ts"
+  },
+  "devDependencies": {
+    "@types/node": "26.2.0",
+    "tsx": "4.23.12",
+    "typescript": "7.0.2",
+    "vitest": "4.1.10"
+  }
+}
