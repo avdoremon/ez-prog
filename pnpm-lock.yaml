@@ -29,6 +29,9 @@ importers:
       '@astrojs/starlight':
         specifier: 0.41.7
         version: 0.41.7(@astrojs/markdown-remark@7.2.2(supports-color@7.2.0))(astro@7.2.2(@astrojs/markdown-remark@7.2.2(supports-color@7.2.0))(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(tsx@4.23.12)(yaml@2.9.0))(supports-color@7.2.0)(typescript@5.9.3)
+      '@cs/viz-react':
+        specifier: workspace:*
+        version: link:../../packages/viz-react
       astro:
         specifier: 7.2.2
         version: 7.2.2(@astrojs/markdown-remark@7.2.2(supports-color@7.2.0))(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.3)(@types/node@26.2.0)(tsx@4.23.12)(yaml@2.9.0)
@@ -58,6 +61,10 @@ importers:
   packages/viz-core: {}
 
   packages/viz-react:
+    dependencies:
+      '@cs/viz-core':
+        specifier: workspace:*
+        version: link:../viz-core
     devDependencies:
       '@types/react':
         specifier: 19.2.18
