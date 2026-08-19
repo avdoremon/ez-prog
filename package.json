@@ -2,13 +2,15 @@
   "name": "cs-learning-platform",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.22.0",
   "scripts": {
     "dev": "pnpm --filter web dev",
     "build": "pnpm --filter web build",
     "test": "vitest run",
     "typecheck": "tsc -b && pnpm --filter web exec astro check",
     "lint:content": "tsx scripts/lint-content.ts",
-    "check:offline": "tsx scripts/check-offline.ts"
+    "check:offline": "tsx scripts/check-offline.ts",
+    "test:e2e": "pnpm --filter web exec playwright test"
   },
   "devDependencies": {
     "@cs/viz-core": "workspace:*",

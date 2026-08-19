@@ -14,6 +14,10 @@ export default defineConfig({
             'scripts/**/*.{test,spec}.ts',
             'apps/web/**/*.{test,spec}.ts',
           ],
+          // apps/web/e2e/*.spec.ts are Playwright tests, not vitest ones; the
+          // glob above would otherwise match them and fail on the unknown
+          // @playwright/test runner globals.
+          exclude: ['**/node_modules/**', '**/dist/**', 'apps/web/e2e/**'],
           passWithNoTests: true,
         },
       },
