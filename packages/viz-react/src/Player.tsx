@@ -11,7 +11,7 @@ export function Player() {
   const f = frames[i]!;
   return (
     <div>
-      <ArrayView state={f.state} marks={f.marks} />
+      <ArrayView state={f.state} marks={f.marks} label="binary search array" />
       <p data-testid="note">{f.note}</p>
       <button onClick={() => setI((n) => Math.max(0, n - 1))}>Prev</button>
       <button onClick={() => setI(0)}>Reset</button>
