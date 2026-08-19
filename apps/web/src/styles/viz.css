@@ -58,6 +58,22 @@
   min-height: 1.5em;
 }
 
+/*
+ * The code panel had no styles at all, so its `white-space: pre` <code> grew
+ * to its longest line and pushed the whole document sideways — every lesson
+ * scrolled horizontally on a 360px screen (bubble-sort by 110px). Confining
+ * the scroll to the panel fixes the page. `min-width: 0` is required: a flex
+ * child's default `min-width: auto` refuses to shrink below its content, so
+ * `overflow-x` alone would not contain it inside `.player`'s flex column.
+ * CodePanel is focusable so this scroll region stays keyboard-reachable; the
+ * shared `[tabindex]:focus-visible` rule below already gives it a focus ring.
+ */
+.code-panel {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .player__warning {
   border: 2px solid var(--discard);
   border-style: dashed;

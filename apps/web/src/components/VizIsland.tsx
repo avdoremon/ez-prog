@@ -7,6 +7,13 @@ interface RunData {
   frames: Frame<number[]>[];
   truncated: boolean;
   code: ParsedCode;
+  /**
+   * Bumped on every Run/Reset and used as the <Player> key, so a new run
+   * remounts the player and starts at frame 0 (AUTHORING.md §4.7). Without
+   * it the player keeps whatever index the learner had stepped to, dropping
+   * them into the middle of a run they never saw start.
+   */
+  runId: number;
 }
 
 function defaultInputText(defaultInput: unknown): string {
@@ -34,7 +41,7 @@ export default function VizIsland({ id }: { id: VizId }) {
           algo.default(entry.defaultInput) as Generator<Frame<number[]>>,
           entry.maxFrames,
         );
-        setData({ frames, truncated, code: parseAnchors(codeMod.default.js) });
+        setData({ frames, truncated, code: parseAnchors(codeMod.default.js), runId: 0 });
       })
       .catch((e: unknown) => {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
@@ -49,7 +56,8 @@ export default function VizIsland({ id }: { id: VizId }) {
       algo.default(input) as Generator<Frame<number[]>>,
       entry.maxFrames,
     );
-    setData((prev) => (prev ? { ...prev, frames, truncated } : prev));
+    setData((prev) =>
+      prev ? { ...prev, frames, truncated, runId: prev.runId + 1 } : prev);
   }
 
   async function handleRun() {
@@ -86,7 +94,7 @@ export default function VizIsland({ id }: { id: VizId }) {
 
   return (
     <>
-      <Player frames={data.frames} truncated={data.truncated}
+      <Player key={data.runId} frames={data.frames} truncated={data.truncated}
               label={entry.label} code={data.code} />
 
       <details className="viz-input-editor">

@@ -124,3 +124,40 @@ test('a large learner input still triggers the frame-cap truncation notice', asy
   const status = await screen.findByRole('status');
   expect(status).toHaveTextContent(/stopped early/i);
 });
+
+// AUTHORING.md §4.7 documents that a successful Run "shows the new run from
+// frame 0". Before this test the player kept whatever index the learner had
+// stepped to, so running new input dropped them into the middle of a run they
+// had not watched start.
+test('Run restarts the player at frame 0 of the new run', async () => {
+  const user = userEvent.setup();
+  render(<VizIsland id="binary-search" />);
+  await screen.findByText(/searching for 23/i);
+
+  await user.click(screen.getByRole('button', { name: /next step/i }));
+  expect(screen.queryByText('1 / 8')).not.toBeInTheDocument();
+
+  await openEditor(user);
+  await replaceInput(user, JSON.stringify({ arr: [1, 2, 3], target: 3 }));
+  await user.click(screen.getByRole('button', { name: /^run$/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText(/searching for 3/i)).toBeInTheDocument();
+  });
+  // The counter reads "1 / n" only when the player is sitting on frame 0.
+  expect(screen.getByText(/^1 \/ \d+$/)).toBeInTheDocument();
+});
+
+test('Reset restarts the player at frame 0 of the default run', async () => {
+  const user = userEvent.setup();
+  render(<VizIsland id="binary-search" />);
+  await screen.findByText(/searching for 23/i);
+
+  await user.click(screen.getByRole('button', { name: /next step/i }));
+  await openEditor(user);
+  await user.click(screen.getByRole('button', { name: /^reset$/i }));
+
+  await waitFor(() => {
+    expect(screen.getByText(/^1 \/ \d+$/)).toBeInTheDocument();
+  });
+});
