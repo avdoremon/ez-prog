@@ -9,6 +9,7 @@ export default defineConfig({
 		react(),
 		starlight({
 			title: 'My Docs',
+			customCss: ['./src/styles/tokens.css', './src/styles/viz.css'],
 			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
 			sidebar: [
 				{

@@ -10,7 +10,8 @@ node_modules/
 dist/
 .astro/
 apps/web/public/pyodide/
-apps/web/public/fonts/*.woff2
+# Fonts ARE committed (self-hosted, required for the offline-asset gate —
+# see scripts/check-offline.ts). Do not re-add a *.woff2 ignore rule here.
 
 # TypeScript project-reference build artifacts (tsc -b)
 .tsc-out/
