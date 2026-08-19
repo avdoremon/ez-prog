@@ -1,2 +1,3 @@
-export { Player } from './Player.js';
-export { ArrayView } from './renderers/ArrayView.js';
+export { Player, type PlayerProps } from './Player.js';
+export { ArrayView, resolveMarks } from './renderers/ArrayView.js';
+export { useFramePlayer, type FramePlayer } from './useFramePlayer.js';
