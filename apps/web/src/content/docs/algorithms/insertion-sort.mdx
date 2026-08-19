@@ -1,0 +1,128 @@
+---
+title: Insertion Sort
+description: Sort an array the way you sort a hand of cards — take the next value and slide it back into place.
+order: 223
+difficulty: beginner
+estimatedMinutes: 6
+viz: insertion-sort
+prerequisites: [/algorithms/bubble-sort]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Picking up a dealt hand of cards, you do not sort it by swapping neighbours
+over and over. You take each new card and slide it left until it sits in the
+right spot. Insertion sort is that habit, written down.
+
+<Viz id="insertion-sort" />
+
+The array is split in two at every moment: a sorted prefix on the left, and
+untouched values on the right. Each step takes the first unsorted value —
+the *key* — and walks it left past everything bigger than it, until the
+prefix is sorted again and one element longer.
+
+## How it works
+
+Start with the prefix `[arr[0]]`, which is trivially sorted. Take `arr[1]`
+as the key and compare it with the value to its left. While that value is
+bigger, copy it one slot right — this is a shift, not a swap, and it opens a
+gap that travels leftward with the search. When you meet a value that is not
+bigger than the key, or you run off the front of the array, the gap is where
+the key belongs, so drop it in.
+
+Repeat with `arr[2]`, `arr[3]`, and so on. Every key ends up inside a sorted
+prefix, so after the last one the whole array is sorted.
+
+Two properties fall out of this. The shift only happens on *strictly*
+bigger, so equal values never jump over each other — the sort is stable. And
+a value already in place triggers no shifts, which is why nearly-sorted
+input is fast.
+
+## Try it
+
+```js
+function insertionSort(arr) {
+  arr = [...arr];
+  for (let i = 1; i < arr.length; i++) {
+    const key = arr[i];
+    let j = i - 1;
+    while (j >= 0 && arr[j] > key) {
+      arr[j + 1] = arr[j];
+      j--;
+    }
+    arr[j + 1] = key;
+  }
+  return arr;
+}
+```
+
+## Trade-offs
+
+Reach for it on small arrays and on data already almost in order: sorted
+input costs one comparison per element and no shifts, which is linear. That
+is why real library sorts drop down to insertion sort once a chunk gets
+small enough.
+
+Avoid it on large unsorted arrays. Reversed input forces every key to travel
+the whole prefix, giving roughly *n*²/2 shifts — bubble sort's growth rate,
+with less work per step.
+
+## Check your understanding
+
+1. **What does insertion sort do to `[1, 2, 3, 4, 5]`, which is already
+   sorted?**
+   - One comparison per key, no shifts at all
+   - The same amount of work as on any other array
+   - It detects the array is sorted and returns immediately without looking
+     at it
+   - Roughly *n*² comparisons, as always
+
+   <details>
+   <summary>Answer</summary>
+
+   One comparison per key and no shifts: the value on the left is smaller,
+   so the `while` loop exits at once. It is not a special case detected up
+   front — the algorithm still visits every element — and *n*² is the worst
+   case, not the cost of every run.
+   </details>
+
+2. **The inner loop shifts values right instead of swapping pairs. Why does
+   that matter?**
+   - It doesn't — shifting and swapping are the same operation
+   - A shift is one write, where a swap is three, so the gap travels with
+     half the memory traffic
+   - Shifting uses less memory overall
+   - Swapping would produce a different sorted order
+
+   <details>
+   <summary>Answer</summary>
+
+   A shift is a single write; swapping two values needs three. The key is
+   held in a variable throughout, so the gap travels left one cheap write at
+   a time. Both versions sort in place and produce the same order — the
+   difference is writes per step, not the result.
+   </details>
+
+3. **Two records have the same sort value. Can insertion sort reorder them
+   relative to each other?**
+   - Yes, whenever they end up adjacent
+   - No, because the shift only happens when the left value is *strictly*
+     bigger than the key
+   - Only if the array is longer than the frame budget
+   - Yes, but only on reversed input
+
+   <details>
+   <summary>Answer</summary>
+
+   No. The loop condition is `arr[j] > key`, so a value *equal* to the key
+   stops the walk and the key settles to its right — the original order of
+   equal values survives. That property is called stability, and it holds on
+   every input, reversed or not; array length has nothing to do with it.
+   </details>
+
+## Practice
+
+Try [Insertion Sort List on LeetCode](https://leetcode.com/problems/insertion-sort-list/)
+— the same algorithm on a linked list, where shifting is replaced by
+relinking nodes.

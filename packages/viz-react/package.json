@@ -1,0 +1,23 @@
+{
+  "name": "@cs/viz-react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.tsx",
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "dependencies": {
+    "@cs/viz-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  }
+}

@@ -1,0 +1,127 @@
+---
+title: How Fast Is Fast?
+description: Watch two search algorithms race on the same array to see why growth rate matters.
+order: 230
+difficulty: beginner
+estimatedMinutes: 7
+viz: linear-search
+prerequisites: [/algorithms/binary-search]
+languages: [js]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+"Fast" is not a stopwatch measurement — it is a question of how the work
+grows as the input grows. The clearest way to see that is to run two
+algorithms on the same data and count their steps.
+
+Below are the same ten sorted values, searched for the same target: once by
+linear search, checking one value at a time, and once by binary search,
+discarding half the array at every step. Watch the `checked` counter in each
+player — that comparison is the whole lesson.
+
+<Viz id="linear-search" />
+
+<Viz id="binary-search" />
+
+Both find the same value in the same array. Linear search checks values in
+order and stops the moment it finds a match — its `checked` counter climbs
+by one every step. Binary search's step count barely moves; a ten-element
+array only ever needs a handful of midpoints.
+
+## The gap grows with the input
+
+At ten elements the difference already favors binary search, but it looks
+small enough to shrug off. The pattern that matters shows up once you
+imagine the array growing: linear search's step count grows in direct
+proportion to the array's size, while binary search's grows in proportion to
+how many times the array can be cut in half. On an array of size *n*, that
+is *n* steps against roughly log₂(*n*) steps. At one thousand values, that
+is 1,000 against 10. At one million, 1,000,000 against 20. Fifty steps
+losing to six, as above, is the same shape of gap — just before it turns
+dramatic.
+
+This growth pattern is what "Big O" describes: not a stopwatch time, but how
+the step count scales as input size scales. Linear search is O(*n*). Binary
+search is O(log *n*). Neither label says which run is faster on a
+particular machine; both say how the algorithm behaves as the data keeps
+growing, which is the property that actually matters once real data does.
+
+## Try it
+
+```js
+function countedLinearSearch(arr, target) {
+  let checked = 0;
+  for (const value of arr) {
+    checked++;
+    if (value === target) return checked;
+  }
+  return checked;
+}
+
+function countedBinarySearch(arr, target) {
+  let lo = 0, hi = arr.length - 1, checked = 0;
+  while (lo <= hi) {
+    checked++;
+    const mid = (lo + hi) >> 1;
+    if (arr[mid] === target) return checked;
+    if (arr[mid] < target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return checked;
+}
+```
+
+## Check your understanding
+
+1. **An array grows from 100 to 100,000 values (1000× larger). Roughly how
+   much does linear search's step count grow?**
+   - Not at all
+   - About 1000×
+   - About 10×
+   - About 2×
+
+   <details>
+   <summary>Answer</summary>
+
+   About 1000×, matching the array's growth exactly — that direct
+   proportionality is what O(*n*) means. Binary search is the one that only
+   grows by a small, roughly-log amount; linear search offers no such
+   discount.
+   </details>
+
+2. **Same 1000× growth in array size. Roughly how much does binary search's
+   step count grow?**
+   - About 1000×, same as linear search
+   - It roughly adds a handful of steps, nowhere near 1000×
+   - It shrinks
+   - It depends entirely on the target value
+
+   <details>
+   <summary>Answer</summary>
+
+   It adds only a handful of steps — log₂(100,000) is about 17, only 10
+   more than log₂(100). Growth tracking input size, not the target, is
+   exactly what makes O(log *n*) so much cheaper at scale; a specific
+   target only affects one run, not the growth trend.
+   </details>
+
+3. **"Big O" describes...**
+   - How many milliseconds an algorithm takes on a specific computer
+   - How an algorithm's step count scales as the input size grows
+   - How much memory an algorithm's source code takes up
+   - Which algorithm is easier to read
+
+   <details>
+   <summary>Answer</summary>
+
+   How an algorithm's step count scales as the input size grows. It
+   deliberately ignores clock time, which depends on the machine, and code
+   readability — both real concerns, just not what this measurement
+   captures.
+   </details>
+
+## Practice
+
+Try [Search Insert Position on LeetCode](https://leetcode.com/problems/search-insert-position/)
+to practice choosing the O(log *n*) approach yourself.

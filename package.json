@@ -1,0 +1,29 @@
+{
+  "name": "cs-learning-platform",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.22.0",
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "test": "vitest run",
+    "typecheck": "tsc -b && pnpm --filter web exec astro check",
+    "lint:content": "tsx scripts/lint-content.ts",
+    "check:offline": "tsx scripts/check-offline.ts",
+    "test:e2e": "pnpm --filter web exec playwright test"
+  },
+  "devDependencies": {
+    "@cs/viz-core": "workspace:*",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.2",
+    "@testing-library/user-event": "14.6.5",
+    "@types/node": "26.2.0",
+    "@vitejs/plugin-react": "6.0.5",
+    "fast-check": "4.9.0",
+    "jsdom": "30.0.1",
+    "tsx": "4.23.12",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10",
+    "yaml": "2.9.0"
+  }
+}
