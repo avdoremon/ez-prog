@@ -16,6 +16,35 @@ const registry = {
       })),
     code: () => import('./code/binary-search/index.js'),
   },
+  'bubble-sort': {
+    renderer: 'ArrayView',
+    label: 'Array being sorted by repeated swaps',
+    defaultInput: { arr: [5, 2, 9, 1, 7, 3] },
+    // Quadratic — tighter than the global MAX_FRAMES budget.
+    maxFrames: 400,
+    inputSchema: z.object({
+      arr: z.array(z.number()).min(1).max(24),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/bubble-sort').then((m) => ({
+        default: m.bubbleSort,
+      })),
+    code: () => import('./code/bubble-sort/index.js'),
+  },
+  'linear-search': {
+    renderer: 'ArrayView',
+    label: 'Array scanned one value at a time',
+    defaultInput: { arr: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target: 23 },
+    inputSchema: z.object({
+      arr: z.array(z.number()).min(1).max(64),
+      target: z.number(),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/linear-search').then((m) => ({
+        default: m.linearSearch,
+      })),
+    code: () => import('./code/linear-search/index.js'),
+  },
 } satisfies Record<string, VizEntry<any, any>>;
 
 export type VizId = keyof typeof registry;
