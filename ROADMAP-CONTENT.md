@@ -1,0 +1,105 @@
+# Phase 1 content roadmap
+
+This is the candidate lesson backlog for Phase 1 ("DSA + Code Runner",
+`IMPLEMENTATION_PLAN.md` §11), derived from the topics that plan names explicitly. It is
+a **fixed, numbered list of concrete lessons**, not a quota — see "On the total count"
+below for why no target number is given.
+
+Every row not marked `done` is a plan, not a commitment: it may be split into more than
+one lesson, merged with a neighbor, or cut, once real authoring cost is known (see
+below). `slug` is the intended `apps/web/src/content/docs/...` path (§1 of
+`docs/AUTHORING.md`); `order` follows the numbering convention in
+`IMPLEMENTATION_PLAN.md` §5.1 (steps of 10 between top-level groups, incrementing by 1
+within a group, matching the real values already used by the three shipped lessons —
+see `docs/AUTHORING.md` §1 for the caveat that `order` does not yet drive the rendered
+sidebar position). `renderer needed` names the `packages/viz-react` renderer the lesson
+depends on; only `ArrayView` exists today (see `docs/AUTHORING.md` §0) — every other
+renderer column value is an **engine change**, not a routine content addition, and must
+be scoped and reported as such before work starts, not discovered mid-PR.
+
+## On the total count
+
+`IMPLEMENTATION_PLAN.md` §14 guesses "~35 lessons" for Phase 1 before a single lesson
+had been authored end to end. §13 of the same plan names this its own top risk:
+*"content is the bottleneck, not code... 40 excellent lessons beat 200 mediocre ones."*
+This roadmap deliberately does not restate a target total. Task 20 measures how long
+one person, working only from `docs/AUTHORING.md` and forbidden from touching
+`packages/`, takes to ship a fourth lesson (insertion sort) reusing the existing
+`ArrayView` renderer. That measured per-lesson cost — not a guess made before any
+lesson existed — is what sets how many rows below this project can actually afford to
+ship in Phase 1. Until that number lands, treat every `planned` row as backlog, not a
+promise.
+
+## Shipped
+
+| # | Slug | Title | `order` | Renderer | Viz id | Status |
+|---|---|---|---|---|---|---|
+| 0a | `/algorithms/binary-search` | Binary Search | 220 | ArrayView | `binary-search` | done |
+| 0b | `/algorithms/bubble-sort` | Bubble Sort | 221 | ArrayView | `bubble-sort` | done |
+| 0c | `/complexity/big-o` | How Fast Is Fast? | 230 | ArrayView | `linear-search` (+ reuses `binary-search`) | done |
+
+The `linear-search` generator, code samples, and registry entry already exist
+(`packages/viz-core/src/algorithms/linear-search.ts`,
+`apps/web/src/viz/registry.ts`) and are exercised today only as the second
+visualization embedded in `/complexity/big-o`. Row 4 below tracks giving Linear Search
+its own dedicated lesson page — that is pure content + registry-reuse work, no new
+generator required.
+
+## Data Structures (`data-structures/` — new sidebar group required, see AUTHORING.md §1)
+
+| # | Slug | Title | `order` | Renderer needed | Viz id | Status |
+|---|---|---|---|---|---|---|
+| 1 | `/data-structures/array` | Arrays | 210 | ArrayView | `array-basics` | planned |
+| 2 | `/data-structures/linked-list` | Linked Lists | 211 | **LinkedList** (new) | `linked-list` | planned — engine change |
+| 3 | `/data-structures/stack` | Stacks | 212 | ArrayView | `stack` | planned |
+| 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | planned |
+| 5 | `/data-structures/hash-table` | Hash Tables | 214 | ArrayView (buckets as array slots)† | `hash-table` | planned |
+| 6 | `/data-structures/tree` | Trees | 215 | **Tree** (new) | `tree-intro` | planned — engine change |
+| 7 | `/data-structures/bst` | Binary Search Trees | 216 | **Tree** (new) | `bst` | planned — engine change |
+| 8 | `/data-structures/heap` | Heaps | 217 | ArrayView (array-backed binary heap) | `heap` | planned |
+| 9 | `/data-structures/graph` | Graphs | 218 | **Graph** (new) | `graph-intro` | planned — engine change |
+| 10 | `/data-structures/trie` | Tries | 219 | **Tree** (new)† | `trie` | planned — engine change |
+
+## Algorithms (`algorithms/`)
+
+| # | Slug | Title | `order` | Renderer needed | Viz id | Status |
+|---|---|---|---|---|---|---|
+| 11 | `/algorithms/selection-sort` | Selection Sort | 222 | ArrayView | `selection-sort` | planned |
+| 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | planned — this is Task 20's fourth-lesson exercise |
+| 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | planned |
+| 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | planned |
+| 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView (viz already registered — see Shipped) | `linear-search` | planned — content only, viz reused from row 0c |
+| 15 | `/algorithms/recursion` | Recursion Basics | 227 | **StackFrame** (new) | `recursion-intro` | planned — engine change |
+| 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **Graph** (new) | `bfs` | planned — engine change |
+| 17 | `/algorithms/dfs` | Depth-First Search | 229 | **Graph** (new) | `dfs` | planned — engine change |
+| 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | **Graph** (new) | `dijkstra` | planned — engine change |
+| 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-intro` | planned |
+| 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | **Matrix2D** (new) | `dp-intro` | planned — engine change |
+| 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | planned |
+| 22 | `/algorithms/sliding-window` | Sliding Window | 235 | ArrayView | `sliding-window` | planned |
+
+## Complexity (`complexity/`)
+
+| # | Slug | Title | `order` | Renderer needed | Viz id | Status |
+|---|---|---|---|---|---|---|
+| 0c | `/complexity/big-o` | How Fast Is Fast? | 230 | ArrayView | `linear-search` + `binary-search` | **done** (see Shipped) |
+| 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView (reuse a dynamic-array-growth viz) | `amortized-growth` | planned |
+| 24 | `/complexity/best-average-worst-case` | Best, Average, and Worst Case | 237‡ | ArrayView (reuse existing search/sort vizzes) | reuse (e.g. `linear-search`) | planned |
+
+† Inferred, not named explicitly in `IMPLEMENTATION_PLAN.md`: the plan lists `hash
+table` and `trie` as Data Structures topics (§11) without specifying a renderer for
+either. `ArrayView` for hash tables and `Tree` for tries are this document's
+recommendation, not a verified decision — confirm before building the generator.
+
+‡ `IMPLEMENTATION_PLAN.md` §11 gives Complexity a rough total of "3 lessons" but names
+only two topics (Big-O, amortized analysis). Row 24 is this document's proposal for the
+third slot, not a plan citation — revisit before committing to it.
+
+## Status legend
+
+- **done** — shipped, lint-passing, in `apps/web/src/content/docs`.
+- **planned** — no engine change required; a content PR following `docs/AUTHORING.md`
+  §0–§7 end to end is sufficient.
+- **planned — engine change** — requires a new `packages/viz-react` renderer (or a
+  `packages/viz-core` model change) before any lesson using it can be written. Report
+  and scope separately; do not fold into a content PR (`docs/AUTHORING.md` §0).
