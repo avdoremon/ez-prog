@@ -20,6 +20,7 @@ runConformance({
   algorithm: binarySearch,
   arbitrary: sortedArrayAndTarget,
   supportedTargets: ['index', 'range'],
+  mutate: (input) => { input.arr[0] = 999; },
 });
 
 // packages/viz-core/test/algorithms.conformance.test.ts

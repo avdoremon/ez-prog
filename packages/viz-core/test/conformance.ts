@@ -15,6 +15,8 @@ export interface ConformanceSpec<I, S> {
   arbitrary: fc.Arbitrary<I>;
   /** Target kinds the paired renderer supports. */
   supportedTargets: Target['t'][];
+  /** Mutates `input` in place (e.g. `(input) => { input.arr[0] = 999; }`). */
+  mutate: (input: I) => void;
 }
 
 export function runConformance<I, S>(spec: ConformanceSpec<I, S>): void {
@@ -64,15 +66,16 @@ export function runConformance<I, S>(spec: ConformanceSpec<I, S>): void {
       }));
     });
 
-    test('yields snapshots, not live references', () => {
-      fc.assert(fc.property(spec.arbitrary, (input) => {
+    test('mutating the input after collect changes no frame', () => {
+      fc.assert(fc.property(spec.arbitrary, (rawInput) => {
+        // Clone so mutation never touches fast-check's own generated value
+        // (which it may reuse across shrink attempts).
+        const input = structuredClone(rawInput);
         const frames = collect(spec.algorithm(input)).frames;
-        const states = frames.map((f) => f.state);
-        // Distinct object identities prove snapshotting for object states.
-        const objects = states.filter((s) => typeof s === 'object' && s !== null);
-        if (objects.length > 1) {
-          expect(new Set(objects).size).toBeGreaterThan(1);
-        }
+        const before = frames.map((f) => JSON.stringify(f.state));
+        spec.mutate(input);
+        const after = frames.map((f) => JSON.stringify(f.state));
+        expect(after).toEqual(before);
       }));
     });
   });
