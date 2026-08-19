@@ -39,3 +39,22 @@ test('ignores lowercase ids so prose comments are not captured', () => {
   const { anchors } = parseAnchors('a();  // @anchor notAnAnchor');
   expect(anchors).toEqual({});
 });
+
+test('normalizes CRLF line endings in source with anchor', () => {
+  const src = 'int lo = 0;\r\nint hi = n - 1;  // @anchor INIT\r\nint mid = 0;';
+  const { display, anchors } = parseAnchors(src);
+  expect(anchors).toEqual({ INIT: 2 });
+  expect(display).not.toContain('\r');
+  expect(display).toBe('int lo = 0;\nint hi = n - 1;\nint mid = 0;');
+});
+
+test('normalizes CRLF line endings with multiple non-anchor lines', () => {
+  const src = 'line1;\r\nline2;\r\nline3;\r\nline4();  // @anchor MARK';
+  const { display, anchors } = parseAnchors(src);
+  expect(anchors).toEqual({ MARK: 4 });
+  const lines = display.split('\n');
+  lines.forEach((line) => {
+    expect(line).not.toContain('\r');
+  });
+  expect(display).toBe('line1;\nline2;\nline3;\nline4();');
+});

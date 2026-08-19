@@ -11,7 +11,9 @@ export interface ParsedCode {
 
 export function parseAnchors(source: string): ParsedCode {
   const anchors: Record<AnchorId, number> = {};
-  const lines = source.split('\n');
+  // Normalize line endings: convert CRLF and CR to LF
+  const normalized = source.replace(/\r\n|\r/g, '\n');
+  const lines = normalized.split('\n');
 
   const display = lines.map((line, idx) => {
     const match = ANCHOR_RE.exec(line);
