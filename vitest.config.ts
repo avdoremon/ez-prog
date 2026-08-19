@@ -22,7 +22,13 @@ export default defineConfig({
         test: {
           name: { label: 'jsdom', color: 'magenta' },
           environment: 'jsdom',
-          include: ['packages/viz-react/**/*.{test,spec}.{ts,tsx}'],
+          // apps/web's React island components (e.g. VizIsland.tsx) need a DOM,
+          // so their .tsx tests run here, not under the plain-node apps/web
+          // project above (which only matches .ts).
+          include: [
+            'packages/viz-react/**/*.{test,spec}.{ts,tsx}',
+            'apps/web/**/*.{test,spec}.tsx',
+          ],
           setupFiles: ['./packages/viz-react/test-setup.ts'],
           passWithNoTests: true,
         },

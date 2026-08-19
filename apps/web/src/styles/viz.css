@@ -81,6 +81,42 @@
   width: 100%;
 }
 
+.viz-input-editor {
+  margin-top: 1rem;
+  border: 2px solid var(--muted);
+  padding: .5rem .75rem;
+}
+
+.viz-input-editor summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.viz-input-editor__body {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin-top: .75rem;
+}
+
+.viz-input-editor__textarea {
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  min-height: 8rem;
+}
+
+.viz-input-editor__error {
+  border: 2px solid var(--discard);
+  border-style: dashed;
+  padding: .5rem .75rem;
+  font-weight: 600;
+}
+
+.viz-input-editor__actions {
+  display: flex;
+  gap: .5rem;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

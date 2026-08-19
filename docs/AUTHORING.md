@@ -469,16 +469,17 @@ Field by field:
 - `label` — a short string, used as the `<ol aria-label>` on `ArrayView` and as the
   `<noscript>` fallback text in `Viz.astro`. Write something a screen-reader user or a
   JS-disabled reader can act on.
-- `defaultInput` — the input the algorithm runs with when the page renders and when
-  lint checks it (§6, rule `frame-budget`). **Honesty note, verified:** `inputSchema` is
-  declared on every entry but nothing in `apps/web/src` actually calls `.parse()` on it
-  at runtime — there is no input-editing UI wired up in `Player`/`VizIsland` yet, so
-  `defaultInput` is the *only* input a learner ever sees today. Pick one that's small
+- `defaultInput` — the input the algorithm runs with when the page first renders and
+  when lint checks it (§6, rule `frame-budget`). It is also what pre-fills the "Try your
+  own input" editor (§4.7) and what **Reset** restores there, so pick one that's small
   enough to read at a glance but large enough to show the algorithm's interesting cases
   (e.g. binary search's `defaultInput` needs several halvings, not two elements).
-- `inputSchema` — a Zod schema describing valid input shape. Not runtime-enforced yet
-  (see above), but write it correctly — it documents the contract and is what the
-  optional conformance test's `fc.Arbitrary` should match.
+- `inputSchema` — a Zod schema describing valid input shape. This *is* runtime-enforced:
+  `VizIsland.tsx` calls `entry.inputSchema.safeParse(...)` on whatever JSON a learner
+  types into the input editor before running it (§4.7). Get the bounds right — `.max(...)`
+  on array length is what keeps a learner-supplied input inside your `maxFrames` budget
+  (see the truncation note in §4.7). It's also what the optional conformance test's
+  `fc.Arbitrary` should match.
 - `maxFrames` (optional) — overrides the global `MAX_FRAMES = 1500`
   (`packages/viz-core/src/collect.ts`). `bubble-sort` sets `400` with the comment
   *"Quadratic — tighter than the global MAX_FRAMES budget."* — set a tighter cap for a
@@ -487,7 +488,41 @@ Field by field:
   loudly instead of shipping a 1500-frame slog.
 - `load` / `code` — dynamic imports, exactly as shown. Copy the shape, change the path.
 
-### 4.7 Picking `defaultInput` and `maxFrames` together
+### 4.7 The learner-editable input editor
+
+Every `<Viz>` renders a collapsed `<details><summary>Try your own input</summary>...`
+disclosure below the `Player` (`apps/web/src/components/VizIsland.tsx`) — collapsed by
+default so it doesn't clutter the lesson, one click to open. Inside it: a `<textarea>`
+pre-filled with `entry.defaultInput` as formatted JSON, a **Run** button, and a
+**Reset** button.
+
+**Run** parses the textarea as JSON and validates it with `entry.inputSchema.safeParse(...)`:
+
+- On success, it re-runs `collect(algorithm(parsed), entry.maxFrames)` and the `Player`
+  shows the new run from frame 0.
+- On failure — a schema violation *or* malformed JSON, handled identically — it shows
+  the message inline next to the textarea and leaves whatever was already on screen
+  alone. It never throws and never blanks the visualization.
+
+**Reset** restores the textarea to `entry.defaultInput` (re-serialized as JSON) and
+re-runs the default.
+
+This is why `inputSchema` matters beyond documentation: it is the only thing standing
+between a learner's typed JSON and your generator. A schema that's too loose (e.g. no
+`.max()` on an array driving a quadratic algorithm) lets a learner type an input that
+blows straight through `maxFrames` — which is not a bug, exactly, since `collect()`
+still caps it and `Player` still shows the *"stopped early"* truncation notice rather
+than hanging, but it's a worse lesson than a schema that keeps the learner in a range
+where they can watch the run finish.
+
+Accessibility wiring, non-negotiable if you touch this component: the textarea has a
+real `<label htmlFor>`, not a placeholder; the error message's `id` is written into the
+textarea's `aria-describedby` whenever an error is showing, so assistive tech announces
+*which* field the message is about; the error message itself is `role="alert"`, so it's
+announced without the user having to go looking for it; and the error text carries a
+leading "⚠" plus prose, not a colour change alone.
+
+### 4.8 Picking `defaultInput` and `maxFrames` together
 
 `lintContent` runs your generator on exactly `entry.defaultInput`, capped at
 `entry.maxFrames ?? MAX_FRAMES`, via the same `collect()` the live site uses (§6, rule
@@ -570,8 +605,11 @@ hand):
 ```markdown
 - [ ] Frontmatter is complete; `estimatedMinutes` is ≤ 12
 - [ ] Prose content is ≤ 700 words (code blocks excluded) — `pnpm lint:content`
-- [ ] At least one interactive visualization is present (not automated: the
-      visualization does not yet let the learner edit its input — see AUTHORING.md §4.6)
+- [ ] At least one interactive visualization is present, with its "Try your own
+      input" editor working — not automated for content PRs (it's covered by
+      `apps/web/src/components/VizIsland.test.tsx` at the engine level; verify by hand
+      that your lesson's `<Viz>` renders and its editor accepts/validates input — see
+      AUTHORING.md §4.7)
 - [ ] A runnable code example exists, ≤ 30 lines (not automated — verify by hand)
 - [ ] 2–3 quiz questions, each with an explanation that also addresses the wrong
       answers (not automated — verify by hand)
