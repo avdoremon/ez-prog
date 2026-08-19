@@ -10,6 +10,17 @@ export default defineConfig({
 		starlight({
 			title: 'My Docs',
 			customCss: ['./src/styles/tokens.css', './src/styles/viz.css'],
+			// Expressive Code (the fenced-code-block renderer) keeps its own
+			// dark/light theme pair and swaps on `data-theme`, independently of
+			// the --sl-color-* variables. Left at its default it kept painting
+			// dark syntax colours onto the now-light background — #c792ea on
+			// #edeef3, 2.07:1. One palette means one code theme.
+			expressiveCode: { themes: ['github-light'] },
+			components: {
+				// The project has one palette (§8); tokens.css forces it on.
+				// A theme toggle here would change nothing — see the component.
+				ThemeSelect: './src/components/EmptyThemeSelect.astro',
+			},
 			head: [
 				{
 					// Marks the document as JS-capable before first paint, so

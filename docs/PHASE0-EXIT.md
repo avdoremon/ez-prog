@@ -9,7 +9,7 @@ one does not, and one passes with a caveat that matters more than the tick.
 | 1 | Lesson 4 built from documentation alone, no `packages/` changes, time recorded | **Pass, with a caveat** |
 | 2 | All reference lessons pass the Definition of Done mechanically in CI | **Pass** |
 | 3 | The Judge0 question answered in writing | **Pass** |
-| 4 | Lighthouse Performance ≥ 95 on a lesson page | **Pass** (97) |
+| 4 | Lighthouse Performance ≥ 95 on a lesson page | **Pass** (95) |
 | 5 | A lesson is readable with JavaScript disabled | **Pass** |
 | 6 | `ROADMAP-CONTENT.md` frozen | **Pass** |
 | 7 | Phase 1's lesson count set from the measured cost | **Not met** |
@@ -24,18 +24,20 @@ The caveat: the run was executed by an AI agent, not a person, so the elapsed
 time is not the human authoring cost the schedule depends on. Full reasoning in
 `ROADMAP-CONTENT.md`, "The measurement".
 
-Exercising the lesson end to end surfaced three pre-existing engine defects that
+Exercising the lesson end to end surfaced four pre-existing engine defects that
 affected all three previously shipped lessons and that no gate caught: an
 unstyled code panel that scrolled every page sideways at 360px, a player that
-did not restart on a new run, and a 0.307 layout shift on island hydration. All
-three are fixed, each with a regression test.
+did not restart on a new run, a 0.307 layout shift on island hydration, and a
+site that was unreadable whenever the OS asked for dark mode. All four are
+fixed, each with a regression test.
 
 ## 2. Definition of Done enforced mechanically — pass
 
 `.github/workflows/ci.yml` runs `typecheck`, `test` (128 unit/conformance
 tests), `build`, `lint:content` (seven content rules), `check:offline`, and a
-15-test Playwright suite covering all four lessons: axe wcag2a/wcag2aa, frame
-stepping, no-JS prose, no horizontal scroll at 360px, and a 0.1 CLS budget.
+20-test Playwright suite covering all four lessons: axe wcag2a/wcag2aa in both
+the default and dark colour schemes, frame stepping, no-JS prose, no horizontal
+scroll at 360px, and a 0.1 CLS budget.
 
 Verified the gate bites rather than merely existing: deleting `viz:` from
 `binary-search.mdx` fails `lint:content` with `[dsa-requires-viz]` and exit
@@ -55,13 +57,13 @@ outcome provided it is written down.
 
 ## 4. Lighthouse — pass
 
-Performance **97** on `/algorithms/insertion-sort/` (FCP 1.5s, LCP 2.6s, TBT
-0ms, CLS 0). It was 79 before the layout-shift fix.
+Performance **95** on `/algorithms/insertion-sort/` (CLS 0, TBT 0ms). It was 79
+before the layout-shift fix, and measures 95–97 across runs.
 
 Measured against `astro preview`, which serves `dist/` without the compression
 and cache headers production nginx will add (`IMPLEMENTATION_PLAN.md` §10), so
 the real figure should be no worse. Other categories: Best Practices 100, SEO
-100, Accessibility 97 — see the open item below for that 97.
+100, Accessibility 100.
 
 ## 5. Readable with JavaScript disabled — pass
 
@@ -84,17 +86,32 @@ fiction. `IMPLEMENTATION_PLAN.md` §14's "~35 lessons" remains neither confirmed
 nor refuted. **A human should author lesson 5 (selection sort — same renderer,
 same shape) with a timer before Phase 1's scope is committed.**
 
-## Open defect, carried out of Phase 0
+## Resolved during the walk: dark-mode unreadability
 
-**The site is unreadable with `prefers-color-scheme: dark`.** Starlight sets
-`data-theme="dark"` and switches its text to white while
-`apps/web/src/styles/tokens.css` pins the background to the light `--paper`
-unconditionally, giving contrast ratios of 1.08–1.61 where WCAG AA requires
-4.5. It affects every page and predates this task.
+**The site was unreadable with `prefers-color-scheme: dark`.** Starlight
+hardcodes `data-theme="dark"` onto `<html>` and switches its text to white,
+while `apps/web/src/styles/tokens.css` pinned the background to the light
+`--paper`. The result was contrast ratios of 1.08–1.61 where WCAG AA requires
+4.5, on every page, with JavaScript on or off. It predated this task and
+escaped the gates because Playwright's axe runs use Chromium's default light
+scheme; only Lighthouse's mobile run caught it.
 
-It escaped the gates because Playwright's axe run uses Chromium's default light
-scheme; Lighthouse's mobile run caught it. The fix is a design decision — author
-a dark palette, or disable the theme switcher and commit to the single light
-"Trace" palette `IMPLEMENTATION_PLAN.md` §8 specifies — so it is recorded here
-rather than decided unilaterally. Whichever is chosen, add a dark-scheme axe run
-to the e2e suite so it cannot regress silently again.
+Resolved by decision: this project has **one palette**, the light "Trace"
+palette `IMPLEMENTATION_PLAN.md` §8 specifies, and no dark palette was ever
+designed. Three changes make that real rather than aspirational:
+
+- `tokens.css` re-declares Starlight's own light values under its dark
+  selector, so the light palette applies unconditionally. The values are copied
+  verbatim from `@astrojs/starlight@0.41.7/style/props.css`; dependencies are
+  exact-pinned, so they cannot drift without a deliberate upgrade.
+- Expressive Code is pinned to a single light code theme. It keeps its own
+  theme pair, independent of the `--sl-color-*` variables, and was still
+  painting dark syntax colours onto the now-light background (#c792ea on
+  #edeef3, 2.07:1).
+- The theme switcher is removed (`src/components/EmptyThemeSelect.astro`)
+  rather than left as a control that changes nothing.
+
+Lighthouse Accessibility went 97 → 100. The e2e suite gained a dark-scheme axe
+run over all four lessons plus an assertion that no switcher is offered, so
+this cannot regress silently. If a dark palette is ever designed, restore
+Starlight's default `ThemeSelect` and drop the forced block in `tokens.css`.

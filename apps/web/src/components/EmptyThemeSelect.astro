@@ -1,0 +1,13 @@
+---
+/*
+ * Starlight's theme switcher, removed.
+ *
+ * IMPLEMENTATION_PLAN.md §8 specifies one light "Trace" palette; no dark
+ * palette exists. src/styles/tokens.css now forces Starlight's light values
+ * regardless of `data-theme`, so the toggle would flip a control that changes
+ * nothing. Rendering nothing is more honest than shipping a dead switch.
+ *
+ * Restore Starlight's default (@astrojs/starlight/components/ThemeSelect.astro
+ * in astro.config.mjs) if a dark palette is ever designed.
+ */
+---

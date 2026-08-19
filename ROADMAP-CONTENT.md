@@ -46,9 +46,9 @@ number; the rows below stay backlog until then.
 ### Engine gaps the test surfaced
 
 The lesson itself needed no engine change, but exercising it end to end exposed
-three pre-existing defects that affected **all three previously shipped
-lessons** and that no gate caught. All three are fixed, each with the check that
-would have caught it:
+four pre-existing defects that affected **all three previously shipped
+lessons** and that no gate caught. All four are fixed, each with the check that
+would have caught it — the fourth is described separately below:
 
 1. **The code panel had no CSS.** Its `white-space: pre` content pushed the
    whole document sideways at 360px (110px of overflow on bubble sort),
@@ -64,22 +64,23 @@ would have caught it:
 The gate now includes Playwright coverage for all four lessons: axe
 (wcag2a/wcag2aa), no horizontal scroll at 360px, and a 0.1 CLS budget.
 
-### One exit-gate item is not met
+### A fourth gap, found and fixed: the site was unreadable in dark mode
 
-**The site is unreadable in dark mode.** With `prefers-color-scheme: dark`,
-Starlight sets `data-theme="dark"` and switches its text to white, while
-`apps/web/src/styles/tokens.css` pins the background to the light `--paper`
-(#F7F5F0) unconditionally. Headings, `<summary>` elements, pagination links and
-inline `<code>` render at contrast ratios of 1.08–1.61 against WCAG AA's
-required 4.5. Lighthouse's mobile run scores Accessibility 97 because of it.
+With `prefers-color-scheme: dark`, Starlight switched its text to white while
+`apps/web/src/styles/tokens.css` pinned the background to the light `--paper`
+(#F7F5F0). Headings, `<summary>` elements, pagination links and inline `<code>`
+rendered at contrast ratios of 1.08–1.61 against WCAG AA's required 4.5 — on
+every page, with JavaScript on or off, since Starlight hardcodes
+`data-theme="dark"` into the static HTML.
 
-This is pre-existing (Task 16) and affects every page, not just the new lesson.
-It was invisible to the automated gates because the Playwright axe run uses
-Chromium's default light scheme. Resolving it is a design decision — either
-author a dark palette for the project's tokens, or disable Starlight's theme
-switcher and commit to the single light "Trace" palette that
-`IMPLEMENTATION_PLAN.md` §8 actually specifies — and is deliberately left open
-rather than decided inside this task.
+Resolved by committing to the single light "Trace" palette that
+`IMPLEMENTATION_PLAN.md` §8 actually specifies: `tokens.css` now forces
+Starlight's light values regardless of `data-theme`, Expressive Code is pinned
+to one light code theme, and the theme switcher is removed rather than left as
+a control that changes nothing. Lighthouse Accessibility went 97 → 100.
+
+The gate gained a dark-scheme axe run over all four lessons, which is the check
+whose absence hid this: the other axe runs use Chromium's default light scheme.
 
 ## On the total count
 

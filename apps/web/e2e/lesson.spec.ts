@@ -96,3 +96,32 @@ test('a reader with JavaScript disabled gets no reserved blank space', async ({ 
   expect(height).toBeLessThan(400);
   await context.close();
 });
+
+/*
+ * The dark-scheme runs are the check that was missing. Starlight hardcodes
+ * data-theme="dark" on <html> and switches its text to white, which against
+ * this project's pinned light --paper background gave 1.08:1 contrast on
+ * headings, summaries, pagination links and inline code — every page, JS on or
+ * off. It survived because the axe runs above use Chromium's default light
+ * scheme. tokens.css now forces Starlight's light palette unconditionally; if
+ * that block is dropped or goes stale against a Starlight upgrade, these fail.
+ */
+test.describe('forced light palette', () => {
+  test.use({ colorScheme: 'dark' });
+
+  for (const path of ALL_LESSONS) {
+    test(`${path} stays readable when the OS asks for dark`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForSelector('[data-testid="note"]');
+      const results = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa'])
+        .analyze();
+      expect(results.violations).toEqual([]);
+    });
+  }
+
+  test('no theme switcher is offered', async ({ page }) => {
+    await page.goto('/algorithms/insertion-sort/');
+    await expect(page.locator('starlight-theme-select')).toHaveCount(0);
+  });
+});
