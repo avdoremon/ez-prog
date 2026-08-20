@@ -1,16 +1,21 @@
 # Authoring a lesson
 
 This is the complete, stand-alone guide to writing a lesson for this platform. It is
-written **from** the three lessons that already exist, not from the design plan — every
-claim below was checked against the real source in this repository as of commit
-`99ed796`. Where the design plan (`IMPLEMENTATION_PLAN.md`) says one thing and the code
-does another, this document follows the code and calls out the gap.
+written **from** the lessons that already exist, not from the design plan — every claim
+below was checked against the real source in this repository as of commit `5327c0c`.
+Where the design plan (`IMPLEMENTATION_PLAN.md`) says one thing and the code does
+another, this document follows the code and calls out the gap.
 
-The three reference lessons, read end to end before you write anything:
+The five lessons shipped today. Read at least the first two end to end before you write
+anything:
 
-- `apps/web/src/content/docs/algorithms/binary-search.mdx`
-- `apps/web/src/content/docs/algorithms/bubble-sort.mdx`
-- `apps/web/src/content/docs/complexity/big-o.mdx`
+- `apps/web/src/content/docs/algorithms/binary-search.mdx` — the canonical example
+- `apps/web/src/content/docs/algorithms/bubble-sort.mdx` — uses a tighter `maxFrames`
+- `apps/web/src/content/docs/algorithms/insertion-sort.mdx` — written from this guide
+  alone, as the test of whether the guide is sufficient
+- `apps/web/src/content/docs/algorithms/linear-search.mdx` — reuses an existing
+  registry entry; adds no new generator at all
+- `apps/web/src/content/docs/complexity/big-o.mdx` — embeds two visualizations
 
 ## 0. The one constraint that shapes everything below
 
@@ -38,9 +43,10 @@ provide — a new renderer (only `ArrayView` exists today), a new `Mark`/`Target
 a change to how `snap`, `collect`, or `parseAnchors` behave — that is an **engine
 change**. It means editing an *existing* file under `packages/viz-core` or
 `packages/viz-react`. Do not make that change as part of a content PR. Stop and report
-it — needing an engine change is a signal about scope, not a routine step, and it is
-exactly the kind of thing Task 20 wants surfaced, not silently absorbed into a "quick"
-edit.
+it — needing an engine change is a signal about scope, not a routine step, and it
+belongs in its own scoped piece of work rather than silently absorbed into a "quick"
+content edit. When this was last measured, exercising a new lesson end to end surfaced
+four pre-existing engine defects (see `docs/PHASE0-EXIT.md`); reporting beats absorbing.
 
 Everything in this document about adding a visualization assumes you are in the
 "reuses `ArrayView`" case — which every DSA lesson that operates on a flat array or
@@ -53,9 +59,12 @@ subdirectories by topic:
 
 ```
 apps/web/src/content/docs/
+  index.mdx            the landing page — link your lesson from here (see below)
   algorithms/
     binary-search.mdx
     bubble-sort.mdx
+    insertion-sort.mdx
+    linear-search.mdx
   complexity/
     big-o.mdx
 ```
@@ -104,11 +113,26 @@ change, but it will not happen for you.
 `autogenerate` sidebar sorts by its own nested `sidebar.order` field (from
 `@astrojs/starlight/schema.ts`: *"Pages are sorted by this value in ascending order.
 Then by slug. If not provided, pages will be sorted alphabetically by slug."*), which
-none of the three real lessons set. So today the nav order is alphabetical by slug,
-coincidentally matching `binary-search` (220) before `bubble-sort` (221). Set `order`
-correctly anyway — it is required by the schema and is the project's own numbering
-convention (§5.1 of `IMPLEMENTATION_PLAN.md`) — just don't expect it to move your
-lesson's position in the sidebar yet.
+no real lesson sets. So today the nav order is alphabetical by slug, coincidentally
+matching `binary-search` (220) before `bubble-sort` (221). Set `order` correctly anyway
+— it is required by the schema and is the project's own numbering convention (§5.1 of
+`IMPLEMENTATION_PLAN.md`) — just don't expect it to move your lesson's position in the
+sidebar yet.
+
+### Two files outside your lesson that you must also edit
+
+A new lesson is not just its own file. Both of these are enforced — skip either and
+`pnpm test:e2e` fails, though not always with an obvious message:
+
+1. **`apps/web/e2e/lesson.spec.ts` → the `ALL_LESSONS` array.** Add your lesson's
+   routed path, with its trailing slash (`/algorithms/two-pointer/`). That array drives
+   the per-lesson accessibility, 360px, dark-scheme, and layout-shift tests — a lesson
+   missing from it is simply never checked, which is the quiet failure mode, not a loud
+   one.
+2. **`apps/web/src/content/docs/index.mdx` → a card in the "Start here" grid.** The
+   homepage test asserts that every path in `ALL_LESSONS` is linked from the homepage,
+   so adding (1) without (2) fails with `expect(locator).toBeVisible()` on an `a[href]`
+   selector. That test exists so lessons cannot ship undiscoverable.
 
 ## 2. Frontmatter: every field, exactly
 
@@ -129,7 +153,7 @@ Source: `docsSchema.ts` inside the installed `@astrojs/starlight` package.
 | `sidebar.order` | Optional | `number` | Starlight's *own* nav-ordering field, distinct from this project's `order` (see §1). Not used by any real lesson yet. |
 
 Starlight also accepts `hero`, `banner`, `prev`/`next`, `draft`, `pagefind`, `editUrl`,
-`head`, `tableOfContents` — none of the three real lessons use these; ignore them
+`head`, `tableOfContents` — no real lesson uses these; ignore them
 unless you have a specific reason.
 
 ### Fields owned by this project's `lessonSchema`
@@ -139,7 +163,7 @@ Source: `apps/web/src/content.config.ts`.
 | Field | Required? | Type / constraint | Notes |
 |---|---|---|---|
 | `order` | **Required** | `number`, integer | See §1 — does not yet control sidebar position, but is required and validated as an integer. |
-| `difficulty` | **Required** | `'beginner' \| 'intermediate' \| 'advanced'` | Exactly these three strings. All three real lessons use `beginner`. |
+| `difficulty` | **Required** | `'beginner' \| 'intermediate' \| 'advanced'` | Exactly these three strings. All five real lessons use `beginner`. |
 | `estimatedMinutes` | **Required** | integer, `2`–`12` inclusive | Real values used: 6, 6, 7. Out-of-range values fail the Zod schema at build time (Astro's content collection validation, checked by `pnpm typecheck` via `astro check` and by `pnpm build`). |
 | `viz` | Optional in the schema, but **required** by lint for any lesson under `algorithms/`, `data-structures/`, or `complexity/` (rule `dsa-requires-viz`, §6) | `string` | Must be a key in `apps/web/src/viz/registry.ts`, or lint rule `viz-id-exists` fails. |
 | `prerequisites` | Optional | `string[]`, defaults to `[]` | Each entry must equal another lesson's derived slug (§1), e.g. `/algorithms/binary-search`. A bare form without the leading slash is also accepted (lint prefixes it), but write the leading-slash form — it's what every real lesson uses and it's the actual slug string. |
@@ -188,7 +212,7 @@ import Viz from '../../../components/Viz.astro';
 ## 3. The lesson shape
 
 Every real lesson follows the same structure (`IMPLEMENTATION_PLAN.md` §5.2, verified
-against all three files):
+against all five files):
 
 1. **Hook** — 1–2 sentences right after the `import`, before the visualization. States
    the everyday intuition or the problem, not the mechanism.
@@ -204,7 +228,7 @@ against all three files):
 4. **Runnable example** — a `## Try it` section with one fenced, language-tagged code
    block, ≤ 30 lines. **This block is separate, hand-written prose** — it is not
    pulled from the viz's per-language samples in `apps/web/src/viz/code/`. The two
-   happen to describe the same algorithm in the three real lessons, but nothing keeps
+   happen to describe the same algorithm in the real lessons, but nothing keeps
    them in sync automatically; if you change one, check the other.
 5. **Trade-offs** — a `## Trade-offs` section: when to use it, when not to, and what
    the practical alternative is.
@@ -235,7 +259,7 @@ against all three files):
 7. **Practice** — a `## Practice` section, one sentence, one outbound Markdown link to
    a LeetCode or HackerRank problem. **Required by project convention** (see §7's
    copyright rule — `IMPLEMENTATION_PLAN.md` §5.4) even though no automated lint rule
-   currently enforces its presence; all three real lessons include one. Example:
+   currently enforces its presence; all five real lessons include one. Example:
    `Try [Binary Search on LeetCode](https://leetcode.com/problems/binary-search/).`
 
 ## 4. Adding a visualization, end to end
@@ -541,9 +565,12 @@ a tripwire for future edits.
 | `pnpm test` | `vitest run` — all unit/conformance tests across `packages/` and `apps/web`. | No |
 | `pnpm build` | `pnpm --filter web build` — the real Astro/Starlight production build, to `apps/web/dist`. | — |
 | `pnpm check:offline` | Runs `scripts/check-offline.ts`, which scans `apps/web/dist/**/*.{html,css}` for any external (`http(s)://` or protocol-relative `//`) asset reference. | **Yes — run `pnpm build` first**, or it will find nothing to scan (or fail on a missing/stale `dist`). |
+| `pnpm test:e2e` | Playwright against the real built site: axe (wcag2a/wcag2aa) in both colour schemes, no horizontal scroll at 360px, a 0.1 layout-shift budget, no-JS rendering, and the homepage links. | **Yes — it serves `apps/web/dist`.** |
 
 Run them in this order during authoring: `lint:content` (fastest feedback on content
-mistakes) → `typecheck` → `test` → `build` → `check:offline`.
+mistakes) → `typecheck` → `test` → `build` → `check:offline` → `test:e2e`.
+
+All of them run in CI (`.github/workflows/ci.yml`) in that same order.
 
 ### The seven `lint:content` rules
 
@@ -605,6 +632,8 @@ hand):
 ```markdown
 - [ ] Frontmatter is complete; `estimatedMinutes` is ≤ 12
 - [ ] Prose content is ≤ 700 words (code blocks excluded) — `pnpm lint:content`
+- [ ] Lesson added to `ALL_LESSONS` in `apps/web/e2e/lesson.spec.ts` and linked
+      from the homepage grid (§1) — `pnpm test:e2e`
 - [ ] At least one interactive visualization is present, with its "Try your own
       input" editor working — not automated for content PRs (it's covered by
       `apps/web/src/components/VizIsland.test.tsx` at the engine level; verify by hand
@@ -614,13 +643,22 @@ hand):
 - [ ] 2–3 quiz questions, each with an explanation that also addresses the wrong
       answers (not automated — verify by hand)
 - [ ] `prerequisites` resolve to real slugs — `pnpm lint:content`
-- [ ] The page is readable with JavaScript off (the <Viz> component's <noscript>
-      fallback covers this automatically if you didn't remove it — verify by hand)
+- [ ] The page is readable with JavaScript off — `pnpm test:e2e`
+- [ ] No accessibility violations (axe wcag2a/wcag2aa), in both the default and
+      dark colour schemes — `pnpm test:e2e`
 - [ ] No external URLs in assets — `pnpm check:offline` (after `pnpm build`)
-- [ ] Reads well on a 360px-wide screen (not automated — verify by hand)
+- [ ] Reads well on a 360px-wide screen: no horizontal page scroll — `pnpm test:e2e`
+- [ ] The page does not shift layout as the visualization hydrates (CLS < 0.1) —
+      `pnpm test:e2e`
 - [ ] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
-      `pnpm check:offline` all exit 0
+      `pnpm check:offline`, `pnpm test:e2e` all exit 0
 ```
+
+Three items that earlier versions of this guide listed as "verify by hand" — no-JS
+readability, 360px, and accessibility — are now mechanically enforced by the Playwright
+suite, **provided you completed the `ALL_LESSONS` step in §1.** That proviso is the
+whole catch: the checks are per-lesson, so a lesson missing from that array passes CI
+without ever being examined.
 
 ## 7. Constraints that bite
 
@@ -649,13 +687,24 @@ hand):
   generate your own test cases if you need any. Link out for the reader to practice
   against the real thing instead of reproducing it.
 
-## 8. Quick recap: how the three real lessons satisfy all of the above
+## 8. Quick recap: how the five real lessons satisfy all of the above
 
-| | `binary-search` | `bubble-sort` | `big-o` |
-|---|---|---|---|
-| Directory | `algorithms/` | `algorithms/` | `complexity/` |
-| `viz` | `binary-search` | `bubble-sort` | `linear-search` (+ reuses `binary-search`) |
-| Renderer | `ArrayView` | `ArrayView` | `ArrayView` (via the two vizzes it embeds) |
-| `maxFrames` | default (1500) | `400` (quadratic) | n/a (embeds the other two) |
-| `prerequisites` | `[]` | `[]` | `[/algorithms/binary-search]` |
-| Languages with anchor samples | js, py, c (+ cpp/java aliased) | js, py, c (+ cpp/java aliased) | js, py, c (reused from the embedded vizzes) |
+| | `binary-search` | `bubble-sort` | `insertion-sort` | `linear-search` | `big-o` |
+|---|---|---|---|---|---|
+| Directory | `algorithms/` | `algorithms/` | `algorithms/` | `algorithms/` | `complexity/` |
+| `viz` | `binary-search` | `bubble-sort` | `insertion-sort` | `linear-search` | `linear-search` (+ reuses `binary-search`) |
+| Renderer | `ArrayView` | `ArrayView` | `ArrayView` | `ArrayView` | `ArrayView` (via the two vizzes it embeds) |
+| `maxFrames` | default (1500) | `400` (quadratic) | `400` (quadratic) | default (1500) | n/a (embeds the other two) |
+| `prerequisites` | `[]` | `[]` | `[/algorithms/bubble-sort]` | `[]` | `[/algorithms/binary-search]` |
+| New generator? | yes | yes | yes | **no — reused** | no — embeds two |
+| Languages with anchor samples | js, py, c (+ cpp/java aliased) | js, py, c (+ cpp/java aliased) | js, py, c (+ cpp/java aliased) | js, py, c (reused) | js, py, c (reused from the embedded vizzes) |
+
+Two of these are worth studying for what they *avoid* doing:
+
+- **`linear-search`** adds no generator, no code samples, and no registry entry — it is
+  one `.mdx` file pointed at a `viz` id that already existed for `big-o`. If a lesson
+  you want to write is already visualized somewhere else, this is the cheapest shape a
+  lesson can take.
+- **`insertion-sort`** was written from this guide alone, with no other context, as the
+  test of whether the guide is complete. It is the closest thing here to a worked
+  example of the full "new generator + samples + registry + lesson" path.
