@@ -125,3 +125,40 @@ test.describe('forced light palette', () => {
     await expect(page.locator('starlight-theme-select')).toHaveCount(0);
   });
 });
+
+/*
+ * The homepage shipped as the untouched Starlight scaffold ("Congrats on
+ * setting up a new Starlight project!", links to starlight.astro.build) all
+ * the way through Phase 0 — the site's front door, and no gate looked at it.
+ * These tests cover it the way the lessons are covered, and would fail if the
+ * scaffold copy ever came back.
+ */
+test.describe('homepage', () => {
+  test('has no accessibility violations', async ({ page }) => {
+    await page.goto('/');
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa'])
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
+
+  test('does not scroll horizontally at 360px', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto('/');
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(1);
+  });
+
+  test('carries no scaffold copy and links to every shipped lesson', async ({ page }) => {
+    await page.goto('/');
+    const body = (await page.textContent('body')) ?? '';
+    expect(body).not.toMatch(/Congrats on setting up|Starlight project|Update content/i);
+    await expect(page.locator('a[href*="starlight.astro.build"]')).toHaveCount(0);
+
+    for (const path of ALL_LESSONS) {
+      await expect(page.locator(`a[href="${path}"]`).first()).toBeVisible();
+    }
+  });
+});

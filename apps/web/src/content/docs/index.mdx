@@ -1,43 +1,74 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
+title: Learn algorithms by watching them run
+description: Interactive computer science lessons — step through an algorithm frame by frame, on your own input, with the code alongside.
 order: 0
 difficulty: beginner
 estimatedMinutes: 2
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
-  image:
-    file: ../../assets/houston.webp
+  tagline: Step through an algorithm one frame at a time, on input you choose, with the code highlighted alongside.
   actions:
     - text: Start with Binary Search
       link: /algorithms/binary-search/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
-      icon: external
+    - text: Why growth rate matters
+      link: /complexity/big-o/
+      icon: open-book
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+Reading that binary search is "O(log n)" teaches you the words. Watching the
+search window collapse by half, step by step, on an array you picked yourself,
+teaches you the idea. Every lesson here is built around that difference.
 
-<CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
+## How a lesson works
+
+<CardGrid>
+	<Card title="Watch it run" icon="seti:notebook">
+		Every algorithm is a series of frames. Step forward and back, or play
+		it through — each frame explains in one sentence what just happened.
 	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
+	<Card title="Use your own input" icon="pencil">
+		Open **Try your own input** under any visualization and run the
+		algorithm on values you choose. Bad input is rejected with an
+		explanation, never a blank screen.
 	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
+	<Card title="Follow the code" icon="seti:javascript">
+		The code panel highlights the line responsible for the current frame,
+		so the picture and the source stay in step.
 	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
+	<Card title="Check yourself" icon="approve-check">
+		Each lesson ends with questions whose answers explain why the wrong
+		options are wrong, and a link to practice the real problem.
 	</Card>
 </CardGrid>
+
+## Start here
+
+<CardGrid>
+	<Card title="Binary Search" icon="magnifier">
+		Find a value in a sorted array by throwing away half of it at a time.
+
+		[Read the lesson](/algorithms/binary-search/)
+	</Card>
+	<Card title="Bubble Sort" icon="bars">
+		The shortest correct sort — and a way to see comparison counts add up.
+
+		[Read the lesson](/algorithms/bubble-sort/)
+	</Card>
+	<Card title="Insertion Sort" icon="list-format">
+		Sort the way you sort a hand of cards: slide each value back into place.
+
+		[Read the lesson](/algorithms/insertion-sort/)
+	</Card>
+	<Card title="How Fast Is Fast?" icon="rocket">
+		Race two search algorithms on the same array and watch growth rate decide.
+
+		[Read the lesson](/complexity/big-o/)
+	</Card>
+</CardGrid>
+
+Every page works without JavaScript, reads on a phone, and loads no fonts,
+scripts, or images from anywhere but this server.

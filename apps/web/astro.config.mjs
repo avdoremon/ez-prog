@@ -8,7 +8,10 @@ export default defineConfig({
 	integrations: [
 		react(),
 		starlight({
-			title: 'My Docs',
+			// Named from IMPLEMENTATION_PLAN.md's own title. This string is the
+			// site header and every page's <title> suffix — change it here if
+			// the project is ever branded differently.
+			title: 'CS Learning Platform',
 			customCss: ['./src/styles/tokens.css', './src/styles/viz.css'],
 			// Expressive Code (the fenced-code-block renderer) keeps its own
 			// dark/light theme pair and swaps on `data-theme`, independently of
@@ -34,7 +37,9 @@ export default defineConfig({
 					content: "document.documentElement.classList.add('js');",
 				},
 			],
-			social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/withastro/starlight' }],
+			// No social links: the scaffold's pointed at withastro/starlight,
+			// which is not this project. Add a real one when the repository has
+			// a public home.
 			sidebar: [
 				{
 					label: 'Algorithms',
