@@ -148,6 +148,36 @@ const registry = {
       })),
     code: () => import('./code/bst-search/index.js'),
   },
+  bfs: {
+    renderer: 'GraphView',
+    label: 'Graph explored breadth-first from a starting node',
+    defaultInput: {
+      values: [0, 1, 2, 3, 4, 5],
+      edges: [
+        { from: 0, to: 1 }, { from: 0, to: 2 }, { from: 1, to: 3 },
+        { from: 2, to: 3 }, { from: 3, to: 4 }, { from: 4, to: 5 },
+      ],
+      start: 0,
+    },
+    inputSchema: z
+      .object({
+        values: z.array(z.number()).min(1).max(16),
+        edges: z
+          .array(z.object({ from: z.number().int(), to: z.number().int() }))
+          .max(40),
+        start: z.number().int().min(0),
+      })
+      .refine((v) => v.start < v.values.length, {
+        message: 'start must be the index of an existing node.',
+      })
+      .refine(
+        (v) => v.edges.every((e) => e.from < v.values.length && e.to < v.values.length),
+        { message: 'every edge must join two existing node indexes.' },
+      ),
+    load: () =>
+      import('@cs/viz-core/algorithms/bfs').then((m) => ({ default: m.bfs })),
+    code: () => import('./code/bfs/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',

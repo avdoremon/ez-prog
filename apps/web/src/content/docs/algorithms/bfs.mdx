@@ -1,0 +1,130 @@
+---
+title: Breadth-First Search
+description: Explore a graph in rings — everything one step away before anything two steps away — and shortest paths fall out for free.
+order: 228
+difficulty: intermediate
+estimatedMinutes: 7
+viz: bfs
+prerequisites: [/data-structures/queue]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Searching a graph raises a question an array never does: from here, several
+places are reachable at once. Breadth-first search answers it by refusing to
+go deep — it finishes everything nearby first.
+
+<Viz id="bfs" />
+
+## How it works
+
+Keep a queue of nodes waiting to be explored, seeded with the start. Then
+repeat: take the node at the front, and add each unseen neighbour to the back.
+
+That is all of it, and the queue is doing the work. Because a queue serves
+oldest-first, every node one step from the start is dequeued before any node
+two steps away — so the search spreads outward in rings rather than plunging
+down one branch. Watch the `depth` variable as you step: it never decreases.
+
+Two consequences follow. First, **the first time you reach a node is by a
+shortest path.** Nothing else could have arrived sooner, because everything
+closer was already dequeued. That makes BFS the standard shortest-path
+algorithm for unweighted graphs, and it is why the `depth` shown is a real
+distance, not a guess.
+
+Second, the `seen` set is not an optimisation — it is what makes the search
+terminate. Follow the 0—1—3—2—0 cycle above without it and you would revisit
+nodes forever. Marking a node when it is *enqueued*, not when it is dequeued,
+also stops it being queued twice.
+
+## Try it
+
+```js
+function bfs(adj, start) {
+  const seen = new Set([start]);
+  const queue = [start], order = [];
+  while (queue.length > 0) {
+    const node = queue.shift();
+    order.push(node);
+    for (const next of adj[node]) {
+      if (seen.has(next)) continue;
+      seen.add(next);
+      queue.push(next);
+    }
+  }
+  return order;
+}
+```
+
+## Trade-offs
+
+Swap the queue for a stack and you get depth-first search — same code, a
+different container, and a completely different traversal. That single
+substitution is the whole difference between the two, and it is worth
+remembering when you meet DFS.
+
+BFS costs one visit per node and one look per edge, so it runs in time
+proportional to nodes plus edges. Its memory is the catch: the queue can hold
+an entire ring at once, which on a wide graph is far more than the single path
+a depth-first search keeps.
+
+Use BFS when distance matters — fewest moves in a puzzle, degrees of
+separation, shortest route on an unweighted map. When edges carry *weights*,
+fewest edges stops meaning shortest, and BFS gives the wrong answer; that is
+Dijkstra's problem.
+
+## Check your understanding
+
+1. **Why does BFS find shortest paths in an unweighted graph?**
+   - It compares all possible paths and keeps the best
+   - Because a queue dequeues nearer nodes first, so the first arrival at a
+     node cannot be beaten
+   - Because it explores edges in sorted order
+   - It doesn't — that is Dijkstra's job
+
+   <details>
+   <summary>Answer</summary>
+
+   The queue serves oldest-first, so every node at distance *d* is processed
+   before any at *d*+1 — the first time a node is reached, nothing closer
+   remains that could have reached it sooner. No paths are compared and edge
+   order is irrelevant. Dijkstra generalises this to weighted graphs, where
+   BFS no longer works.
+   </details>
+
+2. **What happens if you drop the `seen` check on a graph with a cycle?**
+   - Nothing — the graph is explored the same way
+   - The search revisits nodes indefinitely and never terminates
+   - It still terminates but returns nodes out of order
+   - It skips part of the graph
+
+   <details>
+   <summary>Answer</summary>
+
+   It never terminates: going round a cycle re-enqueues nodes already handled,
+   forever. The check is a correctness requirement, not a speed optimisation —
+   which is why the visualization shows the skipped edges rather than hiding
+   them.
+   </details>
+
+3. **You replace the queue with a stack, changing nothing else. What have you
+   built?**
+   - The same algorithm, slightly faster
+   - Depth-first search, which plunges down one branch before backtracking
+   - A shortest-path algorithm for weighted graphs
+   - An infinite loop
+
+   <details>
+   <summary>Answer</summary>
+
+   Depth-first search. A stack returns the most recently added node, so the
+   search follows one branch as far as it goes before considering alternatives
+   — and the shortest-path guarantee disappears with the FIFO order. It still
+   terminates, and weights remain out of scope for both.
+   </details>
+
+## Practice
+
+Try [Number of Islands on LeetCode](https://leetcode.com/problems/number-of-islands/)
+— a grid is a graph, and each island is one traversal from an unvisited cell.

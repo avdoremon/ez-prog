@@ -13,7 +13,7 @@ below). `slug` is the intended `apps/web/src/content/docs/...` path (§1 of
 within a group, matching the real values already used by the shipped lessons; it drives
 the rendered sidebar position, so see `docs/AUTHORING.md` §1 before picking one).
 `renderer needed` names the `packages/viz-react` renderer the lesson
-depends on; `ArrayView` and `TreeView` exist today (see `docs/AUTHORING.md` §4.6) — every other
+depends on; `ArrayView`, `TreeView` and `GraphView` exist today (see `docs/AUTHORING.md` §4.6) — every other
 renderer column value is an **engine change**, not a routine content addition, and must
 be scoped and reported as such before work starts, not discovered mid-PR.
 
@@ -120,6 +120,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | done |
 | 6 | `/data-structures/tree` | Trees | 215 | **TreeView** | `tree-traversal` | done |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | done |
+| 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **GraphView** | `bfs` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -140,7 +141,7 @@ try an unsorted array instead of forking the entry.
 | 6 | `/data-structures/tree` | Trees | 215 | TreeView | `tree-traversal` | **done** (see Shipped) |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | **done** (see Shipped) |
 | 8 | `/data-structures/heap` | Heaps | 217 | ArrayView (array-backed binary heap) | `heap` | **done** (see Shipped) |
-| 9 | `/data-structures/graph` | Graphs | 218 | **Graph** (new) | `graph-intro` | planned — engine change |
+| 9 | `/data-structures/graph` | Graphs | 218 | GraphView | `graph-intro` | planned — content only |
 | 10 | `/data-structures/trie` | Tries | 219 | TreeView†, but see the note | `trie` | planned — needs a decision |
 
 ## Algorithms (`algorithms/`)
@@ -153,9 +154,9 @@ try an unsorted array instead of forking the entry.
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | **done** (see Shipped) |
 | 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView (viz already registered — see Shipped) | `linear-search` | **done** (see Shipped) |
 | 15 | `/algorithms/recursion` | Recursion Basics | 227 | **StackFrame** (new) | `recursion-intro` | planned — engine change |
-| 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **Graph** (new) | `bfs` | planned — engine change |
-| 17 | `/algorithms/dfs` | Depth-First Search | 229 | **Graph** (new) | `dfs` | planned — engine change |
-| 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | **Graph** (new) | `dijkstra` | planned — engine change |
+| 16 | `/algorithms/bfs` | Breadth-First Search | 228 | GraphView | `bfs` | **done** (see Shipped) |
+| 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | planned — content only |
+| 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weights supported) | `dijkstra` | planned — content only |
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | **done** (see Shipped) |
 | 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | **Matrix2D** (new) | `dp-intro` | planned — engine change |
 | 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | **done** (see Shipped) |
