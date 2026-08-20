@@ -13,6 +13,7 @@ const ALL_LESSONS = [
   '/algorithms/insertion-sort/',
   '/algorithms/linear-search/',
   '/algorithms/merge-sort/',
+  '/algorithms/quick-sort/',
   '/algorithms/sliding-window/',
   '/algorithms/two-pointer/',
   '/complexity/big-o/',

@@ -73,6 +73,21 @@ const registry = {
       })),
     code: () => import('./code/merge-sort/index.js'),
   },
+  'quick-sort': {
+    renderer: 'ArrayView',
+    label: 'Array being partitioned around a pivot',
+    defaultInput: { arr: [5, 2, 9, 1, 7, 3, 8, 4] },
+    // Quadratic in the worst case (already-sorted input, with this pivot).
+    maxFrames: 400,
+    inputSchema: z.object({
+      arr: z.array(z.number()).min(1).max(24),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/quick-sort').then((m) => ({
+        default: m.quickSort,
+      })),
+    code: () => import('./code/quick-sort/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',

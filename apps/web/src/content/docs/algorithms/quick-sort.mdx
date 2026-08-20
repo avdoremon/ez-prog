@@ -1,0 +1,135 @@
+---
+title: Quick Sort
+description: Put one value where it belongs, and the array splits into two smaller problems — usually fast, occasionally terrible.
+order: 225
+difficulty: intermediate
+estimatedMinutes: 7
+viz: quick-sort
+prerequisites: [/algorithms/merge-sort]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Merge sort splits blindly and works while combining. Quick sort inverts that:
+it works up front, splitting so well that combining becomes unnecessary.
+
+<Viz id="quick-sort" />
+
+## How it works
+
+Pick one value as the **pivot**. Rearrange the range so everything smaller
+sits left of it and everything larger sits right, then drop the pivot between
+them.
+
+The pivot is now in its **final position**, permanently: nothing on its left
+can need to move past it, and nothing on its right can move back. Watch that
+in the visualization — a placed pivot never moves again, where merge sort's
+writes can still shift in a later merge.
+
+That leaves two independent ranges; recurse into both and the array ends up
+sorted with no merging step. Partitioning costs one pass, so if pivots land
+near the middle the ranges halve — about log *n* levels of *n* work:
+**n log n**.
+
+## When it goes wrong
+
+That "if" is doing real work. This version pivots on the last value, so on
+**already-sorted input** every pivot is the largest in its range. The split is
+then one value against everything else — *n* levels instead of log *n*, and
+the cost becomes *n*².
+
+Try it: run `[1, 2, 3, 4, 5, 6, 7, 8]` in the input editor and count the
+comparisons against the shuffled default. Sorted input — insertion sort's
+easiest case — is the worst case here.
+
+Real implementations pick the pivot better — median-of-three, or at random —
+making the bad case rare rather than impossible.
+
+## Try it
+
+```js
+function quickSort(arr, lo = 0, hi = arr.length - 1) {
+  if (lo >= hi) return arr;
+  const pivot = arr[hi];
+  let small = lo;
+  for (let i = lo; i < hi; i++) {
+    if (arr[i] < pivot) {
+      [arr[small], arr[i]] = [arr[i], arr[small]];
+      small++;
+    }
+  }
+  [arr[small], arr[hi]] = [arr[hi], arr[small]];
+  quickSort(arr, lo, small - 1);
+  quickSort(arr, small + 1, hi);
+  return arr;
+}
+```
+
+## Trade-offs
+
+Quick sort is usually the fastest general-purpose sort in practice, despite
+merge sort's better guarantee. It sorts **in place** — no *n* extra slots —
+and its inner loop is a simple scan with excellent cache behaviour.
+
+You give up the guarantee and stability: the worst case is real, and swapping
+distant elements can reorder equal values.
+
+Pick merge sort for a predictable bound or stable output, quick sort for
+average speed in place. Many libraries hedge: run quick sort, watch the
+recursion depth, switch to heap sort if it degrades — introsort.
+
+## Check your understanding
+
+1. **What is true about a value the moment it is placed as a pivot?**
+   - It is in its final position and will never move again
+   - It is roughly in the right area, and later passes refine it
+   - It is the smallest value in the array
+   - Nothing yet — it settles when the recursion finishes
+
+   <details>
+   <summary>Answer</summary>
+
+   It is final. Everything smaller is already left of it and everything larger
+   right, so no later step has reason to move it — which is why quick sort
+   needs no merge step. The pivot need not be smallest or largest; it is
+   simply where it belongs.
+   </details>
+
+2. **Why is already-sorted input the worst case for a last-element pivot?**
+   - Because the comparisons take longer on sorted data
+   - Because every pivot is the largest in its range, so each partition peels
+     off one value instead of halving
+   - Because sorted input causes extra swaps
+   - It isn't — sorted input is the best case
+
+   <details>
+   <summary>Answer</summary>
+
+   Every pivot is the largest in its range, so the split is "everything else"
+   against "nothing" — *n* levels rather than log *n*, which is *n*² work. It
+   actually performs *fewer* swaps on sorted input; the cost is the shape of
+   the recursion, not the per-step price.
+   </details>
+
+3. **Why do libraries often prefer quick sort despite merge sort's better
+   worst case?**
+   - Merge sort is harder to implement
+   - It sorts in place with better constant factors, so it is usually faster
+     in practice
+   - Quick sort is stable and merge sort is not
+   - Merge sort cannot sort large arrays
+
+   <details>
+   <summary>Answer</summary>
+
+   In-place operation and a tight, cache-friendly inner loop make it faster on
+   typical data. Stability is the other way around — merge sort is stable,
+   quick sort is not — and merge sort handles large data fine; it just needs
+   about *n* extra memory.
+   </details>
+
+## Practice
+
+Try [Kth Largest Element in an Array on LeetCode](https://leetcode.com/problems/kth-largest-element-in-an-array/)
+— partitioning alone answers it.
