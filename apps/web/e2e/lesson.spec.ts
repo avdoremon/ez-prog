@@ -8,6 +8,7 @@ const ALL_LESSONS = [
   '/data-structures/stack/',
   '/data-structures/queue/',
   '/data-structures/heap/',
+  '/data-structures/tree/',
   '/algorithms/binary-search/',
   '/algorithms/bubble-sort/',
   '/algorithms/greedy/',

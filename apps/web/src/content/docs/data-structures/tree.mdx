@@ -1,0 +1,124 @@
+---
+title: Trees
+description: Values with a parent and children instead of neighbours — and the three orders you can walk them in.
+order: 215
+difficulty: intermediate
+estimatedMinutes: 7
+viz: tree-traversal
+prerequisites: [/data-structures/array]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+An array gives every value two neighbours. A tree gives it a parent and up to
+two children instead — and that one change turns "walk from left to right"
+into a genuine choice about what to visit first.
+
+<Viz id="tree-traversal" />
+
+## How it works
+
+Every value is a **node**. The top node is the **root**, childless nodes are
+**leaves**, and the steps from root to deepest leaf is the **height**. In a
+*binary* tree each node has at most two children, a left and a right.
+
+The tree above is a flat array, index *i*'s children at 2*i*+1 and 2*i*+2 —
+the trick the Heaps lesson uses, valid whenever the tree is complete. Trees
+with gaps use node objects holding pointers instead.
+
+Walking it is where trees stop resembling arrays. Two directions lead from any
+node and only one can be first, so you must decide when to record the node
+relative to its subtrees:
+
+- **Pre-order** — record the node, then the left subtree, then the right.
+- **In-order** — left subtree, then the node, then the right.
+- **Post-order** — both subtrees, then the node.
+
+That is the *only* difference between them: one line moves. Change `order` in
+the input editor and watch the same tree produce a different sequence.
+
+Notice what in-order gives on this tree: 1, 3, 6, 8, 9, 10, 14 — sorted. That
+is not a coincidence; it is the property the next lesson is built on.
+
+## Try it
+
+```js
+function traverse(tree, order, i = 0, out = []) {
+  if (i >= tree.length) return out;
+  if (order === 'pre') out.push(tree[i]);
+  traverse(tree, order, 2 * i + 1, out);
+  if (order === 'in') out.push(tree[i]);
+  traverse(tree, order, 2 * i + 2, out);
+  if (order === 'post') out.push(tree[i]);
+  return out;
+}
+```
+
+## Trade-offs
+
+Each order is right for some job. Pre-order sees a node before its children —
+use it to copy or serialise a tree. Post-order sees children first, which is
+what freeing a tree or sizing a directory needs: you cannot total a folder
+before its subfolders. In-order is the one search trees care about.
+
+The cost over an array is indirection: values are no longer adjacent, so
+iteration loses the cache locality arrays enjoy. What you buy is structure — a
+balanced tree puts every node within about log *n* steps of the root, which is
+what makes the next lessons' operations cheap.
+
+## Check your understanding
+
+1. **What distinguishes pre-, in-, and post-order?**
+   - They visit different nodes
+   - Only when the node itself is recorded relative to its two subtrees
+   - Pre-order is depth-first; the others are breadth-first
+   - They differ in which child is explored first
+
+   <details>
+   <summary>Answer</summary>
+
+   Only the moment the node itself is recorded — one line moves. All three
+   visit every node exactly once, all three are depth-first, and all three go
+   left before right. Visiting right before left would be a different
+   traversal again.
+   </details>
+
+2. **You need a folder's total size, including everything inside it. Which
+   order fits?**
+   - Pre-order, so the folder is handled first
+   - Post-order, because a folder's size depends on its contents being
+     totalled first
+   - In-order, since sizes should come out sorted
+   - Any of them — the order does not matter
+
+   <details>
+   <summary>Answer</summary>
+
+   Post-order: you cannot total a folder until its subfolders are totalled, and
+   post-order is exactly "children before parent." Pre-order would reach the
+   folder before knowing what is inside. Sorting is irrelevant here, and the
+   order genuinely matters — this is the case where it does.
+   </details>
+
+3. **In-order on the tree above returns a sorted sequence. Why?**
+   - Because in-order sorts as it goes
+   - Because this tree is arranged with smaller values left and larger right,
+     and in-order visits left, node, right
+   - Because the array behind it happens to be sorted
+   - Coincidence — another tree would too
+
+   <details>
+   <summary>Answer</summary>
+
+   The tree is arranged so everything left of a node is smaller and everything
+   right is larger, and in-order visits precisely in that sequence. Nothing is
+   sorted along the way, and the backing array is `[8, 3, 10, …]`, which is
+   not sorted at all. Give the same traversal an unordered tree and the output
+   is unordered — try it.
+   </details>
+
+## Practice
+
+Try [Binary Tree Inorder Traversal on LeetCode](https://leetcode.com/problems/binary-tree-inorder-traversal/)
+— then attempt it without recursion, which forces the call stack into the open.

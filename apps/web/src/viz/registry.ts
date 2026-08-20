@@ -118,6 +118,22 @@ const registry = {
       })),
     code: () => import('./code/greedy-coins/index.js'),
   },
+  'tree-traversal': {
+    renderer: 'TreeView',
+    label: 'Binary tree being walked depth-first',
+    // A BST-shaped tree, so in-order comes out sorted — which is the hook for
+    // the Binary Search Trees lesson.
+    defaultInput: { values: [8, 3, 10, 1, 6, 9, 14], order: 'in' },
+    inputSchema: z.object({
+      values: z.array(z.number()).min(1).max(31),
+      order: z.enum(['pre', 'in', 'post']),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/tree-traversal').then((m) => ({
+        default: m.treeTraversal,
+      })),
+    code: () => import('./code/tree-traversal/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',
