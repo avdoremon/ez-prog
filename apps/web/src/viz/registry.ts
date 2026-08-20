@@ -46,6 +46,20 @@ const registry = {
       })),
     code: () => import('./code/insertion-sort/index.js'),
   },
+  'two-pointer': {
+    renderer: 'ArrayView',
+    label: 'Sorted array with a pointer converging from each end',
+    defaultInput: { arr: [1, 3, 4, 6, 8, 11, 15], target: 14 },
+    inputSchema: z.object({
+      arr: z.array(z.number()).min(2).max(64),
+      target: z.number(),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/two-pointer').then((m) => ({
+        default: m.twoPointer,
+      })),
+    code: () => import('./code/two-pointer/index.js'),
+  },
   'linear-search': {
     renderer: 'ArrayView',
     label: 'Array scanned one value at a time',

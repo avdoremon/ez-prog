@@ -10,7 +10,7 @@ one lesson, merged with a neighbor, or cut, once real authoring cost is known (s
 below). `slug` is the intended `apps/web/src/content/docs/...` path (§1 of
 `docs/AUTHORING.md`); `order` follows the numbering convention in
 `IMPLEMENTATION_PLAN.md` §5.1 (steps of 10 between top-level groups, incrementing by 1
-within a group, matching the real values already used by the three shipped lessons —
+within a group, matching the real values already used by the shipped lessons —
 see `docs/AUTHORING.md` §1 for the caveat that `order` does not yet drive the rendered
 sidebar position). `renderer needed` names the `packages/viz-react` renderer the lesson
 depends on; only `ArrayView` exists today (see `docs/AUTHORING.md` §0) — every other
@@ -61,8 +61,9 @@ would have caught it — the fourth is described separately below:
 3. **The visualization island shifted the page by 0.307 CLS** on hydration,
    costing ~15 Lighthouse performance points (79 → 97 once fixed).
 
-The gate now includes Playwright coverage for all four lessons: axe
-(wcag2a/wcag2aa), no horizontal scroll at 360px, and a 0.1 CLS budget.
+The gate now includes Playwright coverage for every shipped lesson: axe
+(wcag2a/wcag2aa), no horizontal scroll at 360px, and a 0.1 CLS budget. Adding a
+new lesson to that list is a required authoring step — see `docs/AUTHORING.md` §1.
 
 ### A fourth gap, found and fixed: the site was unreadable in dark mode
 
@@ -79,7 +80,7 @@ Starlight's light values regardless of `data-theme`, Expressive Code is pinned
 to one light code theme, and the theme switcher is removed rather than left as
 a control that changes nothing. Lighthouse Accessibility went 97 → 100.
 
-The gate gained a dark-scheme axe run over all four lessons, which is the check
+The gate gained a dark-scheme axe run over every lesson, which is the check
 whose absence hid this: the other axe runs use Chromium's default light scheme.
 
 ## On the total count
@@ -107,6 +108,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 0c | `/complexity/big-o` | How Fast Is Fast? | 230 | ArrayView | `linear-search` (+ reuses `binary-search`) | done |
 | 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | done |
 | 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView | `linear-search` | done |
+| 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -145,7 +147,7 @@ try an unsorted array instead of forking the entry.
 | 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | **Graph** (new) | `dijkstra` | planned — engine change |
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-intro` | planned |
 | 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | **Matrix2D** (new) | `dp-intro` | planned — engine change |
-| 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | planned |
+| 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | **done** (see Shipped) |
 | 22 | `/algorithms/sliding-window` | Sliding Window | 235 | ArrayView | `sliding-window` | planned |
 
 ## Complexity (`complexity/`)

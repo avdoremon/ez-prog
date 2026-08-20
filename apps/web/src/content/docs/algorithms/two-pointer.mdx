@@ -1,0 +1,124 @@
+---
+title: Two-Pointer Technique
+description: Find a pair that sums to a target by walking two pointers inward from both ends of a sorted array.
+order: 234
+difficulty: beginner
+estimatedMinutes: 6
+viz: two-pointer
+prerequisites: [/algorithms/binary-search]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+To find two values in a sorted list that add to a target, you could try every
+pair. But sorted data tells you which way to move — and one pointer at each
+end is enough to use that.
+
+<Viz id="two-pointer" />
+
+## How it works
+
+Put a pointer on the first value and another on the last, and add them.
+
+- **Sum too small?** The only way to get more is a bigger left value, so move
+  the left pointer right.
+- **Sum too big?** The only way to get less is a smaller right value, so move
+  the right pointer left.
+- **Equal?** Done.
+
+If the pointers meet, no pair exists.
+
+The move rule is the whole idea, and it rests entirely on sortedness. When
+the sum is too small, the left value is paired with the *largest* value
+available — nothing else could rescue it, so that value can never be part of
+the answer, and discarding it is safe. Each step eliminates one candidate
+permanently, so the pointers make at most *n* moves between them: linear
+time, no extra memory.
+
+Watch the discarded ranges dim as you step. Every element the pointers pass
+is ruled out for good, never revisited.
+
+## Try it
+
+```js
+function twoSumSorted(arr, target) {
+  let lo = 0, hi = arr.length - 1;
+  while (lo < hi) {
+    const sum = arr[lo] + arr[hi];
+    if (sum === target) return [lo, hi];
+    if (sum < target) lo++;
+    else hi--;
+  }
+  return null;
+}
+```
+
+## Trade-offs
+
+Against the obvious nested loop over every pair, this turns *n*²/2 additions
+into at most *n*. It uses no extra memory, which is what separates it from
+the hash-map approach: a hash map solves the same problem in linear time on
+*unsorted* data, but stores up to *n* entries.
+
+So the choice is about what you already have. Sorted input: two pointers,
+nothing allocated. Unsorted input you only search once: a hash map, since
+sorting first costs more than the scan. Two pointers is not a trick for
+pair-sums specifically — the same converge-from-both-ends shape solves
+palindrome checks, container-with-most-water, and merging sorted lists.
+
+## Check your understanding
+
+1. **Why is it safe to discard a value the moment the sum is too small?**
+   - It isn't — it's a heuristic that usually works
+   - Because that value was already paired with the largest one available, so
+     no other partner could reach the target
+   - Because the array is sorted, so every value is unique
+   - Because it will be checked again later from the other side
+
+   <details>
+   <summary>Answer</summary>
+
+   It was already paired with the largest remaining value. If even that
+   maximum partner falls short, no smaller partner can do better, so the
+   value cannot appear in any answer. That is a proof, not a heuristic.
+   Sorting does not imply uniqueness, and a discarded value is never
+   revisited.
+   </details>
+
+2. **What happens if you run this on an unsorted array?**
+   - It still finds a pair, just more slowly
+   - It terminates but may report no pair when one exists
+   - It loops forever
+   - It throws an error
+
+   <details>
+   <summary>Answer</summary>
+
+   It terminates but can be wrong. The pointers still converge, so it always
+   halts — but the move rule assumes bigger values lie to the right, and
+   without that the discards are unjustified and a real pair can be skipped.
+   Nothing detects this, which is why sortedness is a precondition you must
+   check yourself.
+   </details>
+
+3. **Your input is unsorted and you need one pair-sum answer. What should
+   you reach for?**
+   - Sort it, then use two pointers
+   - A hash map, in one pass
+   - The nested loop over every pair
+   - Two pointers directly on the unsorted array
+
+   <details>
+   <summary>Answer</summary>
+
+   A hash map, in one pass — linear time without paying to sort. Sorting
+   first would cost more than the single pass you need, though it wins if you
+   will answer many queries. The nested loop is quadratic, and running two
+   pointers on unsorted input is simply incorrect.
+   </details>
+
+## Practice
+
+Try [Two Sum II — Input Array Is Sorted on LeetCode](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/),
+which hands you the sorted precondition and expects exactly this approach.
