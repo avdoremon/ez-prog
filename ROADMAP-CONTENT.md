@@ -119,6 +119,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView | `amortized-growth` | done |
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | done |
 | 6 | `/data-structures/tree` | Trees | 215 | **TreeView** | `tree-traversal` | done |
+| 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -137,7 +138,7 @@ try an unsorted array instead of forking the entry.
 | 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | **done** (see Shipped) |
 | 5 | `/data-structures/hash-table` | Hash Tables | 214 | ArrayView (buckets as array slots)† | `hash-table` | planned |
 | 6 | `/data-structures/tree` | Trees | 215 | TreeView | `tree-traversal` | **done** (see Shipped) |
-| 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView (exists) | `bst` | planned — content only |
+| 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | **done** (see Shipped) |
 | 8 | `/data-structures/heap` | Heaps | 217 | ArrayView (array-backed binary heap) | `heap` | **done** (see Shipped) |
 | 9 | `/data-structures/graph` | Graphs | 218 | **Graph** (new) | `graph-intro` | planned — engine change |
 | 10 | `/data-structures/trie` | Tries | 219 | TreeView†, but see the note | `trie` | planned — needs a decision |

@@ -1,0 +1,127 @@
+---
+title: Binary Search Trees
+description: Put smaller values left and larger values right, and every comparison throws away half the tree.
+order: 216
+difficulty: intermediate
+estimatedMinutes: 7
+viz: bst
+prerequisites: [/data-structures/tree]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+The previous lesson ended with a tree whose in-order walk came out sorted.
+That was not luck. It is one rule, and that rule turns a tree into something
+you can search.
+
+<Viz id="bst" />
+
+## How it works
+
+A binary search tree keeps one invariant at every node: **everything in the
+left subtree is smaller, everything in the right subtree is larger.**
+
+Searching is then one move repeated. Compare the target with the node: equal
+means done, smaller means it cannot be on the right, larger means it cannot be
+on the left. Watch whole branches dim above — each comparison eliminates not
+one value but everything beneath one child.
+
+That is binary search's halving moved onto a structure. A sorted array halves
+too, but inserting into one shifts every later element; a tree walks to the
+right empty spot and hangs the value there, moving nothing.
+
+So the cost is the tree's **height**, not its node count. A balanced tree of
+*n* nodes has height about log₂(*n*), and search, insert and delete all cost
+that.
+
+## When the shape goes wrong
+
+"Balanced" is load-bearing, and nothing in the rule forces it. Insert 1, 2, 3,
+4, 5 in that order and each value goes right of the last: height 5, no
+branching — a linked list wearing a tree's clothes, where search is O(*n*).
+
+This is quick sort's problem again: sorted input defeats the naive strategy.
+Self-balancing trees (AVL, red-black) rotate as they insert so the height
+stays logarithmic whatever order values arrive in. Your language's ordered map
+is almost certainly one.
+
+The visualization only draws complete trees, so it cannot show that case.
+
+## Try it
+
+```js
+function bstSearch(tree, target) {
+  let i = 0;
+  while (i < tree.length) {
+    if (target === tree[i]) return i;
+    i = target < tree[i] ? 2 * i + 1 : 2 * i + 2;
+  }
+  return -1;
+}
+```
+
+## Trade-offs
+
+Against a sorted array, a BST trades cache locality for cheap insertion: both
+search in log *n*, but the array pays *n* per insert and the tree log *n*.
+Against a hash table it is slower for plain lookup — hashing is constant time —
+but it keeps values *ordered*, so it can answer "smallest value above 40?" or
+walk everything in order, which a hash table cannot.
+
+Reach for a BST when you need ordering as well as lookup: ranges, successors,
+sorted iteration. Use a hash table when you only ask "is this present?"
+
+## Check your understanding
+
+1. **Searching for 6 in the tree above, why is the entire right subtree
+   discarded at the first step?**
+   - Because the right subtree happens to be empty
+   - Because 6 is smaller than the root, and the BST rule guarantees
+     everything on the right is larger
+   - Because searches always go left first
+   - Because the right subtree was already checked
+
+   <details>
+   <summary>Answer</summary>
+
+   The rule guarantees everything right of the root is larger, and 6 is
+   smaller, so it cannot be there. That is a deduction from the invariant, not
+   a preference for going left, and nothing on the right was examined.
+   </details>
+
+2. **You insert 1, 2, 3, 4, 5 into an empty BST in that order. What shape do
+   you get?**
+   - A balanced tree of height about 2
+   - A single path leaning right, height 5, where search is O(*n*)
+   - A tree that rebalances itself automatically
+   - An error, because BSTs need sorted input
+
+   <details>
+   <summary>Answer</summary>
+
+   A single right-leaning path: each value is larger than everything before it,
+   so it goes right every time, and search degrades to a linear scan. Plain
+   BSTs do not rebalance — that is what AVL and red-black trees add. Sorted
+   input is legal, just pathological.
+   </details>
+
+3. **When is a hash table the better choice than a BST?**
+   - Always — hash tables are strictly faster
+   - When you only need to ask whether a value is present, and never need
+     order, ranges, or sorted iteration
+   - When the data is already sorted
+   - When you need the smallest value quickly
+
+   <details>
+   <summary>Answer</summary>
+
+   When ordering does not matter: hashing gives constant-time lookup but no
+   order, so successors, ranges and sorted walks are out. Needing the smallest
+   value is precisely where a BST wins.
+   </details>
+
+## Practice
+
+Try [Validate Binary Search Tree on LeetCode](https://leetcode.com/problems/validate-binary-search-tree/)
+— the classic trap is checking each node only against its parent.

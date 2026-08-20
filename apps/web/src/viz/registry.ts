@@ -134,6 +134,20 @@ const registry = {
       })),
     code: () => import('./code/tree-traversal/index.js'),
   },
+  bst: {
+    renderer: 'TreeView',
+    label: 'Binary search tree being searched, discarded subtrees dimmed',
+    defaultInput: { values: [8, 3, 10, 1, 6, 9, 14], target: 6 },
+    inputSchema: z.object({
+      values: z.array(z.number()).min(1).max(31),
+      target: z.number(),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/bst-search').then((m) => ({
+        default: m.bstSearch,
+      })),
+    code: () => import('./code/bst-search/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',
