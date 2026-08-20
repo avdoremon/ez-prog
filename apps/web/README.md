@@ -1,49 +1,35 @@
-# Starlight Starter Kit: Basics
+# web
 
-[![Built with Starlight](https://astro.badg.es/v2/built-with-starlight/tiny.svg)](https://starlight.astro.build)
+The Astro + Starlight site: lesson content, the visualization registry, and the
+Playwright suite.
 
-```
-pnpm create astro@latest -- --template starlight
-```
+Commands are run from the repository root (`pnpm dev`, `pnpm build`,
+`pnpm test:e2e`, …) — see the [root README](../../README.md) for the full list
+of gates and the order to run them in.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-## 🚀 Project Structure
-
-Inside of your Astro + Starlight project, you'll see the following folders and files:
+## What lives here
 
 ```
-.
-├── public/
-├── src/
-│   ├── assets/
-│   ├── content/
-│   │   └── docs/
-│   └── content.config.ts
-├── astro.config.mjs
-├── package.json
-└── tsconfig.json
+src/content/docs/   the lessons (.mdx), one file per lesson
+src/viz/            registry.ts + per-language, anchor-tagged code samples
+src/components/     Viz.astro (no-JS fallback) and the VizIsland React island
+src/styles/         design tokens and visualization styling
+e2e/                Playwright: a11y, no-JS, 360px, layout stability
 ```
 
-Starlight looks for `.md` or `.mdx` files in the `src/content/docs/` directory. Each file is exposed as a route based on its file name.
+Renderers and the frame model are not here — they live in `packages/viz-react`
+and `packages/viz-core`.
 
-Images can be added to `src/assets/` and embedded in Markdown with a relative link.
+## Adding a lesson
 
-Static assets, like favicons, can be placed in the `public/` directory.
+Read [`docs/AUTHORING.md`](../../docs/AUTHORING.md). It covers the frontmatter
+schema, the lesson shape, how to register a visualization, and the seven
+`lint:content` rules that will fail you.
 
-## 🧞 Commands
+## Notes specific to this app
 
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Check out [Starlight’s docs](https://starlight.astro.build/), read [the Astro documentation](https://docs.astro.build), or jump into the [Astro Discord server](https://astro.build/chat).
+- The site renders one light palette by design; `src/styles/tokens.css` forces
+  it regardless of `data-theme`, and the theme switcher is removed. See
+  `docs/PHASE0-EXIT.md` if you are considering a dark theme.
+- `astro preview` daemonizes in this Astro version, which is why the E2E suite
+  starts it from `e2e/preview-server.ts` rather than Playwright's `webServer`.
