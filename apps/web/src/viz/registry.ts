@@ -58,6 +58,21 @@ const registry = {
       import('@cs/viz-core/algorithms/heap').then((m) => ({ default: m.heap })),
     code: () => import('./code/heap/index.js'),
   },
+  'merge-sort': {
+    renderer: 'ArrayView',
+    label: 'Array being sorted by splitting into runs and merging them back',
+    defaultInput: { arr: [5, 2, 9, 1, 7, 3, 8, 4] },
+    // Every level of the recursion writes n values, so frames grow as n log n.
+    maxFrames: 400,
+    inputSchema: z.object({
+      arr: z.array(z.number()).min(1).max(24),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/merge-sort').then((m) => ({
+        default: m.mergeSort,
+      })),
+    code: () => import('./code/merge-sort/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',

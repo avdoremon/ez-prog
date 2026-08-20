@@ -1,0 +1,130 @@
+---
+title: Merge Sort
+description: Merging two already-sorted runs is easy — so split until everything is sorted, then merge all the way back up.
+order: 224
+difficulty: intermediate
+estimatedMinutes: 7
+viz: merge-sort
+prerequisites: [/algorithms/insertion-sort]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Merging two sorted piles is easy: look at the top card of each, take the
+smaller, repeat. Merge sort is built entirely on noticing that a pile of one
+card is already sorted.
+
+<Viz id="merge-sort" />
+
+## How it works
+
+Split the array in half, sort each half, merge them. The sorting of each half
+is the same procedure again — and the recursion bottoms out at runs of one
+value, which are sorted by definition. Nothing clever happens at the bottom;
+all the work is in the merging on the way back up.
+
+Merging is the part worth watching. Two sorted runs sit side by side, and you
+repeatedly compare their front values and take the smaller. Because both runs
+are sorted, whichever value you take is the smallest one left anywhere — so
+one pass over both runs produces a sorted combination. Merging *n* values
+costs about *n* comparisons, not *n*².
+
+Now count. Every level of the recursion merges every value exactly once, so
+each level costs *n*, and halving repeatedly gives about log₂(*n*) levels.
+Total: **n log n** — and unlike the quadratic sorts, that holds for every
+input, because the splitting ignores the values entirely.
+
+Watch a merged range settle: once declared merged, it stays sorted.
+
+## Try it
+
+```js
+function mergeSort(arr, lo = 0, hi = arr.length - 1) {
+  if (lo >= hi) return arr;
+  const mid = (lo + hi) >> 1;
+  mergeSort(arr, lo, mid);
+  mergeSort(arr, mid + 1, hi);
+  const left = arr.slice(lo, mid + 1);
+  const right = arr.slice(mid + 1, hi + 1);
+  let i = 0, j = 0, k = lo;
+  while (i < left.length && j < right.length) {
+    arr[k++] = left[i] <= right[j] ? left[i++] : right[j++];
+  }
+  while (i < left.length) arr[k++] = left[i++];
+  while (j < right.length) arr[k++] = right[j++];
+  return arr;
+}
+```
+
+## Trade-offs
+
+Merge sort's selling point is that its *n* log *n* is a guarantee, not an
+average. Quick sort is usually faster in practice but can degrade badly on
+unlucky input; merge sort has no bad case, which is why it backs sorts that
+must not have surprises.
+
+It is also **stable**: the comparison takes from the left run on a tie, so
+equal values keep their original order. That matters when you sort by one
+field and want a previous sort to survive underneath.
+
+The cost is memory. Merging needs somewhere to put the combination, so the
+usual implementation allocates about *n* extra slots — where the quadratic
+sorts you have seen work in place. That trade flips for data that cannot be
+randomly accessed: merge sort is the natural sort for linked lists, and for
+data too large to fit in memory, since merging only ever reads each run
+front to back.
+
+## Check your understanding
+
+1. **Why does merge sort's cost not depend on how the input is arranged?**
+   - It does — sorted input is much faster
+   - Because the splitting never looks at the values, so the shape of the
+     recursion is the same every time
+   - Because it checks for sorted input first
+   - Because it uses extra memory
+
+   <details>
+   <summary>Answer</summary>
+
+   The split is positional: halve, halve again, regardless of what the values
+   are. So every input produces the same log *n* levels with *n* work each.
+   Some implementations add a sorted-input shortcut, but plain merge sort has
+   none, and the extra memory is unrelated to the timing guarantee.
+   </details>
+
+2. **Merging two sorted runs of total length *n* costs how much?**
+   - About *n* comparisons — one pass, taking the smaller front value
+   - About *n*² comparisons, since every value meets every other
+   - About log *n* comparisons
+   - It depends on how the values are distributed
+
+   <details>
+   <summary>Answer</summary>
+
+   About *n*. Each comparison consumes one value permanently, so one pass over
+   both runs is enough — that is precisely what being *already sorted* buys.
+   Values from opposite runs never all meet each other, and no comparison is
+   skipped, so it is neither quadratic nor logarithmic.
+   </details>
+
+3. **What does merge sort spend that bubble and insertion sort do not?**
+   - Extra comparisons
+   - About *n* extra memory, to hold the merged output
+   - Nothing — it is better in every way
+   - Time, on already-sorted input
+
+   <details>
+   <summary>Answer</summary>
+
+   Memory: the merge needs somewhere to build the combination, roughly *n*
+   extra slots, while the quadratic sorts rearrange in place. It makes far
+   *fewer* comparisons, and on already-sorted input insertion sort is actually
+   the faster one — it finishes in linear time, where merge sort still does
+   its full *n* log *n*.
+   </details>
+
+## Practice
+
+Try [Merge Sorted Array on LeetCode](https://leetcode.com/problems/merge-sorted-array/)
+— just the merge step, which is where all of merge sort's work happens.

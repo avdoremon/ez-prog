@@ -114,6 +114,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 3 | `/data-structures/stack` | Stacks | 212 | ArrayView | `stack` | done |
 | 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | done |
 | 8 | `/data-structures/heap` | Heaps | 217 | ArrayView | `heap` | done |
+| 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -143,7 +144,7 @@ try an unsorted array instead of forking the entry.
 |---|---|---|---|---|---|---|
 | 11 | `/algorithms/selection-sort` | Selection Sort | 222 | ArrayView | `selection-sort` | planned |
 | 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | **done** — was Task 20's fourth-lesson test (see Shipped) |
-| 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | planned |
+| 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | **done** (see Shipped) |
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | planned |
 | 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView (viz already registered — see Shipped) | `linear-search` | **done** (see Shipped) |
 | 15 | `/algorithms/recursion` | Recursion Basics | 227 | **StackFrame** (new) | `recursion-intro` | planned — engine change |
