@@ -46,6 +46,25 @@ const registry = {
       })),
     code: () => import('./code/insertion-sort/index.js'),
   },
+  'sliding-window': {
+    renderer: 'ArrayView',
+    label: 'Array with a fixed-width window sliding across it',
+    defaultInput: { arr: [3, -1, 4, 8, 2, -5, 7, 1], k: 3 },
+    inputSchema: z
+      .object({
+        arr: z.array(z.number()).min(1).max(64),
+        k: z.number().int().min(1).max(64),
+      })
+      // Cross-field: a window wider than the array has no valid position.
+      .refine((v) => v.k <= v.arr.length, {
+        message: 'k must not be larger than the number of values in arr.',
+      }),
+    load: () =>
+      import('@cs/viz-core/algorithms/sliding-window').then((m) => ({
+        default: m.slidingWindow,
+      })),
+    code: () => import('./code/sliding-window/index.js'),
+  },
   'two-pointer': {
     renderer: 'ArrayView',
     label: 'Sorted array with a pointer converging from each end',

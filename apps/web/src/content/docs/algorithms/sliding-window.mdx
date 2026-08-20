@@ -1,0 +1,131 @@
+---
+title: Sliding Window
+description: Keep a running total as a fixed-width window moves, repairing it with one addition and one subtraction instead of recomputing.
+order: 235
+difficulty: beginner
+estimatedMinutes: 6
+viz: sliding-window
+prerequisites: [/algorithms/two-pointer]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+To find the best run of three consecutive values, you could add up every group
+of three. But consecutive groups overlap almost entirely — and re-adding what
+you already know is the waste worth removing.
+
+<Viz id="sliding-window" />
+
+## How it works
+
+Add up the first *k* values. That total is the first window.
+
+Now move the window one step right. Only two things changed: one value left
+at the back, one value joined at the front. So the new total is the old total,
+minus the departing value, plus the arriving one:
+
+```text
+sum = sum - arr[i - k] + arr[i]
+```
+
+Everything in the overlap stays untouched. Track the best total as you go, and
+one pass answers the question.
+
+That single line is the whole technique. Recomputing each window costs *k*
+additions and there are about *n* windows, so the obvious approach is *n*×*k*.
+Repairing the total costs two operations per step regardless of *k*, which
+makes the whole scan linear — and, importantly, **independent of the window
+width.** A window of 3 and a window of 300 cost the same per step.
+
+Watch the departing cell dim at each slide. That is the value being subtracted
+out; the rest of the window is never re-read.
+
+## Try it
+
+```js
+function maxWindowSum(arr, k) {
+  let sum = 0;
+  for (let i = 0; i < k; i++) sum += arr[i];
+  let best = sum, bestStart = 0;
+  for (let i = k; i < arr.length; i++) {
+    sum += arr[i] - arr[i - k];
+    if (sum > best) {
+      best = sum;
+      bestStart = i - k + 1;
+    }
+  }
+  return { best, bestStart };
+}
+```
+
+## Trade-offs
+
+This works because addition is reversible: knowing what left the window is
+enough to undo its contribution. That is the precondition, and it is easy to
+violate. Swap the sum for a **maximum** and the trick collapses — when the
+departing value *was* the maximum, the old maximum tells you nothing about the
+new one, and you are back to rescanning. Sliding-window maximum is solvable in
+linear time, but it needs a deque, not a running total.
+
+Use it when the window has a fixed width and the quantity you track can be
+updated incrementally: sums, counts, averages, character frequencies. Reach
+for something else when the window's width depends on the data — those are
+variable-size windows, where both edges move independently — or when the
+tracked quantity cannot be undone.
+
+## Check your understanding
+
+1. **Why doesn't the cost per step grow when *k* gets larger?**
+   - It does grow — larger windows are slower per step
+   - Because each step changes exactly two values regardless of width
+   - Because the array is scanned in sorted order
+   - Because larger windows mean fewer steps overall
+
+   <details>
+   <summary>Answer</summary>
+
+   Each step changes exactly two values, whatever the width: one leaves, one
+   arrives, and the entire overlap is untouched. It is true that a larger *k*
+   means slightly fewer windows, but that is not the reason — the per-step
+   cost is constant, which is what makes the total linear.
+   </details>
+
+2. **You need the *maximum* in each window instead of the sum. Does the same
+   running-value trick still work?**
+   - Yes, identically — just track the max instead
+   - No, because when the departing value was the maximum you have no way to
+     recover the new one
+   - Yes, but only if all values are positive
+   - No, because maximums cannot be computed on windows at all
+
+   <details>
+   <summary>Answer</summary>
+
+   No. Subtraction undoes a contribution to a sum, but nothing undoes a
+   maximum: once the largest value leaves, the remaining max could be any of
+   the others, so you must rescan. Sign has nothing to do with it, and window
+   maximums are perfectly computable in linear time — just with a deque rather
+   than a running value.
+   </details>
+
+3. **How does this differ from the two-pointer technique?**
+   - It doesn't — they are two names for the same algorithm
+   - Both edges here move together at a fixed distance; two-pointer moves them
+     independently, converging
+   - Sliding window requires sorted input, two-pointer does not
+   - Two-pointer is linear, sliding window is quadratic
+
+   <details>
+   <summary>Answer</summary>
+
+   The window's edges move in lockstep, holding a fixed width; two-pointer's
+   move independently and inward, and the gap between them shrinks. Both are
+   linear. Sortedness is a precondition for two-pointer's discard rule, not
+   for this — the array above is deliberately unsorted.
+   </details>
+
+## Practice
+
+Try [Maximum Average Subarray I on LeetCode](https://leetcode.com/problems/maximum-average-subarray-i/)
+— the same fixed window, with one division at the end.
