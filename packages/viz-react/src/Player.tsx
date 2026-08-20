@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import type { Frame, ParsedCode } from '@cs/viz-core';
+import type { Frame, Mark, ParsedCode } from '@cs/viz-core';
 import { ArrayView } from './renderers/ArrayView.js';
 import { CodePanel } from './CodePanel.js';
 import { FrameRail } from './FrameRail.js';
@@ -8,14 +8,34 @@ import { VarsPanel } from './VarsPanel.js';
 
 const SPEEDS = [0.5, 1, 2, 4];
 
+/**
+ * Every renderer takes exactly these props, so the Player can hold any of them
+ * without knowing which. Adding a renderer is then a new file plus a registry
+ * entry, not a change to the Player.
+ */
+export type Renderer = (props: {
+  state: number[];
+  marks?: Mark[];
+  label: string;
+}) => React.ReactNode;
+
 export interface PlayerProps {
   frames: Frame<number[]>[];
   truncated: boolean;
   label: string;
   code?: ParsedCode;
+  /** Defaults to ArrayView, which is what every lesson used before renderers
+   *  became pluggable. */
+  renderer?: Renderer;
 }
 
-export function Player({ frames, truncated, label, code }: PlayerProps) {
+export function Player({
+  frames,
+  truncated,
+  label,
+  code,
+  renderer: View = ArrayView,
+}: PlayerProps) {
   const p = useFramePlayer(frames.length);
   const frame = frames[p.index]!;
 
@@ -36,7 +56,7 @@ export function Player({ frames, truncated, label, code }: PlayerProps) {
 
   return (
     <div className="player" onKeyDown={onKeyDown}>
-      <ArrayView state={frame.state} marks={frame.marks} label={label} />
+      <View state={frame.state} marks={frame.marks} label={label} />
 
       {code && <CodePanel code={code} active={frame.line} />}
 

@@ -2,20 +2,21 @@
 
 This is the complete, stand-alone guide to writing a lesson for this platform. It is
 written **from** the lessons that already exist, not from the design plan — every claim
-below was checked against the real source in this repository as of commit `5327c0c`.
+below was checked against the real source in this repository as of commit `b3d8251`.
 Where the design plan (`IMPLEMENTATION_PLAN.md`) says one thing and the code does
 another, this document follows the code and calls out the gap.
 
-The five lessons shipped today. Read at least the first two end to end before you write
-anything:
+Every shipped lesson lives under `apps/web/src/content/docs/`; list that directory for
+the current set rather than trusting a list here. Four are worth reading first, because
+each shows a different shape:
 
-- `apps/web/src/content/docs/algorithms/binary-search.mdx` — the canonical example
-- `apps/web/src/content/docs/algorithms/bubble-sort.mdx` — uses a tighter `maxFrames`
-- `apps/web/src/content/docs/algorithms/insertion-sort.mdx` — written from this guide
-  alone, as the test of whether the guide is sufficient
-- `apps/web/src/content/docs/algorithms/linear-search.mdx` — reuses an existing
-  registry entry; adds no new generator at all
-- `apps/web/src/content/docs/complexity/big-o.mdx` — embeds two visualizations
+- `algorithms/binary-search.mdx` - the canonical example. Start here.
+- `algorithms/insertion-sort.mdx` - written from this guide alone, as the test of
+  whether the guide is sufficient.
+- `algorithms/linear-search.mdx` - reuses an existing registry entry and adds no new
+  generator at all: the cheapest shape a lesson can take.
+- `data-structures/tree.mdx` - uses `TreeView` instead of `ArrayView`, and lets the
+  learner change the traversal order from the input editor.
 
 ## 0. The one constraint that shapes everything below
 
@@ -39,7 +40,8 @@ already exists under `packages/`.** Concretely:
 
 So: **adding a lesson that reuses the `ArrayView` renderer touches zero existing files
 under `packages/`.** If your lesson idea needs anything the existing pieces don't
-provide — a new renderer (only `ArrayView` exists today), a new `Mark`/`Target` shape,
+provide — a third renderer (`ArrayView` and `TreeView` exist today), a new
+`Mark`/`Target` shape,
 a change to how `snap`, `collect`, or `parseAnchors` behave — that is an **engine
 change**. It means editing an *existing* file under `packages/viz-core` or
 `packages/viz-react`. Do not make that change as part of a content PR. Stop and report
@@ -48,9 +50,11 @@ belongs in its own scoped piece of work rather than silently absorbed into a "qu
 content edit. When this was last measured, exercising a new lesson end to end surfaced
 four pre-existing engine defects (see `docs/PHASE0-EXIT.md`); reporting beats absorbing.
 
-Everything in this document about adding a visualization assumes you are in the
-"reuses `ArrayView`" case — which every DSA lesson that operates on a flat array or
-range (sorting, searching, two-pointer, sliding-window, ...) is.
+Everything in this document about adding a visualization assumes you are reusing one of
+the two existing renderers: `ArrayView` for anything positional (sorting, searching,
+two-pointer, sliding-window, stacks, queues), `TreeView` for a complete binary tree held
+in an array. Both take the same `number[]` state and the same index-based marks, so
+choosing between them is a one-word change in the registry (§4.6).
 
 ## 1. Where lesson files go, and how a slug is derived
 
@@ -60,13 +64,9 @@ subdirectories by topic:
 ```
 apps/web/src/content/docs/
   index.mdx            the landing page — link your lesson from here (see below)
-  algorithms/
-    binary-search.mdx
-    bubble-sort.mdx
-    insertion-sort.mdx
-    linear-search.mdx
-  complexity/
-    big-o.mdx
+  data-structures/     array, stack, queue, heap, tree, ...
+  algorithms/          searches, sorts, two-pointer, sliding-window, greedy, ...
+  complexity/          big-o, amortized-analysis, ...
 ```
 
 Both `.md` and `.mdx` are discovered and linted identically — verified in
@@ -92,19 +92,20 @@ the routed URL Starlight serves the page at (with a trailing slash, e.g.
 "DSA content" by the linter — `data-structures/`, `algorithms/`, `complexity/`
 (`DSA_PREFIXES` in `scripts/lint-content.ts`). Any lesson under one of these **must**
 declare a `viz` (§6, rule `dsa-requires-viz`). Beyond linting, the sidebar is built from
-`apps/web/astro.config.mjs`, which today lists two explicit groups:
+`apps/web/astro.config.mjs`, which lists one explicit group per directory:
 
 ```js
 sidebar: [
+  { label: 'Data Structures', items: [{ autogenerate: { directory: 'data-structures' } }] },
   { label: 'Algorithms', items: [{ autogenerate: { directory: 'algorithms' } }] },
   { label: 'Complexity', items: [{ autogenerate: { directory: 'complexity' } }] },
 ],
 ```
 
-A file dropped into `algorithms/` or `complexity/` appears in the nav automatically. If
-you introduce a brand-new top-level directory (e.g. `data-structures/`), you must add a
-matching sidebar group to this file — that is an ordinary `apps/web` edit, not an engine
-change, but it will not happen for you.
+A file dropped into any of those appears in the nav automatically. Group order here is
+manual and follows `IMPLEMENTATION_PLAN.md` §5.1's numbering. If you introduce a
+brand-new top-level directory, you must add a matching group yourself — an ordinary
+`apps/web` edit, not an engine change, but it will not happen for you.
 
 **`order` drives the sidebar — set it deliberately.** Starlight's `autogenerate`
 sidebar sorts by its own nested `sidebar.order` field (from
@@ -491,12 +492,23 @@ Verbatim shape, from the real `binary-search` entry:
 
 Field by field:
 
-- `renderer` — must be `'ArrayView'` today; it's the only value the type
-  (`apps/web/src/viz/types.ts`) allows. Adding a second renderer is an engine change
-  (§0) inside `packages/viz-react`.
-- `label` — a short string, used as the `<ol aria-label>` on `ArrayView` and as the
-  `<noscript>` fallback text in `Viz.astro`. Write something a screen-reader user or a
-  JS-disabled reader can act on.
+- `renderer` — `'ArrayView'` or `'TreeView'`; the union in
+  `apps/web/src/viz/types.ts` is what the type allows. Choosing between the two is
+  ordinary content work. **Writing a third one is still an engine change** (§0), but a
+  much smaller one than it used to be: renderers are now pluggable, so a new renderer is
+  a new file in `packages/viz-react/src/renderers/` plus two lines — a name in that
+  union, and an entry in the `RENDERERS` map in `apps/web/src/components/VizIsland.tsx`.
+  Nothing in `Player` or `viz-core` needs touching.
+  - **`ArrayView`** draws the state as a flat row of cells. Use it for anything
+    positional: searches, sorts, windows, pointers, stacks and queues.
+  - **`TreeView`** draws the *same* `number[]` as a binary tree, taking index *i*'s
+    children to be 2*i*+1 and 2*i*+2. Because positions are still array indexes, your
+    `Mark` targets need no new shape and your generator is unchanged — the only
+    difference is how the state is drawn. It expects a complete tree; gaps have no
+    representation.
+- `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
+  `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
+  screen-reader user or a JS-disabled reader can act on.
 - `defaultInput` — the input the algorithm runs with when the page first renders and
   when lint checks it (§6, rule `frame-budget`). It is also what pre-fills the "Try your
   own input" editor (§4.7) and what **Reset** restores there, so pick one that's small

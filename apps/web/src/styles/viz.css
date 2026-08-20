@@ -183,3 +183,55 @@
     padding-block: .5rem;
   }
 }
+
+/*
+ * TreeView: a flat array drawn as a binary tree (index i's children at 2i+1
+ * and 2i+2). Depth is shown by indentation and a real `tree`/`treeitem`
+ * structure rather than drawn edges, so it degrades gracefully at 360px and
+ * reads correctly to a screen reader. As with ArrayView, every mark pairs its
+ * colour with a border style and a text tag — colour is never the only
+ * channel.
+ */
+.tree-view, .tree-view__children {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.tree-view__children {
+  padding-left: 1.25rem;
+  border-left: 2px solid var(--muted);
+  margin-left: .75rem;
+}
+
+.tree-view__node {
+  margin: .25rem 0;
+}
+
+.tree-view__value {
+  display: inline-block;
+  border: 2px solid var(--muted);
+  padding: .25rem .5rem;
+  min-width: 2.25rem;
+  text-align: center;
+  font-family: var(--font-mono);
+}
+
+.tree-view__index, .tree-view__tag {
+  font-size: .625rem;
+  margin-left: .35rem;
+  color: var(--muted);
+}
+
+.tree-view__tag {
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.tree-view__node[data-marks~="compare"] > .tree-view__value { border-color: var(--signal); border-style: dashed; }
+.tree-view__node[data-marks~="cursor"]  > .tree-view__value { border-color: var(--signal); border-width: 4px; }
+.tree-view__node[data-marks~="swap"]    > .tree-view__value { border-color: var(--signal); border-style: groove; border-width: 3px; }
+.tree-view__node[data-marks~="done"]    > .tree-view__value { border-color: var(--commit); border-style: double; }
+.tree-view__node[data-marks~="visited"] > .tree-view__value { border-color: var(--probe); border-style: dotted; }
+.tree-view__node[data-marks~="active"]  > .tree-view__value { border-color: var(--probe); }
+.tree-view__node[data-marks~="discard"] > .tree-view__value { border-color: var(--discard); opacity: .45; }

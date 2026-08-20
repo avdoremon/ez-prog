@@ -1,6 +1,6 @@
 import { useEffect, useId, useState } from 'react';
 import { collect, parseAnchors, type Frame, type ParsedCode } from '@cs/viz-core';
-import { Player } from '@cs/viz-react';
+import { ArrayView, Player, TreeView, type Renderer } from '@cs/viz-react';
 import { VIZ, type VizId } from '../viz/registry.js';
 
 interface RunData {
@@ -15,6 +15,13 @@ interface RunData {
    */
   runId: number;
 }
+
+// Registry entries name their renderer as a string so the registry stays
+// serialisable data; this is the one place that maps a name to a component.
+const RENDERERS: Record<'ArrayView' | 'TreeView', Renderer> = {
+  ArrayView,
+  TreeView,
+};
 
 function defaultInputText(defaultInput: unknown): string {
   return JSON.stringify(defaultInput, null, 2);
@@ -95,7 +102,8 @@ export default function VizIsland({ id }: { id: VizId }) {
   return (
     <>
       <Player key={data.runId} frames={data.frames} truncated={data.truncated}
-              label={entry.label} code={data.code} />
+              label={entry.label} code={data.code}
+              renderer={RENDERERS[entry.renderer]} />
 
       <details className="viz-input-editor">
         <summary>Try your own input</summary>
