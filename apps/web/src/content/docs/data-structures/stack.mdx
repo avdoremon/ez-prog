@@ -1,0 +1,120 @@
+---
+title: Stacks
+description: Add and remove at one end only — the discipline behind undo, back buttons, and the call stack itself.
+order: 212
+difficulty: beginner
+estimatedMinutes: 6
+viz: stack
+prerequisites: [/data-structures/array]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+A stack is an array that has given something up. You may only touch one end,
+and in exchange every operation becomes cheap and the ordering becomes a
+guarantee you can build on.
+
+<Viz id="stack" />
+
+## How it works
+
+Two operations, both at the same end, called the **top**:
+
+- **Push** puts a value on the top.
+- **Pop** removes the value on the top and hands it back.
+
+That is the entire interface. Because both touch only the end, neither has to
+move anything else — no shifting, no matter how deep the stack. Both are
+constant time, unlike inserting into the middle of an array.
+
+The consequence is the ordering: the value that comes out is always the one
+that went in most recently. **Last in, first out** — LIFO. Step the
+visualization and watch 15 arrive after 8 and leave before it.
+
+What a stack refuses to do matters as much. There is no reaching into the
+middle, and no indexing. Give up those, and you get a structure whose ordering
+you can rely on without checking.
+
+## Try it
+
+```js
+function runStack(ops) {
+  const stack = [];
+  for (const op of ops) {
+    if (op !== null) stack.push(op);
+    else if (stack.length > 0) stack.pop();
+  }
+  return stack;
+}
+```
+
+## Trade-offs
+
+Use a stack whenever the most recent thing is the thing you need next.
+Undo history, the browser's back button, matching brackets in a parser,
+depth-first traversal — all of them are "deal with the newest first"
+problems, and all of them are a stack whether or not it is named one.
+
+Your language already runs on one: each function call pushes a frame holding
+its local variables, and returning pops it. That is why infinite recursion
+reports a *stack overflow* — pushes without matching pops, until the space
+runs out.
+
+Avoid it when you need the *oldest* item first — that is a queue, and using a
+stack instead reverses your order. Avoid it too when you need to inspect or
+index the middle; a stack that you keep reaching into is just an array
+wearing a costume.
+
+## Check your understanding
+
+1. **You push 4, 8, then 15, then pop once. What comes back?**
+   - 4, because it went in first
+   - 15, because it went in most recently
+   - 8, the middle value
+   - Whichever is largest
+
+   <details>
+   <summary>Answer</summary>
+
+   15 — last in, first out. A structure returning 4 would be a queue, which is
+   FIFO. Nothing about a stack inspects the values themselves, so size is
+   irrelevant; only arrival order decides.
+   </details>
+
+2. **Why are push and pop constant time, when inserting into an array is
+   not?**
+   - Because stacks are stored differently in memory
+   - Because both act on the end, so no other values have to move
+   - Because stacks are limited to small sizes
+   - They aren't — push is linear like array insertion
+
+   <details>
+   <summary>Answer</summary>
+
+   Both act on the end, so nothing needs shifting. An array-backed stack
+   *is* an array — the same memory layout as the previous lesson — and the
+   difference is entirely which position you are allowed to touch. Size has
+   nothing to do with it.
+   </details>
+
+3. **A program recurses forever and crashes with "stack overflow". What
+   filled up?**
+   - The array holding the program's data
+   - The call stack — one frame pushed per call, none popped
+   - The hard disk
+   - The program's list of variable names
+
+   <details>
+   <summary>Answer</summary>
+
+   The call stack. Every call pushes a frame for its local state, and a frame
+   is only popped when the call returns — so a recursion with no base case
+   pushes without ever popping until the space reserved for it runs out. It
+   is a stack in exactly the sense of this lesson, not a metaphor.
+   </details>
+
+## Practice
+
+Try [Valid Parentheses on LeetCode](https://leetcode.com/problems/valid-parentheses/)
+— the classic case where "most recent unmatched opener" is exactly the top.

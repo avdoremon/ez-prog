@@ -46,6 +46,19 @@ const registry = {
       })),
     code: () => import('./code/insertion-sort/index.js'),
   },
+  stack: {
+    renderer: 'ArrayView',
+    label: 'Stack contents, with the top at the right',
+    // A number pushes it; null pops. Interleaved so the LIFO order is visible
+    // rather than just "fill up, then drain".
+    defaultInput: { ops: [4, 8, 15, null, 16, null, null, 23] },
+    inputSchema: z.object({
+      ops: z.array(z.union([z.number(), z.null()])).min(1).max(40),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/stack').then((m) => ({ default: m.stack })),
+    code: () => import('./code/stack/index.js'),
+  },
   'array-basics': {
     renderer: 'ArrayView',
     label: 'Array being read by index and then inserted into',
