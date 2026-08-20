@@ -210,6 +210,34 @@ const registry = {
       import('@cs/viz-core/algorithms/dfs').then((m) => ({ default: m.dfs })),
     code: () => import('./code/dfs/index.js'),
   },
+  'graph-intro': {
+    renderer: 'GraphView',
+    label: 'Graph tour: each node with its neighbours and degree',
+    defaultInput: {
+      values: [0, 1, 2, 3, 4],
+      edges: [
+        { from: 0, to: 1 }, { from: 0, to: 2 }, { from: 1, to: 2 }, { from: 2, to: 3 },
+      ],
+      directed: false,
+    },
+    inputSchema: z
+      .object({
+        values: z.array(z.number()).min(1).max(16),
+        edges: z
+          .array(z.object({ from: z.number().int(), to: z.number().int() }))
+          .max(40),
+        directed: z.boolean(),
+      })
+      .refine(
+        (v) => v.edges.every((e) => e.from < v.values.length && e.to < v.values.length),
+        { message: 'every edge must join two existing node indexes.' },
+      ),
+    load: () =>
+      import('@cs/viz-core/algorithms/graph-intro').then((m) => ({
+        default: m.graphIntro,
+      })),
+    code: () => import('./code/graph-intro/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',

@@ -122,6 +122,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | done |
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **GraphView** | `bfs` | done |
 | 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | done |
+| 9 | `/data-structures/graph` | Graphs | 218 | GraphView | `graph-intro` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -142,7 +143,7 @@ try an unsorted array instead of forking the entry.
 | 6 | `/data-structures/tree` | Trees | 215 | TreeView | `tree-traversal` | **done** (see Shipped) |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | **done** (see Shipped) |
 | 8 | `/data-structures/heap` | Heaps | 217 | ArrayView (array-backed binary heap) | `heap` | **done** (see Shipped) |
-| 9 | `/data-structures/graph` | Graphs | 218 | GraphView | `graph-intro` | planned — content only |
+| 9 | `/data-structures/graph` | Graphs | 218 | GraphView | `graph-intro` | **done** (see Shipped) |
 | 10 | `/data-structures/trie` | Tries | 219 | TreeView†, but see the note | `trie` | planned — needs a decision |
 
 ## Algorithms (`algorithms/`)

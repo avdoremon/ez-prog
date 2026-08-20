@@ -1,0 +1,123 @@
+---
+title: Graphs
+description: Nodes joined by edges — the structure for anything where "connected to" matters more than "next to".
+order: 218
+difficulty: intermediate
+estimatedMinutes: 6
+viz: graph-intro
+prerequisites: [/data-structures/tree]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+An array says what comes next. A tree says what comes below. A graph drops
+both assumptions and says only what connects to what — which is enough to
+model roads, friendships, dependencies, and the web.
+
+<Viz id="graph-intro" />
+
+## How it works
+
+A graph is two sets: **nodes** (also called vertices) and **edges** joining
+pairs of them. Two nodes joined by an edge are **neighbours**, and a node's
+**degree** is how many edges touch it. Step the visualization to see each
+node's degree counted.
+
+Notice the closing frame: the degrees add up to exactly twice the number of
+edges. That is not a property of this example — every edge has two ends, so
+every edge contributes 1 to each of two nodes. It is the first thing you can
+prove about a graph without knowing anything else about it.
+
+A tree is just a graph with restrictions: connected, and free of cycles. Drop
+those and a tree's guarantees go with them. There is no root, so no natural
+starting point. There may be **cycles**, so a walk can return where it began —
+which is why every graph traversal keeps a `seen` set. Some nodes may be
+unreachable entirely.
+
+Edges can be **directed** — a one-way street, a "follows" on social media —
+or undirected. Set `directed` to `true` in the input editor and watch the
+neighbour lists change: with direction, being reachable from A no longer means
+A is reachable from you.
+
+## Try it
+
+```js
+function describe(values, edges, directed) {
+  const adj = values.map(() => []);
+  for (const { from, to } of edges) {
+    adj[from].push(to);
+    if (!directed) adj[to].push(from);
+  }
+  return { adj, degrees: adj.map((a) => a.length) };
+}
+```
+
+## Trade-offs
+
+The representation above is an **adjacency list**: each node stores its
+neighbours. It costs space proportional to nodes plus edges, and listing a
+node's neighbours is immediate — which is exactly what traversals do, so it is
+the usual choice.
+
+The alternative is an **adjacency matrix**: an *n*×*n* grid where cell (*i*,
+*j*) says whether an edge exists. Checking "is there an edge from A to B?" is
+then one lookup rather than a scan, but it costs *n*² space whether or not the
+edges exist. That pays off only for **dense** graphs, where most possible
+edges are present. Most real graphs are sparse — a road network has far fewer
+roads than the square of its junctions — so lists usually win.
+
+The questions worth asking are then about *reaching*: what connects to what,
+how far apart two nodes are, whether a cycle exists. That is the next two
+lessons.
+
+## Check your understanding
+
+1. **Why do a graph's degrees always add up to twice the number of edges?**
+   - Because each node is counted twice
+   - Because every edge has two ends, contributing 1 to each of two nodes
+   - It is a coincidence of this example
+   - Because the graph is undirected and connected
+
+   <details>
+   <summary>Answer</summary>
+
+   Every edge contributes 1 to the degree of each endpoint, so summing degrees
+   counts every edge exactly twice. It holds for any undirected graph — cyclic,
+   disconnected, or with isolated nodes — and does not depend on connectedness.
+   </details>
+
+2. **What can a graph do that a tree cannot?**
+   - Hold more than two children per node
+   - Contain cycles, be disconnected, and have no root
+   - Store values
+   - Be traversed
+
+   <details>
+   <summary>Answer</summary>
+
+   Cycles, disconnection, and the absence of a root. A tree is a connected
+   acyclic graph, so it is a graph with those possibilities removed. Trees with
+   many children per node exist too, and both structures store values and can
+   be traversed.
+   </details>
+
+3. **Your graph has 10,000 nodes and about 30,000 edges. List or matrix?**
+   - Matrix, because lookups are faster
+   - Adjacency list — a matrix would need 100 million cells for 30,000 edges
+   - Either; they use the same space
+   - Matrix, because the graph is large
+
+   <details>
+   <summary>Answer</summary>
+
+   A list. The graph is sparse — 30,000 edges against 100 million possible
+   pairs — so a matrix would spend nearly all its space storing "no edge".
+   Matrices win on dense graphs, where constant-time lookup is worth the *n*²
+   cost; size alone does not decide it.
+   </details>
+
+## Practice
+
+Try [Find if Path Exists in Graph on LeetCode](https://leetcode.com/problems/find-if-path-exists-in-graph/)
+— building the adjacency list is most of the work.

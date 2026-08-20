@@ -279,8 +279,24 @@
   font-size: .875rem;
 }
 
-.graph-view__edge--none { color: var(--muted); border-color: transparent; }
-.graph-view__weight { color: var(--muted); font-size: .75rem; }
+/*
+ * Both of these carry meaning a reader needs, so neither may use --muted:
+ * #7A8493 on --paper is 3.47:1, under WCAG AA's 4.5:1 for normal text. The
+ * axe run on the Graphs lesson caught the "none" label; the weight label
+ * would have failed the same way as soon as a weighted graph shipped.
+ * --muted stays fine for the aria-hidden index labels, which axe skips and a
+ * screen reader never reaches.
+ */
+.graph-view__edge--none {
+  color: var(--ink);
+  font-style: italic;
+  border-color: transparent;
+}
+
+.graph-view__weight {
+  color: var(--ink);
+  font-size: .75rem;
+}
 
 .graph-view__tag {
   font-size: .625rem;
