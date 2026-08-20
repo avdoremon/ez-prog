@@ -121,6 +121,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 6 | `/data-structures/tree` | Trees | 215 | **TreeView** | `tree-traversal` | done |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | done |
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **GraphView** | `bfs` | done |
+| 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -155,7 +156,7 @@ try an unsorted array instead of forking the entry.
 | 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView (viz already registered — see Shipped) | `linear-search` | **done** (see Shipped) |
 | 15 | `/algorithms/recursion` | Recursion Basics | 227 | **StackFrame** (new) | `recursion-intro` | planned — engine change |
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | GraphView | `bfs` | **done** (see Shipped) |
-| 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | planned — content only |
+| 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | **done** (see Shipped) |
 | 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weights supported) | `dijkstra` | planned — content only |
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | **done** (see Shipped) |
 | 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | **Matrix2D** (new) | `dp-intro` | planned — engine change |

@@ -1,0 +1,128 @@
+---
+title: Depth-First Search
+description: The same search with a stack instead of a queue — it dives down one branch before considering any alternative.
+order: 229
+difficulty: intermediate
+estimatedMinutes: 6
+viz: dfs
+prerequisites: [/algorithms/bfs]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+The previous lesson ended on a claim: swap the queue for a stack and you have
+written a different algorithm. This is that algorithm, on the same graph, so
+you can watch the difference the container makes.
+
+<Viz id="dfs" />
+
+## How it works
+
+Keep a **stack** of nodes waiting to be explored. Take the node on top, and
+push each unseen neighbour. That is breadth-first search with `pop()` where
+`shift()` used to be — compare the two code panels and the only difference is
+that one word.
+
+The behaviour could hardly be more different. A stack returns the *most
+recently* added node, so the search commits to whatever it just discovered and
+follows it as far as it goes. It only comes back for alternatives when a
+branch dead-ends. BFS spreads in rings; DFS dives and backtracks.
+
+The shortest-path guarantee is gone with it. BFS reached each node by a
+shortest route because closer nodes were always dequeued first; a stack makes
+no such promise, so the first time DFS arrives somewhere may be by a long
+detour.
+
+**You have almost certainly written DFS without a visible stack.** Recursing
+into each neighbour does the same thing, because the call stack *is* the
+stack — each call pushes a frame and returning pops it. That is the Stacks
+lesson's point arriving in a new place, and it is why a deep enough graph can
+overflow the call stack where an explicit stack on the heap would cope.
+
+## Try it
+
+```js
+function dfs(adj, start) {
+  const seen = new Set([start]);
+  const stack = [start], order = [];
+  while (stack.length > 0) {
+    const node = stack.pop();
+    order.push(node);
+    for (const next of adj[node]) {
+      if (seen.has(next)) continue;
+      seen.add(next);
+      stack.push(next);
+    }
+  }
+  return order;
+}
+```
+
+## Trade-offs
+
+Both searches cost the same: one visit per node, one look per edge. Memory is
+where they part. BFS's queue can hold an entire ring at once, which on a wide
+graph is enormous; DFS holds roughly one path plus the branches hanging off
+it, which on a wide shallow graph is far less. On a deep narrow graph the
+comparison reverses.
+
+Reach for DFS when you need to explore exhaustively rather than by distance:
+detecting cycles, topological sorting, finding connected components, solving
+mazes, backtracking puzzles. Reach for BFS when the question is "how far" or
+"fewest steps," because DFS will answer it wrongly.
+
+## Check your understanding
+
+1. **What is the only difference between the BFS and DFS code above?**
+   - DFS sorts the neighbours first
+   - The container: `pop()` takes the most recently added node where `shift()`
+     took the oldest
+   - DFS uses recursion and BFS does not
+   - DFS skips the `seen` check
+
+   <details>
+   <summary>Answer</summary>
+
+   One method call. Everything else — the loop, the `seen` set, the
+   bookkeeping — is identical, which is why the two files can be diffed. DFS
+   is often *written* recursively, but that is a style choice, not the
+   difference; and dropping the `seen` check would break both equally.
+   </details>
+
+2. **Does DFS find shortest paths in an unweighted graph?**
+   - Yes, the same as BFS
+   - No — a stack can reach a node by a long detour before the short route is
+     ever considered
+   - Yes, but only on graphs without cycles
+   - Only if you sort the neighbours
+
+   <details>
+   <summary>Answer</summary>
+
+   No. The guarantee came from the queue processing nearer nodes first, and a
+   stack does the opposite. Acyclicity does not rescue it — a tree with one
+   long branch and one short one is enough to see it fail — and neighbour
+   order changes which wrong answer you get, not whether it is wrong.
+   </details>
+
+3. **You write DFS recursively on a graph a million nodes deep. What goes
+   wrong?**
+   - Nothing — recursion has no depth limit
+   - The call stack overflows, because each pending call holds a frame
+   - It silently returns the wrong order
+   - It becomes O(*n*²)
+
+   <details>
+   <summary>Answer</summary>
+
+   The call stack overflows. Recursion stores the pending state in stack
+   frames, and that space is small and fixed; an explicit stack lives on the
+   heap and can grow much larger. The traversal order and running time are
+   identical either way — only the memory it lives in changes.
+   </details>
+
+## Practice
+
+Try [Course Schedule on LeetCode](https://leetcode.com/problems/course-schedule/)
+— detecting a cycle in a dependency graph, which is DFS's signature use.

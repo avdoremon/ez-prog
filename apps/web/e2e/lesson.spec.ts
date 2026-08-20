@@ -12,6 +12,7 @@ const ALL_LESSONS = [
   '/data-structures/bst/',
   '/algorithms/bfs/',
   '/algorithms/binary-search/',
+  '/algorithms/dfs/',
   '/algorithms/bubble-sort/',
   '/algorithms/greedy/',
   '/algorithms/insertion-sort/',
