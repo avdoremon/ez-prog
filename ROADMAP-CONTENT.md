@@ -113,6 +113,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 1 | `/data-structures/array` | Arrays | 210 | ArrayView | `array-basics` | done |
 | 3 | `/data-structures/stack` | Stacks | 212 | ArrayView | `stack` | done |
 | 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | done |
+| 8 | `/data-structures/heap` | Heaps | 217 | ArrayView | `heap` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -132,7 +133,7 @@ try an unsorted array instead of forking the entry.
 | 5 | `/data-structures/hash-table` | Hash Tables | 214 | ArrayView (buckets as array slots)† | `hash-table` | planned |
 | 6 | `/data-structures/tree` | Trees | 215 | **Tree** (new) | `tree-intro` | planned — engine change |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | **Tree** (new) | `bst` | planned — engine change |
-| 8 | `/data-structures/heap` | Heaps | 217 | ArrayView (array-backed binary heap) | `heap` | planned |
+| 8 | `/data-structures/heap` | Heaps | 217 | ArrayView (array-backed binary heap) | `heap` | **done** (see Shipped) |
 | 9 | `/data-structures/graph` | Graphs | 218 | **Graph** (new) | `graph-intro` | planned — engine change |
 | 10 | `/data-structures/trie` | Tries | 219 | **Tree** (new)† | `trie` | planned — engine change |
 

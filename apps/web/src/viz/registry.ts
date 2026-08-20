@@ -46,6 +46,18 @@ const registry = {
       })),
     code: () => import('./code/insertion-sort/index.js'),
   },
+  heap: {
+    renderer: 'ArrayView',
+    label: 'Binary max-heap stored as a flat array, root at index 0',
+    defaultInput: { values: [15, 4, 23, 8, 42, 16], extract: true },
+    inputSchema: z.object({
+      values: z.array(z.number()).min(1).max(31),
+      extract: z.boolean(),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/heap').then((m) => ({ default: m.heap })),
+    code: () => import('./code/heap/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',
