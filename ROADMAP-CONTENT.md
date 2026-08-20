@@ -117,6 +117,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | done |
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | done |
 | 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView | `amortized-growth` | done |
+| 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -153,7 +154,7 @@ try an unsorted array instead of forking the entry.
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **Graph** (new) | `bfs` | planned — engine change |
 | 17 | `/algorithms/dfs` | Depth-First Search | 229 | **Graph** (new) | `dfs` | planned — engine change |
 | 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | **Graph** (new) | `dijkstra` | planned — engine change |
-| 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-intro` | planned |
+| 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | **done** (see Shipped) |
 | 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | **Matrix2D** (new) | `dp-intro` | planned — engine change |
 | 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | **done** (see Shipped) |
 | 22 | `/algorithms/sliding-window` | Sliding Window | 235 | ArrayView | `sliding-window` | **done** (see Shipped) |

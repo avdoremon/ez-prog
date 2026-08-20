@@ -10,6 +10,7 @@ const ALL_LESSONS = [
   '/data-structures/heap/',
   '/algorithms/binary-search/',
   '/algorithms/bubble-sort/',
+  '/algorithms/greedy/',
   '/algorithms/insertion-sort/',
   '/algorithms/linear-search/',
   '/algorithms/merge-sort/',

@@ -104,6 +104,20 @@ const registry = {
       })),
     code: () => import('./code/amortized-growth/index.js'),
   },
+  'greedy-coins': {
+    renderer: 'ArrayView',
+    label: 'Coin denominations, largest first, as greedy works through them',
+    defaultInput: { coins: [25, 10, 5, 1], amount: 63 },
+    inputSchema: z.object({
+      coins: z.array(z.number().int().positive()).min(1).max(12),
+      amount: z.number().int().positive().max(200),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/greedy-coins').then((m) => ({
+        default: m.greedyCoins,
+      })),
+    code: () => import('./code/greedy-coins/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',

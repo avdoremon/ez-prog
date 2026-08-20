@@ -1,0 +1,128 @@
+---
+title: Greedy Algorithms
+description: Always take the best-looking option right now — and understand exactly when that stops being enough.
+order: 232
+difficulty: intermediate
+estimatedMinutes: 7
+viz: greedy-coins
+prerequisites: [/complexity/big-o]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+A greedy algorithm takes the best option available right now and never looks
+back. Sometimes that is provably optimal; sometimes it is confidently wrong.
+Telling the two apart is the interesting part.
+
+<Viz id="greedy-coins" />
+
+## How it works
+
+Making 63 from coins of 25, 10, 5 and 1, the rule is: take the largest coin
+that still fits, repeat. Two 25s, one 10, three 1s — six coins, optimal.
+
+What makes it *greedy* is what it never does: compare whole solutions,
+backtrack, or ask whether a worse choice now would pay off later. Each
+decision is made once, from what is visible then, and is permanent.
+
+That is why greedy is fast: no search tree, just one pass over the options,
+where trying every combination would be exponential.
+
+## Where it fails
+
+Change the coins to `[4, 3, 1]` and ask for 6. Run it in the editor above.
+
+Greedy takes the 4, then needs 2 more that only 1s can cover: **three coins**.
+But 3 + 3 is **two**. Taking the 4 — locally the best move — destroyed the
+possibility of using two 3s.
+
+Nothing in the algorithm detects this — it has no notion of a solution it did
+not build. The failure is silent, which is what makes greedy dangerous: it
+always returns *an* answer, and never says whether it is the best one.
+
+## Try it
+
+```js
+function greedyCoins(coins, amount) {
+  const sorted = [...coins].sort((a, b) => b - a);
+  let remaining = amount, used = 0;
+  for (const coin of sorted) {
+    while (coin <= remaining) {
+      remaining -= coin;
+      used++;
+    }
+  }
+  return remaining === 0 ? used : null;
+}
+```
+
+## Trade-offs
+
+Greedy is worth trying first because it is simple and fast. The cost is that
+using it *correctly* means proving it applies — you get no warning otherwise.
+
+It is provably optimal for Dijkstra's shortest paths, Huffman coding, minimum
+spanning trees, and interval scheduling by earliest finish time. The US coin
+system is another: its denominations are arranged so the locally-largest
+choice never blocks a better global one.
+
+When it fails, the usual replacement is dynamic programming, which considers
+the alternatives greedy discarded — at more time and memory. The workflow is:
+try greedy, hunt for a counterexample, and drop it if you find one. One
+counterexample is a disproof; a hundred passing examples prove nothing.
+
+## Check your understanding
+
+1. **Why does greedy give the wrong answer for `[4, 3, 1]` and amount 6?**
+   - It has a bug in how it sorts the coins
+   - Taking the locally-largest 4 rules out the better 3 + 3, and greedy never
+     reconsiders
+   - Because 6 cannot be made from those coins
+   - Because the coins are not sorted
+
+   <details>
+   <summary>Answer</summary>
+
+   The 4 looks best in isolation, but taking it leaves 2, reachable only with
+   1s — three coins where 3 + 3 needs two, and greedy cannot undo the choice.
+   The coins are sorted correctly and 6 is makeable; greedy just misses the
+   best way.
+   </details>
+
+2. **How would you know a greedy approach is safe for a new problem?**
+   - Test it on several examples and ship it if they all pass
+   - Prove that a locally-best choice can never rule out a globally-best
+     solution
+   - Check that the input is sorted
+   - Greedy is always safe if it terminates
+
+   <details>
+   <summary>Answer</summary>
+
+   You need the proof — typically an exchange argument showing any optimal
+   solution can be rewritten to include the greedy choice without getting
+   worse. Examples cannot establish it: `[4, 3, 1]` works for most amounts and
+   still fails at 6. Sorting and termination are unrelated.
+   </details>
+
+3. **What does greedy do when it cannot reach the target at all — say coins
+   `[5, 3]` and amount 7?**
+   - It backtracks and tries a different combination
+   - It gets stuck with an amount still owed, having no way to undo choices
+   - It throws an error before starting
+   - It returns the closest possible amount as though it succeeded
+
+   <details>
+   <summary>Answer</summary>
+
+   It takes the 5, the 3 no longer fits, and it finishes with 2 still owed.
+   Backtracking is precisely what greedy does not do. A careful implementation
+   reports the failure — as this one does — but the algorithm cannot discover
+   that 3 + 3 would have left only 1.
+   </details>
+
+## Practice
+
+Try [Assign Cookies on LeetCode](https://leetcode.com/problems/assign-cookies/)
+— a case where the greedy choice really is provably optimal.
