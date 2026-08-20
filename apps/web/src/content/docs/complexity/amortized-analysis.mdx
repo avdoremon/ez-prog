@@ -1,0 +1,128 @@
+---
+title: Amortized Analysis
+description: Some operations are occasionally expensive but cheap on average — and averaging them honestly needs its own kind of accounting.
+order: 236
+difficulty: intermediate
+estimatedMinutes: 7
+viz: amortized-growth
+prerequisites: [/complexity/big-o]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Appending to a list feels free. But an array is a fixed block, so eventually
+an append finds no room and must move everything somewhere bigger. Amortized
+analysis is how we say "that is still cheap" without lying.
+
+<Viz id="amortized-growth" />
+
+## How it works
+
+A dynamic array keeps two numbers: how many values it holds and how many it
+*could* hold. Appending writes into a spare slot — one step. When the spares
+run out, it allocates a bigger block, copies everything across, then appends.
+
+The copy is genuinely expensive: copying *n* values costs *n*. The worst case
+for a single append really is O(*n*), and averaging does not change that.
+
+What saves it is **how rarely** it happens. The array does not grow by one
+slot, it **doubles** — so each resize buys twice the room of the last, and
+resizes get rarer exactly as fast as they get costlier.
+
+Count it above: from capacity 1, sixteen appends trigger four resizes copying
+1, 2, 4, and 8 values — fifteen copies for sixteen appends.
+
+That series is the argument. Copies total 1 + 2 + 4 + …, summing to just under
+**twice** the final size, so the copying averages under two per append however
+long the run. That is what "amortized O(1)" claims: not that every append is
+cheap, but that *n* appends cost O(*n*) together.
+
+Be careful with the arithmetic: "fewer copies than appends" is tempting, and
+true for sixteen values — but five values from capacity 1 makes seven copies.
+The bound is two per append, not one.
+
+## Try it
+
+```js
+function push(arr, value) {
+  if (arr.size === arr.capacity) {
+    const bigger = new Array(arr.capacity * 2);
+    for (let i = 0; i < arr.size; i++) bigger[i] = arr.data[i];
+    arr.data = bigger;
+    arr.capacity *= 2;
+  }
+  arr.data[arr.size++] = value;
+  return arr;
+}
+```
+
+## Trade-offs
+
+Doubling is what makes the argument work; growing by a *fixed* amount destroys
+it. Add ten slots at a time and resizes stay equally expensive while never
+getting rarer — *n* appends then cost about *n*²/20. Growth has to be
+multiplicative.
+
+The cost is wasted space: just after a resize the array may be half empty, so
+you trade up to 2× memory for constant-time appends. Some implementations grow
+by 1.5× to waste less.
+
+Amortized is also not average-case: it makes no probabilistic claim, but
+guarantees any *n* appends cost O(*n*). The distinction bites when one slow
+operation is unacceptable — an amortized bound is no comfort if a single
+append missing a deadline is a failure, which is why real-time systems often
+refuse doubling arrays.
+
+## Check your understanding
+
+1. **Is a single append to a dynamic array O(1)?**
+   - Yes, always
+   - No — an append that triggers a resize copies everything, costing O(*n*)
+   - No, every append is O(*n*)
+   - Only when the array is empty
+
+   <details>
+   <summary>Answer</summary>
+
+   No: the append that finds the array full is O(*n*), and amortized analysis
+   never claims otherwise — only that *n* appends cost O(*n*) in total. Most
+   appends are one write, so "every append is O(*n*)" is equally wrong.
+   </details>
+
+2. **What breaks if the array grows by a fixed 10 slots instead of doubling?**
+   - Nothing — it is the same cost
+   - Resizes stay just as expensive but stop getting rarer, so *n* appends
+     become about *n*² work
+   - It uses more memory
+   - Appends become O(log *n*)
+
+   <details>
+   <summary>Answer</summary>
+
+   The resizes stop thinning out. Doubling works because each buys twice the
+   room the last did, so they get rarer as fast as they get costlier; a fixed
+   increment gives *n*/10 resizes each copying O(*n*), which is quadratic. It
+   actually wastes *less* memory — that is the trade against it.
+   </details>
+
+3. **How does amortized differ from average-case analysis?**
+   - They are two names for the same thing
+   - Amortized is a worst-case guarantee about a sequence of operations;
+     average-case is a claim about likely inputs
+   - Amortized only applies to arrays
+   - Average-case is always the more pessimistic of the two
+
+   <details>
+   <summary>Answer</summary>
+
+   Amortized makes no probabilistic assumption: *any* sequence of *n* appends
+   costs O(*n*), guaranteed. Average-case reasons about likely inputs, so an
+   unlucky one can beat it. Amortized reasoning applies broadly — hash table
+   resizing, union-find — and neither is uniformly more pessimistic.
+   </details>
+
+## Practice
+
+Try [Design HashMap on LeetCode](https://leetcode.com/problems/design-hashmap/)
+— picking a capacity and a moment to grow makes the trade real.

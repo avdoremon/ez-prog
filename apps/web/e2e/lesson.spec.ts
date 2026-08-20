@@ -16,6 +16,7 @@ const ALL_LESSONS = [
   '/algorithms/quick-sort/',
   '/algorithms/sliding-window/',
   '/algorithms/two-pointer/',
+  '/complexity/amortized-analysis/',
   '/complexity/big-o/',
 ];
 

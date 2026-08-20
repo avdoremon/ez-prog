@@ -88,6 +88,22 @@ const registry = {
       })),
     code: () => import('./code/quick-sort/index.js'),
   },
+  'amortized-growth': {
+    renderer: 'ArrayView',
+    label: 'Dynamic array growing by doubling as values are appended',
+    defaultInput: { count: 16, initialCapacity: 1 },
+    // Copies during resizes add frames beyond the append count.
+    maxFrames: 400,
+    inputSchema: z.object({
+      count: z.number().int().min(1).max(32),
+      initialCapacity: z.number().int().min(1).max(16),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/amortized-growth').then((m) => ({
+        default: m.amortizedGrowth,
+      })),
+    code: () => import('./code/amortized-growth/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',

@@ -116,6 +116,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 8 | `/data-structures/heap` | Heaps | 217 | ArrayView | `heap` | done |
 | 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | done |
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | done |
+| 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView | `amortized-growth` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -162,7 +163,7 @@ try an unsorted array instead of forking the entry.
 | # | Slug | Title | `order` | Renderer needed | Viz id | Status |
 |---|---|---|---|---|---|---|
 | 0c | `/complexity/big-o` | How Fast Is Fast? | 230 | ArrayView | `linear-search` + `binary-search` | **done** (see Shipped) |
-| 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView (reuse a dynamic-array-growth viz) | `amortized-growth` | planned |
+| 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView | `amortized-growth` | **done** (see Shipped) |
 | 24 | `/complexity/best-average-worst-case` | Best, Average, and Worst Case | 237‡ | ArrayView (reuse existing search/sort vizzes) | reuse (e.g. `linear-search`) | planned |
 
 † Inferred, not named explicitly in `IMPLEMENTATION_PLAN.md`: the plan lists `hash
