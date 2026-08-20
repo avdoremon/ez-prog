@@ -1,0 +1,122 @@
+---
+title: Arrays
+description: One contiguous block of memory — why reading by index is instant and inserting in the middle is not.
+order: 210
+difficulty: beginner
+estimatedMinutes: 6
+viz: array-basics
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+An array is not a list of things so much as a single block of memory with the
+values packed side by side. Almost everything arrays are good and bad at
+follows from that one decision.
+
+<Viz id="array-basics" />
+
+## How it works
+
+Because the values are contiguous and every one is the same size, the machine
+does not *search* for index 3 — it computes where it must be:
+
+```text
+address = start + index × size
+```
+
+That is one multiplication and one addition, whatever the array's length. An
+array of ten and an array of ten million cost the same to read from. This is
+what "random access" means: no position is harder to reach than any other.
+
+The same layout is what makes inserting expensive. There is no spare room
+between neighbours, so to put a value at index 1, everything from index 1
+onward must first move one slot right — and each of those moves is a real
+copy. Step the visualization and count the shifts: inserting near the front of
+*n* values costs about *n* moves, while appending at the end costs none.
+
+Deleting has the mirror problem: remove from the middle and everything to its
+right slides left to close the hole.
+
+## Try it
+
+```js
+function insertInto(arr, index, value) {
+  arr.length = arr.length + 1;
+  for (let i = arr.length - 1; i > index; i--) {
+    arr[i] = arr[i - 1];
+  }
+  arr[index] = value;
+  return arr;
+}
+```
+
+## Trade-offs
+
+Reach for an array when you index, or when you iterate. Contiguity makes
+iteration genuinely faster than the step count suggests: memory arrives in
+cache lines, so reading one value drags its neighbours along for free.
+Structures that scatter their values across memory lose that.
+
+Avoid it when you insert or delete in the middle often — that is the shifting
+cost, paid per operation. A structure that stores each value with a pointer to
+the next can splice in one step, at the cost of losing indexing and cache
+locality. That is the trade this whole topic keeps circling.
+
+One wrinkle: the arrays in JavaScript and Python grow on demand, which the
+fixed block above cannot do. They manage it by allocating spare capacity and,
+when it runs out, moving everything into a larger block. Individual appends
+are therefore usually free and occasionally expensive.
+
+## Check your understanding
+
+1. **Why is reading `arr[500]` no slower than reading `arr[0]`?**
+   - The array keeps an index of where each value lives
+   - Because the address is computed with arithmetic, not searched for
+   - Because modern CPUs cache the whole array
+   - It is slower — later indexes take longer to reach
+
+   <details>
+   <summary>Answer</summary>
+
+   The address is computed: start plus index times element size. No scan, no
+   lookup table, no dependence on length. Caching does make repeated access
+   faster in practice, but it is not why the *first* read is constant-time —
+   the arithmetic is.
+   </details>
+
+2. **Inserting at the front of an array of *n* values costs roughly how much?**
+   - One step, like appending
+   - About *n* steps, because every value shifts right
+   - About log *n* steps
+   - It depends on the values, not the length
+
+   <details>
+   <summary>Answer</summary>
+
+   About *n* steps: every existing value must move one slot right to open the
+   gap. Appending at the end is the cheap case precisely because nothing sits
+   to its right. The cost tracks how many values are displaced — the length —
+   never what the values are.
+   </details>
+
+3. **What does contiguous storage buy beyond index arithmetic?**
+   - Nothing else — it is purely about indexing
+   - Cache locality: neighbouring values arrive together, so iteration is fast
+   - Automatic sorting of the values
+   - Protection against running out of memory
+
+   <details>
+   <summary>Answer</summary>
+
+   Cache locality. Memory is fetched in blocks, so reading one value pulls its
+   neighbours into cache and the next few reads are nearly free — which is why
+   iterating an array beats iterating a structure of the same size scattered
+   across memory. Contiguity says nothing about order, and it does not prevent
+   exhausting memory.
+   </details>
+
+## Practice
+
+Try [Remove Element on LeetCode](https://leetcode.com/problems/remove-element/)
+— removing in place, where the shifting cost is the entire problem.

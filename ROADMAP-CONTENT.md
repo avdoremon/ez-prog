@@ -110,6 +110,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView | `linear-search` | done |
 | 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | done |
 | 22 | `/algorithms/sliding-window` | Sliding Window | 235 | ArrayView | `sliding-window` | done |
+| 1 | `/data-structures/array` | Arrays | 210 | ArrayView | `array-basics` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -118,11 +119,11 @@ entry drives the Big-O race against binary search, where sortedness is the whole
 The lesson turns that into a teaching note and sends the reader to the input editor to
 try an unsorted array instead of forking the entry.
 
-## Data Structures (`data-structures/` — new sidebar group required, see AUTHORING.md §1)
+## Data Structures (`data-structures/` — sidebar group now exists in `astro.config.mjs`)
 
 | # | Slug | Title | `order` | Renderer needed | Viz id | Status |
 |---|---|---|---|---|---|---|
-| 1 | `/data-structures/array` | Arrays | 210 | ArrayView | `array-basics` | planned |
+| 1 | `/data-structures/array` | Arrays | 210 | ArrayView | `array-basics` | **done** (see Shipped) |
 | 2 | `/data-structures/linked-list` | Linked Lists | 211 | **LinkedList** (new) | `linked-list` | planned — engine change |
 | 3 | `/data-structures/stack` | Stacks | 212 | ArrayView | `stack` | planned |
 | 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | planned |

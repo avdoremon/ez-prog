@@ -40,7 +40,15 @@ export default defineConfig({
 			// No social links: the scaffold's pointed at withastro/starlight,
 			// which is not this project. Add a real one when the repository has
 			// a public home.
+			// Group order here is manual and deliberate: it follows the numbering
+			// in IMPLEMENTATION_PLAN.md §5.1 (data structures 210s, algorithms
+			// 220s, complexity 230s). Within a group, pages sort by the `order`
+			// frontmatter — see src/content.config.ts.
 			sidebar: [
+				{
+					label: 'Data Structures',
+					items: [{ autogenerate: { directory: 'data-structures' } }],
+				},
 				{
 					label: 'Algorithms',
 					items: [{ autogenerate: { directory: 'algorithms' } }],

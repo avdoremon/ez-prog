@@ -4,6 +4,7 @@ import { expect, test } from '@playwright/test';
 const LESSON = '/algorithms/binary-search/';
 
 const ALL_LESSONS = [
+  '/data-structures/array/',
   '/algorithms/binary-search/',
   '/algorithms/bubble-sort/',
   '/algorithms/insertion-sort/',

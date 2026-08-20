@@ -35,7 +35,14 @@ function lessonsIn(group: string): Lesson[] {
     .sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
 }
 
-for (const group of ['algorithms', 'complexity']) {
+// Groups are discovered from the content tree rather than listed here, so a
+// new top-level directory is covered the moment it exists. A hardcoded list
+// would have silently skipped data-structures/ when it was added.
+const groups = readdirSync(contentRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name);
+
+for (const group of groups) {
   test(`the ${group} sidebar follows the lessons' order field`, async ({ page }) => {
     const expected = lessonsIn(group);
     expect(expected.length).toBeGreaterThan(0);

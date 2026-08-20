@@ -46,6 +46,29 @@ const registry = {
       })),
     code: () => import('./code/insertion-sort/index.js'),
   },
+  'array-basics': {
+    renderer: 'ArrayView',
+    label: 'Array being read by index and then inserted into',
+    defaultInput: { arr: [4, 8, 15, 16, 23, 42], readIndex: 3, insertAt: 1, value: 9 },
+    inputSchema: z
+      .object({
+        arr: z.array(z.number()).min(1).max(32),
+        readIndex: z.number().int().min(0),
+        insertAt: z.number().int().min(0),
+        value: z.number(),
+      })
+      .refine((v) => v.readIndex < v.arr.length, {
+        message: 'readIndex must point at an existing element.',
+      })
+      .refine((v) => v.insertAt <= v.arr.length, {
+        message: 'insertAt may be at most the array length (appending at the end).',
+      }),
+    load: () =>
+      import('@cs/viz-core/algorithms/array-basics').then((m) => ({
+        default: m.arrayBasics,
+      })),
+    code: () => import('./code/array-basics/index.js'),
+  },
   'sliding-window': {
     renderer: 'ArrayView',
     label: 'Array with a fixed-width window sliding across it',
