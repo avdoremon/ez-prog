@@ -10,9 +10,9 @@ one lesson, merged with a neighbor, or cut, once real authoring cost is known (s
 below). `slug` is the intended `apps/web/src/content/docs/...` path (§1 of
 `docs/AUTHORING.md`); `order` follows the numbering convention in
 `IMPLEMENTATION_PLAN.md` §5.1 (steps of 10 between top-level groups, incrementing by 1
-within a group, matching the real values already used by the shipped lessons —
-see `docs/AUTHORING.md` §1 for the caveat that `order` does not yet drive the rendered
-sidebar position). `renderer needed` names the `packages/viz-react` renderer the lesson
+within a group, matching the real values already used by the shipped lessons; it drives
+the rendered sidebar position, so see `docs/AUTHORING.md` §1 before picking one).
+`renderer needed` names the `packages/viz-react` renderer the lesson
 depends on; only `ArrayView` exists today (see `docs/AUTHORING.md` §0) — every other
 renderer column value is an **engine change**, not a routine content addition, and must
 be scoped and reported as such before work starts, not discovered mid-PR.

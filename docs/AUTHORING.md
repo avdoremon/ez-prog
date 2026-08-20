@@ -106,18 +106,22 @@ you introduce a brand-new top-level directory (e.g. `data-structures/`), you mus
 matching sidebar group to this file — that is an ordinary `apps/web` edit, not an engine
 change, but it will not happen for you.
 
-**Important, verified gap:** the project's own `order` frontmatter field (see §2) is
-**not** currently wired to the rendered sidebar order. I checked every reference to
-`order` under `apps/web/src` and the only place it is read is the Zod schema itself
-(`apps/web/src/content.config.ts`) — nothing sorts pages by it. Starlight's
-`autogenerate` sidebar sorts by its own nested `sidebar.order` field (from
+**`order` drives the sidebar — set it deliberately.** Starlight's `autogenerate`
+sidebar sorts by its own nested `sidebar.order` field (from
 `@astrojs/starlight/schema.ts`: *"Pages are sorted by this value in ascending order.
-Then by slug. If not provided, pages will be sorted alphabetically by slug."*), which
-no real lesson sets. So today the nav order is alphabetical by slug, coincidentally
-matching `binary-search` (220) before `bubble-sort` (221). Set `order` correctly anyway
-— it is required by the schema and is the project's own numbering convention (§5.1 of
-`IMPLEMENTATION_PLAN.md`) — just don't expect it to move your lesson's position in the
-sidebar yet.
+Then by slug. If not provided, pages will be sorted alphabetically by slug."*).
+`apps/web/src/content.config.ts` copies this project's `order` into `sidebar.order`
+when parsing frontmatter, so the number you write in §2 is the position your lesson
+takes in the nav. **You do not write the number twice** — an explicit `sidebar.order`
+still wins if you set one, but no lesson needs to.
+
+This was not always true. Until it was wired up, nav order was alphabetical by slug and
+merely *coincided* with the teaching order, because the early lesson names happened to
+sort the same way their numbers did. The first lesson whose name and number disagreed
+would have silently landed in the wrong place — a lesson numbered 222 rendered last,
+after 226 and 234. `apps/web/e2e/sidebar-order.spec.ts` now derives the expected order
+from the lesson files themselves and fails if the rendered nav disagrees, so it covers
+your lesson without you editing the test.
 
 ### Two files outside your lesson that you must also edit
 
