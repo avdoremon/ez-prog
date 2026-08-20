@@ -235,3 +235,66 @@
 .tree-view__node[data-marks~="visited"] > .tree-view__value { border-color: var(--probe); border-style: dotted; }
 .tree-view__node[data-marks~="active"]  > .tree-view__value { border-color: var(--probe); }
 .tree-view__node[data-marks~="discard"] > .tree-view__value { border-color: var(--discard); opacity: .45; }
+
+/*
+ * GraphView: an adjacency list, one row per node. Not a node-and-edge diagram
+ * — laying one out legibly needs force simulation or hand-placed coordinates,
+ * and neither survives a 360px screen or a screen reader. This is the shape
+ * the algorithms actually traverse.
+ */
+.graph-view {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+.graph-view__node {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  flex-wrap: wrap;
+  padding: .25rem 0;
+}
+
+.graph-view__value {
+  border: 2px solid var(--muted);
+  padding: .25rem .5rem;
+  min-width: 2.25rem;
+  text-align: center;
+}
+
+.graph-view__arrow { color: var(--muted); }
+
+.graph-view__edges {
+  display: flex;
+  gap: .35rem;
+  flex-wrap: wrap;
+}
+
+.graph-view__edge {
+  border: 2px solid var(--muted);
+  border-style: dotted;
+  padding: .15rem .4rem;
+  font-size: .875rem;
+}
+
+.graph-view__edge--none { color: var(--muted); border-color: transparent; }
+.graph-view__weight { color: var(--muted); font-size: .75rem; }
+
+.graph-view__tag {
+  font-size: .625rem;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+}
+
+.graph-view__node[data-marks~="cursor"]  > .graph-view__value { border-color: var(--signal); border-width: 4px; }
+.graph-view__node[data-marks~="compare"] > .graph-view__value { border-color: var(--signal); border-style: dashed; }
+.graph-view__node[data-marks~="visited"] > .graph-view__value { border-color: var(--probe); border-style: dotted; }
+.graph-view__node[data-marks~="active"]  > .graph-view__value { border-color: var(--probe); }
+.graph-view__node[data-marks~="done"]    > .graph-view__value { border-color: var(--commit); border-style: double; }
+.graph-view__node[data-marks~="discard"] > .graph-view__value { border-color: var(--discard); opacity: .45; }
+
+.graph-view__edge[data-marks~="active"]  { border-color: var(--probe); border-style: solid; }
+.graph-view__edge[data-marks~="visited"] { border-color: var(--probe); }
+.graph-view__edge[data-marks~="done"]    { border-color: var(--commit); border-style: solid; }

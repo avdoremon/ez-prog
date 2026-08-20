@@ -1,10 +1,14 @@
 import { useEffect, useId, useState } from 'react';
 import { collect, parseAnchors, type Frame, type ParsedCode } from '@cs/viz-core';
-import { ArrayView, Player, TreeView, type Renderer } from '@cs/viz-react';
+import { ArrayView, GraphView, Player, TreeView, type Renderer } from '@cs/viz-react';
 import { VIZ, type VizId } from '../viz/registry.js';
 
+// The state shape varies by renderer — number[] for ArrayView and TreeView, a
+// GraphState for GraphView — so frames are held loosely here. The registry
+// entry is what guarantees a generator is paired with a renderer that can draw
+// what it produces.
 interface RunData {
-  frames: Frame<number[]>[];
+  frames: Frame<never>[];
   truncated: boolean;
   code: ParsedCode;
   /**
@@ -18,9 +22,14 @@ interface RunData {
 
 // Registry entries name their renderer as a string so the registry stays
 // serialisable data; this is the one place that maps a name to a component.
-const RENDERERS: Record<'ArrayView' | 'TreeView', Renderer> = {
-  ArrayView,
-  TreeView,
+const RENDERERS: Record<'ArrayView' | 'TreeView' | 'GraphView', Renderer<never>> = {
+  // Each renderer accepts its own state shape, and the registry entry pairs a
+  // renderer name with a generator producing that shape. The map therefore
+  // cannot be soundly typed for all of them at once; the pairing is what is
+  // checked, entry by entry, in registry.ts.
+  ArrayView: ArrayView as Renderer<never>,
+  TreeView: TreeView as Renderer<never>,
+  GraphView: GraphView as Renderer<never>,
 };
 
 function defaultInputText(defaultInput: unknown): string {
@@ -45,7 +54,7 @@ export default function VizIsland({ id }: { id: VizId }) {
       .then(([algo, codeMod]) => {
         if (cancelled) return;
         const { frames, truncated } = collect(
-          algo.default(entry.defaultInput) as Generator<Frame<number[]>>,
+          algo.default(entry.defaultInput) as Generator<Frame<never>>,
           entry.maxFrames,
         );
         setData({ frames, truncated, code: parseAnchors(codeMod.default.js), runId: 0 });
@@ -60,7 +69,7 @@ export default function VizIsland({ id }: { id: VizId }) {
     const { load } = entry;
     const algo = await load();
     const { frames, truncated } = collect(
-      algo.default(input) as Generator<Frame<number[]>>,
+      algo.default(input) as Generator<Frame<never>>,
       entry.maxFrames,
     );
     setData((prev) =>

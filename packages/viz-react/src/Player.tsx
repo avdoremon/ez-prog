@@ -13,29 +13,32 @@ const SPEEDS = [0.5, 1, 2, 4];
  * without knowing which. Adding a renderer is then a new file plus a registry
  * entry, not a change to the Player.
  */
-export type Renderer = (props: {
-  state: number[];
+export type Renderer<S = number[]> = (props: {
+  state: S;
   marks?: Mark[];
   label: string;
 }) => React.ReactNode;
 
-export interface PlayerProps {
-  frames: Frame<number[]>[];
+export interface PlayerProps<S = number[]> {
+  frames: Frame<S>[];
   truncated: boolean;
   label: string;
   code?: ParsedCode;
   /** Defaults to ArrayView, which is what every lesson used before renderers
    *  became pluggable. */
-  renderer?: Renderer;
+  renderer?: Renderer<S>;
 }
 
-export function Player({
+export function Player<S = number[]>({
   frames,
   truncated,
   label,
   code,
-  renderer: View = ArrayView,
-}: PlayerProps) {
+  // The default is only sound when S is number[], which the default type
+  // parameter makes true for every caller that omits `renderer`. A caller
+  // passing graph-shaped state must pass its own renderer, and does.
+  renderer: View = ArrayView as Renderer<S>,
+}: PlayerProps<S>) {
   const p = useFramePlayer(frames.length);
   const frame = frames[p.index]!;
 

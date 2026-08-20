@@ -40,8 +40,8 @@ already exists under `packages/`.** Concretely:
 
 So: **adding a lesson that reuses the `ArrayView` renderer touches zero existing files
 under `packages/`.** If your lesson idea needs anything the existing pieces don't
-provide — a third renderer (`ArrayView` and `TreeView` exist today), a new
-`Mark`/`Target` shape,
+provide — a fourth renderer (`ArrayView`, `TreeView` and `GraphView` exist today), a
+new `Mark`/`Target` shape,
 a change to how `snap`, `collect`, or `parseAnchors` behave — that is an **engine
 change**. It means editing an *existing* file under `packages/viz-core` or
 `packages/viz-react`. Do not make that change as part of a content PR. Stop and report
@@ -51,10 +51,11 @@ content edit. When this was last measured, exercising a new lesson end to end su
 four pre-existing engine defects (see `docs/PHASE0-EXIT.md`); reporting beats absorbing.
 
 Everything in this document about adding a visualization assumes you are reusing one of
-the two existing renderers: `ArrayView` for anything positional (sorting, searching,
+the three existing renderers: `ArrayView` for anything positional (sorting, searching,
 two-pointer, sliding-window, stacks, queues), `TreeView` for a complete binary tree held
-in an array. Both take the same `number[]` state and the same index-based marks, so
-choosing between them is a one-word change in the registry (§4.6).
+in an array, `GraphView` for nodes and edges. The first two take the same `number[]`
+state and the same index-based marks, so choosing between them is a one-word change in
+the registry; `GraphView` takes a `GraphState` instead (§4.6).
 
 ## 1. Where lesson files go, and how a slug is derived
 
@@ -492,13 +493,17 @@ Verbatim shape, from the real `binary-search` entry:
 
 Field by field:
 
-- `renderer` — `'ArrayView'` or `'TreeView'`; the union in
-  `apps/web/src/viz/types.ts` is what the type allows. Choosing between the two is
-  ordinary content work. **Writing a third one is still an engine change** (§0), but a
-  much smaller one than it used to be: renderers are now pluggable, so a new renderer is
-  a new file in `packages/viz-react/src/renderers/` plus two lines — a name in that
-  union, and an entry in the `RENDERERS` map in `apps/web/src/components/VizIsland.tsx`.
-  Nothing in `Player` or `viz-core` needs touching.
+- `renderer` — `'ArrayView'`, `'TreeView'` or `'GraphView'`; the union in
+  `apps/web/src/viz/types.ts` is what the type allows. Choosing between them is ordinary
+  content work. **Writing a fourth one is still an engine change** (§0), but a small
+  one: renderers are pluggable, so a new renderer is a new file in
+  `packages/viz-react/src/renderers/` plus two lines — a name in that union, and an
+  entry in the `RENDERERS` map in `apps/web/src/components/VizIsland.tsx`. `Player` is
+  generic over the state type and needs no change. You only touch `viz-core` if your
+  renderer needs a **new `Target` kind**, as `GraphView` did for edges — and that is
+  deliberately noisy, because `Target` is a closed union and every existing renderer's
+  exhaustiveness check will fail to compile until it decides what to do with the new
+  kind.
   - **`ArrayView`** draws the state as a flat row of cells. Use it for anything
     positional: searches, sorts, windows, pointers, stacks and queues.
   - **`TreeView`** draws the *same* `number[]` as a binary tree, taking index *i*'s
@@ -506,6 +511,12 @@ Field by field:
     `Mark` targets need no new shape and your generator is unchanged — the only
     difference is how the state is drawn. It expects a complete tree; gaps have no
     representation.
+  - **`GraphView`** is the one renderer whose state is *not* `number[]`. It takes a
+    `GraphState` — `{ values, edges, directed? }` from `@cs/viz-core` — and draws an
+    adjacency list, one row per node listing its neighbours, rather than a node-and-edge
+    diagram. Nodes are still marked by `{ t: 'index' }`; edges use `{ t: 'edge', from,
+    to }`, and on an undirected graph a single edge mark lights up both listings of that
+    edge. Weights render when present, which is what a Dijkstra lesson will need.
 - `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
   `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
   screen-reader user or a JS-disabled reader can act on.

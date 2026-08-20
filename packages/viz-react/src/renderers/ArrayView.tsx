@@ -17,6 +17,13 @@ export function resolveMarks(marks: Mark[], length: number): Map<number, MarkKin
         for (let i = Math.min(from, to); i <= Math.max(from, to); i++) add(i, mark.kind);
         break;
       }
+      case 'edge':
+        // Rejected rather than ignored: a generator emitting edge marks has
+        // graph-shaped state and belongs in GraphView. Silently dropping them
+        // would render a plausible-looking but incomplete picture.
+        throw new Error(
+          'ArrayView cannot render an edge target — use the GraphView renderer.',
+        );
       default: {
         const unsupported: never = mark.at;
         throw new Error(
