@@ -6,6 +6,7 @@ const LESSON = '/algorithms/binary-search/';
 const ALL_LESSONS = [
   '/data-structures/array/',
   '/data-structures/stack/',
+  '/data-structures/queue/',
   '/algorithms/binary-search/',
   '/algorithms/bubble-sort/',
   '/algorithms/insertion-sort/',

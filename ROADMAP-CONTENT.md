@@ -112,6 +112,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 22 | `/algorithms/sliding-window` | Sliding Window | 235 | ArrayView | `sliding-window` | done |
 | 1 | `/data-structures/array` | Arrays | 210 | ArrayView | `array-basics` | done |
 | 3 | `/data-structures/stack` | Stacks | 212 | ArrayView | `stack` | done |
+| 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -127,7 +128,7 @@ try an unsorted array instead of forking the entry.
 | 1 | `/data-structures/array` | Arrays | 210 | ArrayView | `array-basics` | **done** (see Shipped) |
 | 2 | `/data-structures/linked-list` | Linked Lists | 211 | **LinkedList** (new) | `linked-list` | planned — engine change |
 | 3 | `/data-structures/stack` | Stacks | 212 | ArrayView | `stack` | **done** (see Shipped) |
-| 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | planned |
+| 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | **done** (see Shipped) |
 | 5 | `/data-structures/hash-table` | Hash Tables | 214 | ArrayView (buckets as array slots)† | `hash-table` | planned |
 | 6 | `/data-structures/tree` | Trees | 215 | **Tree** (new) | `tree-intro` | planned — engine change |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | **Tree** (new) | `bst` | planned — engine change |

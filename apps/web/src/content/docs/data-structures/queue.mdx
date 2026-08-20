@@ -1,0 +1,124 @@
+---
+title: Queues
+description: First in, first out — and why removing from the front of an array costs more than you would guess.
+order: 213
+difficulty: beginner
+estimatedMinutes: 6
+viz: queue
+prerequisites: [/data-structures/stack]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+A queue is the other half of the stack's bargain. It also restricts you to the
+ends — but to *opposite* ends, and that one change flips the ordering and the
+cost of a removal.
+
+<Viz id="queue" />
+
+## How it works
+
+Values **enqueue** at the back and **dequeue** from the front. The value that
+comes out is always the one that has waited longest: **first in, first out**.
+A stack would have handed back the newest instead.
+
+Enqueueing is cheap, exactly as pushing was — the back is the end of the
+array, and nothing else moves. Dequeueing is where the trouble is. Removing
+index 0 leaves a hole at the front, and the array has no way to represent a
+hole, so everything behind it shifts left. Step the visualization: each
+dequeue is followed by one shift per remaining value.
+
+That is the Arrays lesson's shifting cost, arriving where you least want it —
+on the operation a queue performs constantly. A queue of *n* values costs
+about *n* per dequeue this way.
+
+Real implementations refuse to pay it. Instead of moving the values, they move
+a **head index**: dequeueing just advances a marker and leaves the value
+behind. Let the head and back wrap around the array — a *circular buffer* —
+and both operations become constant time with no shifting at all.
+
+## Try it
+
+```js
+function runQueue(ops) {
+  const queue = [];
+  let head = 0;
+  for (const op of ops) {
+    if (op !== null) queue.push(op);
+    else if (head < queue.length) head++;
+  }
+  return queue.slice(head);
+}
+```
+
+## Trade-offs
+
+Use a queue when fairness in arrival order is the point: work waiting for a
+worker, requests waiting for a server, print jobs, keystrokes. Breadth-first
+search is a queue too — it visits everything one step away before anything two
+steps away, which is exactly "oldest first."
+
+The catch is the one above: the obvious array implementation makes the common
+operation the expensive one. Use your language's real queue — Python's
+`collections.deque`, Java's `ArrayDeque` — or keep a head index yourself.
+`Array.prototype.shift()` in JavaScript is the trap, since it looks like `pop()`
+but is not the same cost.
+
+Avoid a queue when you want the newest item first — that is a stack — or when
+priority should beat arrival order, which is a heap.
+
+## Check your understanding
+
+1. **You enqueue 4, 8, then 15, and dequeue once. What comes back?**
+   - 15, the newest
+   - 4, the one that has waited longest
+   - 8, the middle value
+   - Whichever is smallest
+
+   <details>
+   <summary>Answer</summary>
+
+   4 — first in, first out. A stack is what returns 15; that difference is the
+   entire distinction between the two structures. As with a stack, the values
+   themselves are never compared, so size does not matter.
+   </details>
+
+2. **Why is dequeueing from a plain array queue more expensive than popping
+   from a stack?**
+   - Because queues store their values in a different kind of memory
+   - Because removing the front leaves a hole, so every remaining value shifts
+     left to close it
+   - Because queues must search for the oldest value first
+   - It isn't — both are constant time
+
+   <details>
+   <summary>Answer</summary>
+
+   Removing the front leaves a hole an array cannot represent, so everything
+   behind it slides left — one move per remaining value. A stack removes from
+   the end, where nothing sits behind it to move. The memory layout is
+   identical; the front is simply the expensive end. No searching is involved:
+   the oldest value's position is known.
+   </details>
+
+3. **How does a circular buffer avoid that cost?**
+   - It sorts the values so the front is always cheapest to remove
+   - It advances a head index instead of moving values, wrapping around the
+     array when it reaches the end
+   - It copies the queue into a second array each time
+   - It limits the queue to a small fixed size
+
+   <details>
+   <summary>Answer</summary>
+
+   It moves a head index rather than the values, and wraps both ends around
+   the array so the space before the head gets reused. Nothing is sorted,
+   nothing is copied, and while such buffers are often fixed-capacity, that is
+   a separate design choice — the constant-time win comes from not shifting.
+   </details>
+
+## Practice
+
+Try [Implement Queue using Stacks on LeetCode](https://leetcode.com/problems/implement-queue-using-stacks/)
+— building FIFO out of two LIFOs, which forces the distinction to be explicit.

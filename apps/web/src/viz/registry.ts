@@ -46,6 +46,21 @@ const registry = {
       })),
     code: () => import('./code/insertion-sort/index.js'),
   },
+  queue: {
+    renderer: 'ArrayView',
+    label: 'Queue contents, front at the left and back at the right',
+    // A number enqueues it; null dequeues. Interleaved so FIFO order shows.
+    defaultInput: { ops: [4, 8, 15, null, 16, null, 23] },
+    inputSchema: z.object({
+      ops: z.array(z.union([z.number(), z.null()])).min(1).max(24),
+    }),
+    // Each dequeue costs a shift per remaining value, so frames grow faster
+    // than the op count.
+    maxFrames: 400,
+    load: () =>
+      import('@cs/viz-core/algorithms/queue').then((m) => ({ default: m.queue })),
+    code: () => import('./code/queue/index.js'),
+  },
   stack: {
     renderer: 'ArrayView',
     label: 'Stack contents, with the top at the right',
