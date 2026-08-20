@@ -106,13 +106,14 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 0b | `/algorithms/bubble-sort` | Bubble Sort | 221 | ArrayView | `bubble-sort` | done |
 | 0c | `/complexity/big-o` | How Fast Is Fast? | 230 | ArrayView | `linear-search` (+ reuses `binary-search`) | done |
 | 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | done |
+| 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView | `linear-search` | done |
 
-The `linear-search` generator, code samples, and registry entry already exist
-(`packages/viz-core/src/algorithms/linear-search.ts`,
-`apps/web/src/viz/registry.ts`) and are exercised today only as the second
-visualization embedded in `/complexity/big-o`. Row 4 below tracks giving Linear Search
-its own dedicated lesson page — that is pure content + registry-reuse work, no new
-generator required.
+Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
+embeds — no new generator, code samples, or registry entry were needed, only the lesson
+prose. Its `defaultInput` is deliberately left **sorted**, because the same registry
+entry drives the Big-O race against binary search, where sortedness is the whole point.
+The lesson turns that into a teaching note and sends the reader to the input editor to
+try an unsorted array instead of forking the entry.
 
 ## Data Structures (`data-structures/` — new sidebar group required, see AUTHORING.md §1)
 
@@ -137,7 +138,7 @@ generator required.
 | 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | **done** — was Task 20's fourth-lesson test (see Shipped) |
 | 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | planned |
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | planned |
-| 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView (viz already registered — see Shipped) | `linear-search` | planned — content only, viz reused from row 0c |
+| 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView (viz already registered — see Shipped) | `linear-search` | **done** (see Shipped) |
 | 15 | `/algorithms/recursion` | Recursion Basics | 227 | **StackFrame** (new) | `recursion-intro` | planned — engine change |
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **Graph** (new) | `bfs` | planned — engine change |
 | 17 | `/algorithms/dfs` | Depth-First Search | 229 | **Graph** (new) | `dfs` | planned — engine change |

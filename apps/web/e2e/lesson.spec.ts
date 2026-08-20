@@ -7,6 +7,7 @@ const ALL_LESSONS = [
   '/algorithms/binary-search/',
   '/algorithms/bubble-sort/',
   '/algorithms/insertion-sort/',
+  '/algorithms/linear-search/',
   '/complexity/big-o/',
 ];
 
