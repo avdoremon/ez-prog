@@ -22,7 +22,7 @@ Every one of these runs in CI (`.github/workflows/ci.yml`) and must pass before
 a change lands. Run them in this order locally:
 
 ```bash
-pnpm lint:content   # seven content rules (see docs/AUTHORING.md §6)
+pnpm lint:content   # eight content rules (see docs/AUTHORING.md §6)
 pnpm typecheck      # tsc -b across packages, then astro check
 pnpm test           # vitest: unit, property, and conformance tests
 pnpm build          # the real production build, to apps/web/dist

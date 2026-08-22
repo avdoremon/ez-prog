@@ -587,7 +587,7 @@ a tripwire for future edits.
 
 | Command | What it does | Needs a prior build? |
 |---|---|---|
-| `pnpm lint:content` | Runs `scripts/lint-content.ts` — the seven content rules below. | No |
+| `pnpm lint:content` | Runs `scripts/lint-content.ts` — the eight content rules below. | No |
 | `pnpm typecheck` | `tsc -b` across all packages, then `astro check` inside `apps/web` (validates frontmatter against the Zod schema, JSX, etc.). | No |
 | `pnpm test` | `vitest run` — all unit/conformance tests across `packages/` and `apps/web`. | No |
 | `pnpm build` | `pnpm --filter web build` — the real Astro/Starlight production build, to `apps/web/dist`. | — |
@@ -599,7 +599,7 @@ mistakes) → `typecheck` → `test` → `build` → `check:offline` → `test:e
 
 All of them run in CI (`.github/workflows/ci.yml`) in that same order.
 
-### The seven `lint:content` rules
+### The eight `lint:content` rules
 
 Source: `scripts/lint-content.ts`. Each rule's real error format is
 `[rule-name] <file>: <message>`.
@@ -649,6 +649,19 @@ Source: `scripts/lint-content.ts`. Each rule's real error format is
    entry if the extra length is genuinely pedagogically valuable, or — if the generator
    never terminates — fix the generator; that's a real bug, not a budget problem.
 
+8. **`code-line-length`** — a line inside a fenced code block is wider than 68
+   characters.
+   Real message (captured): `Code line 53 is 84 characters; the limit is 68. Longer lines make the rendered <pre> scroll sideways, which fails axe's scrollable-region-focusable (wcag2a). Split the line.`
+   **Fix:** split the statement across lines, or shorten names. The limit is measured,
+   not chosen by taste: Expressive Code renders each fence as a `<pre>` 630px wide in
+   the content column at the e2e suite's 1280px viewport, in a font whose character
+   advance is 8.64px — so 72 characters fit and the 73rd makes the block scroll
+   sideways, which axe fails as a scroll region no keyboard can reach. 68 leaves margin
+   for the fallback font's different metrics. The derivation is in `lint-content.ts`
+   next to the constant; re-derive it rather than nudging it if the column or the code
+   font ever changes. This rule exists because `pnpm test:e2e` catches the same defect
+   **only intermittently** — see §7.
+
 ## 6. Definition of Done
 
 Copy this into the pull request description (from `IMPLEMENTATION_PLAN.md` §12,
@@ -696,18 +709,18 @@ without ever being examined.
   `code-block-language` (§6) even for a block you don't intend to be "real code" (e.g.
   sample terminal output) — tag it (`text`, `bash`, whatever fits) rather than leaving
   it bare.
-- **Keep fenced lines short — about 65 characters.** No lint rule enforces this, and
-  the way it bites is nasty. A long line makes Expressive Code's rendered `<pre>`
-  horizontally scrollable, and axe's `scrollable-region-focusable` (wcag2a) then fails
-  the page: a scroll region that keyboard users cannot reach. The Dijkstra lesson hit
-  this at 84 characters, and **it failed only intermittently** — overflow depends on
-  whether the web font has loaded when axe runs, so the same commit passed
-  `pnpm test:e2e` and failed it on consecutive runs. Do not read one green e2e run as
-  proof here. Every other shipped lesson's longest fenced line is 63 characters or
-  fewer, which is where the safe budget comes from; if your code will not fit, split
-  the statement rather than letting the line run. (The `<pre>` inside the *code panel*
-  is a different element and is already focusable — see `docs/PHASE0-EXIT.md`. This is
-  only about the ` ``` ` blocks in your `.mdx`.)
+- **Fenced code lines are capped at 68 characters** by rule `code-line-length` (§6).
+  The cap guards a rendering property, not a style: a longer line makes Expressive
+  Code's `<pre>` scroll sideways, which axe fails as a scroll region no keyboard can
+  reach. Worth knowing *why* it is a lint rule rather than left to the e2e suite — the
+  Dijkstra lesson shipped an 84-character line and `pnpm test:e2e` caught it **only
+  intermittently**, because whether the block overflows depends on whether the web font
+  has loaded by the time axe runs. The same commit passed and failed on consecutive
+  runs. So: do not read one green e2e run as proof of anything here, and if
+  `lint:content` flags a line, split it rather than re-running the suite until it goes
+  quiet. (The `<pre>` inside the *code panel* is a different element and is already
+  focusable — see `docs/PHASE0-EXIT.md`. This rule is only about the ` ``` ` blocks in
+  your `.mdx`.)
 - **`prerequisites` must resolve to real slugs**, derived exactly as in §1 — a typo or
   a not-yet-written lesson both fail the build the same way.
 - **No external asset references** — `check:offline` scans built HTML/CSS for any

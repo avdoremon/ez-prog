@@ -23,7 +23,7 @@ and `packages/viz-core`.
 ## Adding a lesson
 
 Read [`docs/AUTHORING.md`](../../docs/AUTHORING.md). It covers the frontmatter
-schema, the lesson shape, how to register a visualization, and the seven
+schema, the lesson shape, how to register a visualization, and the eight
 `lint:content` rules that will fail you.
 
 ## Notes specific to this app

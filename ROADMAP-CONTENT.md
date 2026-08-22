@@ -147,10 +147,13 @@ code line of 84 characters made Expressive Code's `<pre>` horizontally scrollabl
 axe's `scrollable-region-focusable` (wcag2a) — **intermittently**, because overflow depends
 on whether the web font has loaded when axe runs. The same commit passed and failed
 `pnpm test:e2e` on consecutive runs. The fix was content-side (split the line; the longest
-is now 60 characters, against 63 for the next-longest lesson). **The flaky gate is the real
-finding**, though: it can let a future lesson ship the same defect. A deterministic check —
-a line-length rule in `scripts/lint-content.ts` — is **not** done, and is worth scoping
-separately rather than folding into a content PR.
+is now 60 characters, against 63 for the next-longest lesson). **The flaky gate was the
+real finding**, though, and it is now closed: `scripts/lint-content.ts` grew an eighth
+rule, `code-line-length`, capping fenced lines at 68 characters. The cap is measured
+rather than chosen — the rendered `<pre>` is 630px at a character advance of 8.64px, so
+72 fit — and the derivation sits beside the constant so a future layout change can
+re-derive it. Authors now get a deterministic failure naming the line, instead of an
+axe violation that appears on some runs and not others.
 
 ## Data Structures (`data-structures/` — sidebar group now exists in `astro.config.mjs`)
 

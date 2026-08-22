@@ -11,6 +11,28 @@ const DSA_PREFIXES = ['data-structures/', 'algorithms/', 'complexity/'];
 const WORD_LIMIT = 700;
 
 /**
+ * Maximum characters in a fenced code line.
+ *
+ * Not a style preference, and not a guess. Expressive Code renders each fence
+ * as a `<pre>` that measures exactly 630px in the content column at the e2e
+ * suite's 1280px viewport, in a monospace face whose character advance
+ * measures 8.64px. So 72 characters fit, and the 73rd makes the `<pre>` scroll
+ * sideways — a scrollable region with no keyboard access, which fails axe's
+ * `scrollable-region-focusable` (wcag2a).
+ *
+ * 68 keeps margin below that 72, because the fallback font's metrics differ
+ * from the web font's. That difference is also why the e2e suite caught this
+ * only intermittently when an 84-character line shipped in the Dijkstra
+ * lesson: whether the `<pre>` overflowed depended on whether the web font had
+ * loaded by the time axe ran, so the same commit passed and failed
+ * `pnpm test:e2e` on consecutive runs. This rule is the deterministic check.
+ *
+ * If the content column or the code font changes, re-derive rather than nudge:
+ * floor(<pre> clientWidth / character advance), less margin.
+ */
+const CODE_LINE_LIMIT = 68;
+
+/**
  * Windows' `readdir` returns backslash-separated paths (see `d.parentPath`
  * below), while lesson slugs and `prerequisites` frontmatter values are
  * always written with forward slashes (e.g. `/algorithms/binary-search`).
@@ -28,6 +50,36 @@ function stripCodeBlocks(body: string): string {
 
 function countWords(text: string): number {
   return text.split(/\s+/).filter(Boolean).length;
+}
+
+/**
+ * Columns a line occupies once rendered. Tabs advance to the next 4-column
+ * stop; raw `.length` would score one, and undercount the line that overflows.
+ */
+function displayWidth(line: string): number {
+  let width = 0;
+  for (const ch of line) width = ch === '\t' ? width + 4 - (width % 4) : width + 1;
+  return width;
+}
+
+/**
+ * Every fenced line wider than `limit`, with its 1-based line number in the
+ * file as the author sees it — frontmatter included, so the number matches
+ * what their editor shows. Fence markers themselves are never measured.
+ */
+function overlongCodeLines(raw: string, limit: number): { line: number; width: number }[] {
+  const found: { line: number; width: number }[] = [];
+  let inFence = false;
+  raw.split(/\r?\n/).forEach((line, i) => {
+    if (/^\s*```/.test(line)) {
+      inFence = !inFence;
+      return;
+    }
+    if (!inFence) return;
+    const width = displayWidth(line);
+    if (width > limit) found.push({ line: i + 1, width });
+  });
+  return found;
 }
 
 function untaggedCodeFences(body: string): number {
@@ -114,6 +166,14 @@ export async function lintContent(
     if (untaggedCodeFences(body) > 0) {
       errors.push({ rule: 'code-block-language', file: rel,
         message: `A fenced code block does not declare its language.` });
+    }
+
+    // Rule 8
+    for (const { line, width } of overlongCodeLines(raw, CODE_LINE_LIMIT)) {
+      errors.push({ rule: 'code-line-length', file: rel,
+        message: `Code line ${line} is ${width} characters; the limit is ${CODE_LINE_LIMIT}. ` +
+                 `Longer lines make the rendered <pre> scroll sideways, which fails axe's ` +
+                 `scrollable-region-focusable (wcag2a). Split the line.` });
     }
 
     // Rules 5-7

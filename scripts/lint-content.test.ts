@@ -163,3 +163,51 @@ test('every error names a file and is human-readable', async () => {
     expect(e.message.length).toBeGreaterThan(10);
   }
 });
+
+/*
+ * Rule 8 (code-line-length) exists because of a defect that shipped past a
+ * green e2e run. A fenced line of 84 characters in the Dijkstra lesson made
+ * Expressive Code's rendered <pre> horizontally scrollable, which fails axe's
+ * `scrollable-region-focusable` (wcag2a): a scroll region no keyboard can
+ * reach. The e2e suite DOES catch it -- but only intermittently, because
+ * overflow depends on whether the web font has loaded when axe runs, so the
+ * same commit passed and failed `pnpm test:e2e` on consecutive runs. These
+ * tests make the check deterministic and cheap, at authoring time.
+ */
+test('rule 8: a fenced line wider than the rendered column is rejected', async () => {
+  const errors = await lintContent(fixture('long-code-line'));
+  expect(errors.map((e) => e.rule)).toContain('code-line-length');
+});
+
+test('rule 8: the message names the offending line and its width', async () => {
+  const [error] = (await lintContent(fixture('long-code-line')))
+    .filter((e) => e.rule === 'code-line-length');
+  // An author who cannot see WHICH line is too long has to bisect the file by
+  // hand, so the line number and both widths are part of the contract.
+  expect(error?.message).toMatch(/line 11/);
+  expect(error?.message).toMatch(/78/);
+  expect(error?.message).toMatch(/68/);
+});
+
+// Boundary, pinned from the other side: scripts/fixtures/clean carries a
+// fenced line of exactly 68 characters. At the limit must pass, or the rule
+// would be off by one and reject conforming lessons.
+test('rule 8: a line of exactly the limit is allowed', async () => {
+  const errors = await lintContent(fixture('clean'));
+  expect(errors.map((e) => e.rule)).not.toContain('code-line-length');
+});
+
+// The rule guards a rendering property, not a language one: a long line in a
+// ```text block overflows the same <pre> and trips the same axe rule.
+test('rule 8: an untagged-language fence is measured too', async () => {
+  const errors = await lintContent(fixture('untagged-code'));
+  expect(errors.map((e) => e.rule)).not.toContain('code-line-length');
+});
+
+// The real lessons must already satisfy the rule the moment it lands --
+// otherwise this ships a red gate. The limit (68) was chosen from a browser
+// measurement, not taste: see the derivation in lint-content.ts.
+test('rule 8: every shipped lesson already satisfies the limit', async () => {
+  const errors = await lintContent('apps/web/src/content/docs');
+  expect(errors.filter((e) => e.rule === 'code-line-length')).toEqual([]);
+});
