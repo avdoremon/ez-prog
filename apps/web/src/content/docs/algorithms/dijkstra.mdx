@@ -1,0 +1,132 @@
+---
+title: Dijkstra's Algorithm
+description: When edges carry a cost, the fewest hops stop being the cheapest route — so settle nodes in order of price instead.
+order: 231
+difficulty: intermediate
+estimatedMinutes: 8
+viz: dijkstra
+prerequisites: [/algorithms/bfs]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+A map where every road takes the same time is not a map. Once edges carry a
+cost, the fewest hops and the cheapest route stop being the same thing — and
+breadth-first search only knew how to count hops.
+
+<Viz id="dijkstra" />
+
+## How it works
+
+Keep one number per node: the cheapest cost you currently know of reaching it.
+All start at ∞ except the start, at 0. Then repeat until nothing is left:
+
+1. **Settle** the cheapest unsettled node. Its number is now final.
+2. **Relax** its edges — if going through it reaches a neighbour for less than
+   that neighbour's current number, write down the smaller figure.
+
+Step 1 is the whole idea, and a claim worth pausing on. Why is that number
+*final*? Because any cheaper route must leave through another unsettled node,
+which already costs at least as much — and a non-negative edge cannot bring
+the total back down.
+
+That leans entirely on **non-negative weights**. Allow a negative edge and a
+settled node can turn out cheaper later — but the algorithm has moved on and
+never looks back, so it answers wrongly rather than slowly. The input editor
+rejects negative weights for exactly that reason.
+
+Watch node 4. It sits one edge from the start, so BFS would call it the
+nearest node in the graph, and step 5 records it at cost 9. Ten steps later a
+three-edge detour through 1 and 3 reaches it for 6. Hops and cost disagree;
+cost wins.
+
+## Try it
+
+```js
+function dijkstra(adj, start, n) {
+  const dist = Array(n).fill(Infinity), settled = new Set();
+  dist[start] = 0;
+  for (;;) {
+    let node = -1;
+    for (let i = 0; i < n; i++) {
+      if (settled.has(i)) continue;
+      if (node < 0 || dist[i] < dist[node]) node = i;
+    }
+    if (node < 0 || dist[node] === Infinity) break;
+    settled.add(node);
+    for (const { to, weight } of adj[node]) {
+      const via = dist[node] + weight;
+      if (settled.has(to) || via >= dist[to]) continue;
+      dist[to] = via;
+    }
+  }
+  return dist;
+}
+```
+
+## Trade-offs
+
+Set every weight to 1 and this degenerates into BFS with extra bookkeeping.
+BFS is not the weaker algorithm — it is the specialisation for equal weights,
+because a queue beats repeatedly searching for a minimum.
+
+That search is this version's cost: a pass over every node, once per settle —
+quadratic in the number of nodes. Real implementations keep the tentative
+distances in a binary heap and pay a logarithm per operation. Same algorithm;
+the scan is shown here because it is the step you need to see.
+
+For negative weights use Bellman-Ford, at a higher price. A\* is Dijkstra plus
+a guess about where the goal lies.
+
+## Check your understanding
+
+1. **Why can Dijkstra call a node's distance final the moment it settles it?**
+   - Because it has already examined every path to that node
+   - Because any other route must first pass through an unsettled node costing
+     at least as much, and non-negative edges cannot reduce that
+   - Because the graph is undirected
+   - It cannot — the distance may still change later
+
+   <details>
+   <summary>Answer</summary>
+
+   The node chosen is the cheapest unsettled one, so any alternative route
+   leaves through a node costing at least as much, and non-negative weight
+   only grows the total. No paths are enumerated, and direction is irrelevant.
+   The distance never changes again — which is why settled edges get skipped.
+   </details>
+
+2. **You run this on a graph containing one edge of weight −3. What happens?**
+   - It loops forever
+   - It rejects the input before running
+   - It finishes normally but may report a distance that is too high
+   - Negative weights make no difference
+
+   <details>
+   <summary>Answer</summary>
+
+   It terminates and returns an answer that can simply be wrong: a settled
+   node may be cheaper through the negative edge, and nothing revisits it. The
+   silence is the danger — no loop, no error. Use Bellman-Ford. (This lesson's
+   editor rejects negative weights up front; a bare implementation would not.)
+   </details>
+
+3. **Every edge in your graph has weight 1. How does Dijkstra behave?**
+   - It returns the same distances as BFS, more slowly
+   - It returns different distances, because it optimises cost, not hops
+   - It fails, because it needs varied weights
+   - It becomes faster than BFS
+
+   <details>
+   <summary>Answer</summary>
+
+   With equal weights, cheapest and fewest-hops coincide, so the distances
+   match BFS exactly — but Dijkstra still scans for a minimum every iteration,
+   which a FIFO queue gets for free. Same answer, more work.
+   </details>
+
+## Practice
+
+Try [Network Delay Time on LeetCode](https://leetcode.com/problems/network-delay-time/)
+— the answer is the largest of the shortest-path costs from the source.

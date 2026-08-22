@@ -696,6 +696,18 @@ without ever being examined.
   `code-block-language` (§6) even for a block you don't intend to be "real code" (e.g.
   sample terminal output) — tag it (`text`, `bash`, whatever fits) rather than leaving
   it bare.
+- **Keep fenced lines short — about 65 characters.** No lint rule enforces this, and
+  the way it bites is nasty. A long line makes Expressive Code's rendered `<pre>`
+  horizontally scrollable, and axe's `scrollable-region-focusable` (wcag2a) then fails
+  the page: a scroll region that keyboard users cannot reach. The Dijkstra lesson hit
+  this at 84 characters, and **it failed only intermittently** — overflow depends on
+  whether the web font has loaded when axe runs, so the same commit passed
+  `pnpm test:e2e` and failed it on consecutive runs. Do not read one green e2e run as
+  proof here. Every other shipped lesson's longest fenced line is 63 characters or
+  fewer, which is where the safe budget comes from; if your code will not fit, split
+  the statement rather than letting the line run. (The `<pre>` inside the *code panel*
+  is a different element and is already focusable — see `docs/PHASE0-EXIT.md`. This is
+  only about the ` ``` ` blocks in your `.mdx`.)
 - **`prerequisites` must resolve to real slugs**, derived exactly as in §1 — a typo or
   a not-yet-written lesson both fail the build the same way.
 - **No external asset references** — `check:offline` scans built HTML/CSS for any

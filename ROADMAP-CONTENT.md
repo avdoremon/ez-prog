@@ -123,6 +123,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **GraphView** | `bfs` | done |
 | 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | done |
 | 9 | `/data-structures/graph` | Graphs | 218 | GraphView | `graph-intro` | done |
+| 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weighted) | `dijkstra` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -130,6 +131,26 @@ prose. Its `defaultInput` is deliberately left **sorted**, because the same regi
 entry drives the Big-O race against binary search, where sortedness is the whole point.
 The lesson turns that into a teaching note and sends the reader to the input editor to
 try an unsorted array instead of forking the entry.
+
+Dijkstra (row 18) confirms the "content only" call this document made for it: `GraphView`
+already rendered `GraphEdge.weight` when present, so the lesson needed a generator, samples,
+a registry entry and prose — and **no edit to any existing file under `packages/`** (§0 of
+`docs/AUTHORING.md`). It reuses the six-node graph the `bfs` and `dfs` entries use, now
+weighted, with one deliberately expensive direct edge 0—4: BFS calls node 4 one step away,
+Dijkstra finds a three-edge route costing less. That disagreement is the lesson, and a
+conformance test pins it so prose and generator cannot drift apart. The `dijkstra` entry is
+also the first `inputSchema` to enforce a *precondition of the algorithm* rather than a
+shape — non-negative weights — which is what lets the prose claim the editor rejects them.
+
+It also surfaced one authoring trap, now written up in `docs/AUTHORING.md` §7: a fenced
+code line of 84 characters made Expressive Code's `<pre>` horizontally scrollable, failing
+axe's `scrollable-region-focusable` (wcag2a) — **intermittently**, because overflow depends
+on whether the web font has loaded when axe runs. The same commit passed and failed
+`pnpm test:e2e` on consecutive runs. The fix was content-side (split the line; the longest
+is now 60 characters, against 63 for the next-longest lesson). **The flaky gate is the real
+finding**, though: it can let a future lesson ship the same defect. A deterministic check —
+a line-length rule in `scripts/lint-content.ts` — is **not** done, and is worth scoping
+separately rather than folding into a content PR.
 
 ## Data Structures (`data-structures/` — sidebar group now exists in `astro.config.mjs`)
 
@@ -158,7 +179,7 @@ try an unsorted array instead of forking the entry.
 | 15 | `/algorithms/recursion` | Recursion Basics | 227 | **StackFrame** (new) | `recursion-intro` | planned — engine change |
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | GraphView | `bfs` | **done** (see Shipped) |
 | 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | **done** (see Shipped) |
-| 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weights supported) | `dijkstra` | planned — content only |
+| 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weights supported) | `dijkstra` | **done** (see Shipped) |
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | **done** (see Shipped) |
 | 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | **Matrix2D** (new) | `dp-intro` | planned — engine change |
 | 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | **done** (see Shipped) |

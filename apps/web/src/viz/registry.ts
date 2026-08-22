@@ -210,6 +210,55 @@ const registry = {
       import('@cs/viz-core/algorithms/dfs').then((m) => ({ default: m.dfs })),
     code: () => import('./code/dfs/index.js'),
   },
+  dijkstra: {
+    renderer: 'GraphView',
+    label: 'Weighted graph with the cheapest known cost to reach each node',
+    // The same six nodes as the 'bfs' and 'dfs' entries, now carrying weights,
+    // so the three lessons can be compared directly. Edge 0-4 is deliberately
+    // one expensive hop: BFS calls node 4 a single step away, while Dijkstra
+    // finds a three-edge route that costs less. That disagreement is the lesson.
+    defaultInput: {
+      values: [0, 1, 2, 3, 4, 5],
+      edges: [
+        { from: 0, to: 1, weight: 2 }, { from: 0, to: 2, weight: 1 },
+        { from: 0, to: 4, weight: 9 }, { from: 1, to: 3, weight: 1 },
+        { from: 2, to: 3, weight: 5 }, { from: 3, to: 4, weight: 3 },
+        { from: 4, to: 5, weight: 2 },
+      ],
+      start: 0,
+    },
+    inputSchema: z
+      .object({
+        values: z.array(z.number()).min(1).max(16),
+        edges: z
+          .array(
+            z.object({
+              from: z.number().int(),
+              to: z.number().int(),
+              // Non-negative is a precondition of the algorithm, not a taste:
+              // a negative edge can make an already-settled distance wrong,
+              // and Dijkstra never revisits a settled node to find out.
+              weight: z
+                .number()
+                .min(0, 'Dijkstra requires non-negative edge weights.'),
+            }),
+          )
+          .max(40),
+        start: z.number().int().min(0),
+      })
+      .refine((v) => v.start < v.values.length, {
+        message: 'start must be the index of an existing node.',
+      })
+      .refine(
+        (v) => v.edges.every((e) => e.from < v.values.length && e.to < v.values.length),
+        { message: 'every edge must join two existing node indexes.' },
+      ),
+    load: () =>
+      import('@cs/viz-core/algorithms/dijkstra').then((m) => ({
+        default: m.dijkstra,
+      })),
+    code: () => import('./code/dijkstra/index.js'),
+  },
   'graph-intro': {
     renderer: 'GraphView',
     label: 'Graph tour: each node with its neighbours and degree',
