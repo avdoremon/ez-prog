@@ -21,6 +21,7 @@ const ALL_LESSONS = [
   '/algorithms/linear-search/',
   '/algorithms/merge-sort/',
   '/algorithms/quick-sort/',
+  '/algorithms/selection-sort/',
   '/algorithms/sliding-window/',
   '/algorithms/two-pointer/',
   '/complexity/amortized-analysis/',

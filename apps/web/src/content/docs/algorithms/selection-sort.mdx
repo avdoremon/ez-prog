@@ -1,0 +1,124 @@
+---
+title: Selection Sort
+description: Find the smallest value, put it in front, repeat — the sort that thinks a lot and moves almost nothing.
+order: 222
+difficulty: beginner
+estimatedMinutes: 6
+viz: selection-sort
+prerequisites: [/algorithms/bubble-sort]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Handed a shelf of books to order by height, most people do not swap
+neighbours over and over. They scan for the shortest, stand it at the left
+end, then scan again. Selection sort is that habit, written down.
+
+<Viz id="selection-sort" />
+
+## How it works
+
+The array splits into a sorted prefix on the left and an unsorted rest. Each
+pass scans the whole rest, remembers where the smallest value sits, and swaps
+it into the first unsorted slot. That slot is settled, the boundary moves
+right one, and the next pass repeats.
+
+Notice what the scan does *not* do: it moves nothing, only records an
+index. All movement happens once per pass, in a single swap at the end — and
+if the smallest value already sits in the right slot, even that is skipped.
+Watch the `swaps` counter above: it reaches **2** on six values that took 15
+comparisons to sort.
+
+That gap is the point. Selection sort makes at most *n*−1 swaps on any input,
+because each pass settles a slot for good; bubble sort on this array makes 8. When comparing is cheap but moving data is expensive — flash memory
+that wears out, or records far larger than the key they are sorted by — that
+is the trade you want.
+
+The other half of the trade: the scan never gets cheaper. With no early exit, a
+sorted array costs exactly as many comparisons as a reversed one.
+
+## Try it
+
+```js
+function selectionSort(arr) {
+  arr = [...arr];
+  for (let i = 0; i < arr.length - 1; i++) {
+    let min = i;
+    for (let j = i + 1; j < arr.length; j++) {
+      if (arr[j] < arr[min]) min = j;
+    }
+    if (min !== i) [arr[i], arr[min]] = [arr[min], arr[i]];
+  }
+  return arr;
+}
+```
+
+## Trade-offs
+
+Use it when writes cost far more than reads and the array is small. Otherwise
+its *n*²/2 comparisons make it a poor general sort: the next lesson's
+insertion sort finishes nearly-ordered data in roughly linear time, while
+selection sort grinds through every comparison regardless.
+
+One more difference matters when sorting records rather than bare numbers.
+The long-range swap can throw a value behind an equal one: on `[2, 2, 1]` the
+first `2` ends up after the second. Selection sort is **not stable**;
+insertion sort is. If equal records must keep their original order, that
+rules it out.
+
+## Check your understanding
+
+1. **How many comparisons does it make on `[1, 2, 3, 4, 5]`, already sorted?**
+   - None — it detects the array is sorted
+   - Exactly as many as on any other 5-element array
+   - One per element
+   - Fewer than on reversed input, but more than none
+
+   <details>
+   <summary>Answer</summary>
+
+   Exactly as many: 10, or *n*(*n*−1)/2. Every pass scans the whole unsorted
+   rest to prove which value is smallest, and nothing about sorted input lets
+   it stop early — unlike bubble sort, which bails out when a pass makes no
+   swap. Sorted input saves all the *swaps*, none of the comparisons.
+   </details>
+
+2. **Why does it make at most *n*−1 swaps, whatever the input?**
+   - Because it swaps only adjacent values
+   - Because each pass settles one slot permanently, so it needs at most one
+     swap per pass
+   - Because it refuses to swap equal values
+   - It doesn't — reversed input forces many more
+
+   <details>
+   <summary>Answer</summary>
+
+   Each pass puts the correct value in one slot and never touches it again,
+   so a pass costs at most one swap and there are *n*−1 passes. The swap is
+   deliberately *not* between adjacent values — being long-range is why one
+   suffices. Reversed input does not change the bound.
+   </details>
+
+3. **You sort employees by department, having already sorted them by surname.
+   Is selection sort safe?**
+   - Yes — sorting is sorting
+   - No, because it is not stable: a long-range swap can reorder two
+     employees in the same department
+   - No, because it is too slow on large lists
+   - Yes, provided no two employees share a surname
+
+   <details>
+   <summary>Answer</summary>
+
+   No — surname order within a department can be destroyed, because a swap
+   can throw one record behind an equal one. Speed is a real objection but a
+   different one, and it is the *departments* comparing equal here, not the
+   surnames. Insertion sort is stable and would preserve the earlier order.
+   </details>
+
+## Practice
+
+Try [Sort an Array on LeetCode](https://leetcode.com/problems/sort-an-array/)
+— write selection sort first, then see why the constraints push you toward
+*n* log *n*.

@@ -118,6 +118,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | done |
 | 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView | `amortized-growth` | done |
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | done |
+| 11 | `/algorithms/selection-sort` | Selection Sort | 222 | ArrayView | `selection-sort` | done |
 | 6 | `/data-structures/tree` | Trees | 215 | **TreeView** | `tree-traversal` | done |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | done |
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **GraphView** | `bfs` | done |
@@ -142,7 +143,23 @@ conformance test pins it so prose and generator cannot drift apart. The `dijkstr
 also the first `inputSchema` to enforce a *precondition of the algorithm* rather than a
 shape — non-negative weights — which is what lets the prose claim the editor rejects them.
 
-It also surfaced one authoring trap, now written up in `docs/AUTHORING.md` §7: a fenced
+Selection sort (row 11) surfaced a gap in what `frame-budget` actually protects. That
+lint rule only ever runs a viz on its own `defaultInput`, so it says nothing about the
+inputs the "Try your own input" editor will accept. This generator emits a frame per
+comparison *and* one per new minimum, so at the 24-element bound its siblings use, a
+reversed array needs 468 frames against a `maxFrames` of 400 — the run gets cut off
+before `DONE`, which is the frame carrying the final swap count the whole lesson is
+built on. Fixed by tightening `inputSchema` to 16 (`docs/AUTHORING.md` §4.6 is explicit
+that the schema bound, not the cap, is what keeps learner input inside the budget), with
+a test asserting no schema-valid input truncates. That test was mutation-checked: put the
+bound back to 24 and it fails.
+
+**The same latent problem exists in `bubble-sort`, and is deliberately not fixed here.**
+Reversed input at its 24-element bound needs 577 frames against the same 400 cap. It is a
+one-line schema change, but it alters a shipped lesson's behaviour and belongs in its own
+change rather than being smuggled into a new lesson's PR.
+
+Dijkstra also surfaced one authoring trap, now written up in `docs/AUTHORING.md` §7: a fenced
 code line of 84 characters made Expressive Code's `<pre>` horizontally scrollable, failing
 axe's `scrollable-region-focusable` (wcag2a) — **intermittently**, because overflow depends
 on whether the web font has loaded when axe runs. The same commit passed and failed
@@ -174,7 +191,7 @@ axe violation that appears on some runs and not others.
 
 | # | Slug | Title | `order` | Renderer needed | Viz id | Status |
 |---|---|---|---|---|---|---|
-| 11 | `/algorithms/selection-sort` | Selection Sort | 222 | ArrayView | `selection-sort` | planned |
+| 11 | `/algorithms/selection-sort` | Selection Sort | 222 | ArrayView | `selection-sort` | **done** (see Shipped) |
 | 12 | `/algorithms/insertion-sort` | Insertion Sort | 223 | ArrayView | `insertion-sort` | **done** — was Task 20's fourth-lesson test (see Shipped) |
 | 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | **done** (see Shipped) |
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | **done** (see Shipped) |

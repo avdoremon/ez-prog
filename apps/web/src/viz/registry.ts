@@ -31,6 +31,33 @@ const registry = {
       })),
     code: () => import('./code/bubble-sort/index.js'),
   },
+  'selection-sort': {
+    renderer: 'ArrayView',
+    label: 'Array being sorted by selecting the smallest remaining value',
+    // Deliberately the same six values as the 'bubble-sort' and
+    // 'insertion-sort' entries, so the three quadratic sorts can be compared
+    // on identical input. This array also exercises both branches of the
+    // guarded swap: passes 0 and 2 swap, passes 1, 3 and 4 find the value
+    // already in place and settle without a write.
+    defaultInput: { arr: [5, 2, 9, 1, 7, 3] },
+    // Quadratic — tighter than the global MAX_FRAMES budget.
+    maxFrames: 400,
+    // 16, not the 24 its sibling sorts allow. This generator emits a frame per
+    // comparison AND a frame per new minimum, so 24 reversed values need 468
+    // frames and truncate against the cap above — cutting the run off before
+    // DONE, which is the frame carrying the final swap count the lesson is
+    // built on. At 16 the theoretical worst case is 272, so every input the
+    // editor accepts runs to completion. See AUTHORING.md §4.6: the schema
+    // bound is what keeps learner input inside the frame budget.
+    inputSchema: z.object({
+      arr: z.array(z.number()).min(1).max(16),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/selection-sort').then((m) => ({
+        default: m.selectionSort,
+      })),
+    code: () => import('./code/selection-sort/index.js'),
+  },
   'insertion-sort': {
     renderer: 'ArrayView',
     label: 'Array being sorted by inserting each value into the sorted prefix',
