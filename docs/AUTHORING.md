@@ -583,6 +583,24 @@ count roughly how many frames it produces, and only then decide whether the defa
 `1500` cap is fine or whether — like `bubble-sort` — you want a tighter `maxFrames` as
 a tripwire for future edits.
 
+**`defaultInput` is only the starting input, and rule `frame-budget` never looks past
+it.** The "Try your own input" editor (§4.7) will run anything `inputSchema` accepts, so
+the pair you actually have to get right is **`inputSchema` against `maxFrames`**, not
+`defaultInput` against `maxFrames`. Work out your generator's *worst* case at the bound
+your schema allows — for a quadratic algorithm emitting a frame per comparison, that is
+usually reversed input — and make sure it fits. Tighten the schema rather than inflating
+the cap: a run that completes at 16 elements teaches better than one that is cut off at
+24, and `maxFrames` exists to keep lessons short.
+
+This is enforced by `apps/web/src/viz/frame-budget.test.ts`, which searches every
+entry's own schema for its worst case and fails if the run truncates — so you do not
+have to remember to add your entry to anything. It exists because three of the
+quadratic sorts shipped with this defect at once: at a 24-element bound, reversed input
+needed 577 frames for `bubble-sort` and 600 for `insertion-sort` against a cap of 400,
+stranding the learner mid-sort with the final frame — the one carrying the result —
+never reached. Every gate had been green, because every gate only ever ran
+`defaultInput`.
+
 ## 5. Running the gates
 
 | Command | What it does | Needs a prior build? |

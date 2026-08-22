@@ -8,9 +8,11 @@ import { insertionSort } from '../src/algorithms/insertion-sort.js';
 import { runConformance } from './conformance.js';
 
 // Matches the registry's inputSchema for 'insertion-sort'
-// (apps/web/src/viz/registry.ts): 1–24 numbers.
+// (apps/web/src/viz/registry.ts): 1–16 numbers. It was 24 until reversed
+// input at that bound was found to need 600 frames against the entry's
+// maxFrames of 400 — see apps/web/src/viz/frame-budget.test.ts.
 const smallArray = fc.record({
-  arr: fc.array(fc.integer({ min: -99, max: 99 }), { minLength: 1, maxLength: 24 }),
+  arr: fc.array(fc.integer({ min: -99, max: 99 }), { minLength: 1, maxLength: 16 }),
 });
 
 runConformance({

@@ -110,20 +110,13 @@ test('the validation message is associated with the textarea via aria-describedb
   expect(describedBy).toBe(alert.getAttribute('id'));
 });
 
-test('a large learner input still triggers the frame-cap truncation notice', async () => {
-  const user = userEvent.setup();
-  render(<VizIsland id="bubble-sort" />);
-  await screen.findByText(/sorting 6 values/i);
-
-  await openEditor(user);
-  // Worst case for bubble sort: fully descending, at the schema's max length (24).
-  const worstCase = Array.from({ length: 24 }, (_, i) => 24 - i);
-  await replaceInput(user, JSON.stringify({ arr: worstCase }));
-  await user.click(screen.getByRole('button', { name: /^run$/i }));
-
-  const status = await screen.findByRole('status');
-  expect(status).toHaveTextContent(/stopped early/i);
-});
+// The frame-cap truncation test that lived here reached the notice by running
+// bubble-sort on 24 reversed values. That is no longer schema-valid input:
+// apps/web/src/viz/frame-budget.test.ts now asserts no entry can truncate on
+// anything its inputSchema accepts, and the quadratic sorts were bounded to 16
+// to make that hold. Any real entry that could still satisfy the old test
+// would be a defect in that entry, so the notice is covered with a synthetic
+// entry instead — see VizIsland.truncation.test.tsx.
 
 // AUTHORING.md §4.7 documents that a successful Run "shows the new run from
 // frame 0". Before this test the player kept whatever index the learner had

@@ -154,10 +154,19 @@ that the schema bound, not the cap, is what keeps learner input inside the budge
 a test asserting no schema-valid input truncates. That test was mutation-checked: put the
 bound back to 24 and it fails.
 
-**The same latent problem exists in `bubble-sort`, and is deliberately not fixed here.**
-Reversed input at its 24-element bound needs 577 frames against the same 400 cap. It is a
-one-line schema change, but it alters a shipped lesson's behaviour and belongs in its own
-change rather than being smuggled into a new lesson's PR.
+**That turned out to be two lessons, not one, and both are now fixed.** Sweeping every
+registry entry with adversarial input at its own schema bound found `bubble-sort` at 577
+frames and `insertion-sort` at 600, against the same 400 cap — insertion sort being the
+worst of the three, since it emits a frame per comparison *and* one per shift. All three
+quadratic sorts now bound `arr` at 16, which also settles an inconsistency: they share a
+`defaultInput` precisely so they can be compared, which is a poor argument for letting
+them disagree about how much input they accept.
+
+The durable fix is `apps/web/src/viz/frame-budget.test.ts`. Rather than a hand-written
+list of inputs, it searches each entry's *own* schema for that entry's worst case and
+fails if the run truncates, so entries added later are covered without anyone remembering
+to extend it. It also fails an entry that yields no candidates at all, since a silent skip
+is the exact failure mode this project keeps rediscovering.
 
 Dijkstra also surfaced one authoring trap, now written up in `docs/AUTHORING.md` §7: a fenced
 code line of 84 characters made Expressive Code's `<pre>` horizontally scrollable, failing

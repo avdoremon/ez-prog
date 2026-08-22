@@ -86,24 +86,13 @@ test('selectionSort is NOT stable, unlike insertion sort', () => {
   expect(swapsFor([2, 2, 1])).toBe(1);
 });
 
-test('every input the editor accepts finishes inside the frame budget', () => {
-  // Not covered by lint rule frame-budget, which only ever runs defaultInput.
-  // A learner who types the worst case must still reach the DONE frame, since
-  // that is where the final swap count — the whole point of the lesson — is
-  // reported. At the previous bound of 24 this failed: reversed input needed
-  // 468 frames against a cap of 400 and the run was cut off mid-sort.
-  const MAX_FRAMES_FOR_ENTRY = 400;
-  const worstCases = [
-    Array.from({ length: MAX_LEN }, (_, i) => MAX_LEN - i),  // reversed
-    Array.from({ length: MAX_LEN }, (_, i) => i),            // already sorted
-  ];
-  for (const arr of worstCases) {
-    expect(collect(selectionSort({ arr }), MAX_FRAMES_FOR_ENTRY).truncated).toBe(false);
-  }
-  fc.assert(fc.property(smallArray, ({ arr }) => {
-    expect(collect(selectionSort({ arr }), MAX_FRAMES_FOR_ENTRY).truncated).toBe(false);
-  }));
-});
+// The frame-budget check that used to live here has moved to
+// apps/web/src/viz/frame-budget.test.ts, which now covers every registry
+// entry. This file cannot import the registry (it is under apps/web), so the
+// version here had to hardcode both the length bound and maxFrames — two
+// copies of numbers that only the registry really knows, and which would go
+// quietly stale the moment either changed. The generic test reads them from
+// the entry instead.
 
 test('selectionSort does not mutate its input', () => {
   const arr = [5, 2, 9, 1, 7, 3];

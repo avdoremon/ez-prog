@@ -22,8 +22,14 @@ const registry = {
     defaultInput: { arr: [5, 2, 9, 1, 7, 3] },
     // Quadratic — tighter than the global MAX_FRAMES budget.
     maxFrames: 400,
+    // 16, matching the other two quadratic sorts. At the previous bound of 24
+    // a reversed array needed 577 frames and truncated against the cap above,
+    // stranding the learner mid-sort. The three sorts also share a
+    // defaultInput so they can be compared directly, which is a poor argument
+    // for letting them disagree about how much input they accept.
+    // frame-budget.test.ts pins this for every entry.
     inputSchema: z.object({
-      arr: z.array(z.number()).min(1).max(24),
+      arr: z.array(z.number()).min(1).max(16),
     }),
     load: () =>
       import('@cs/viz-core/algorithms/bubble-sort').then((m) => ({
@@ -64,8 +70,12 @@ const registry = {
     defaultInput: { arr: [5, 2, 9, 1, 7, 3] },
     // Quadratic — tighter than the global MAX_FRAMES budget.
     maxFrames: 400,
+    // 16, for the same reason as bubble-sort above: reversed input at the
+    // previous bound of 24 needed 600 frames against this cap — the worst of
+    // the three sorts, since it emits a frame per comparison and another per
+    // shift. frame-budget.test.ts pins this for every entry.
     inputSchema: z.object({
-      arr: z.array(z.number()).min(1).max(24),
+      arr: z.array(z.number()).min(1).max(16),
     }),
     load: () =>
       import('@cs/viz-core/algorithms/insertion-sort').then((m) => ({
