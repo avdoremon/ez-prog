@@ -1,0 +1,135 @@
+---
+title: Hash Tables
+description: An array can find slot 5 instantly but not the value 37 — unless you compute the slot from the value itself.
+order: 214
+difficulty: intermediate
+estimatedMinutes: 8
+viz: hash-table
+prerequisites: [/data-structures/array]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+An array reaches slot 5 instantly, but finding the *value* 37 means looking
+through it. A hash table closes that gap with one idea: if the value decides
+which slot it goes in, you can compute where to look instead of searching.
+
+<Viz id="hash-table" />
+
+## How it works
+
+Pick a slot from the key by arithmetic — here `key % capacity`, seven slots,
+so 12 goes to slot 5. To find 12 again, run the same sum and look in slot 5.
+No scan, at any table size.
+
+The catch arrives with 19, which also hashes to slot 5. Two keys, one slot: a
+**collision** — not bad luck but unavoidable, since there are more possible
+keys than slots.
+
+This table resolves it by **linear probing**: if the slot is taken, try the
+next one, wrapping round the end. Watch 19 walk 5 → 6 → 0 and settle in the
+first free slot it meets.
+
+That has a consequence worth pausing on. **19 is no longer at its own hash.**
+A lookup cannot check slot 5 and give up — it must repeat the insert's walk
+exactly, as the last four steps show. Finding 19 costs three looks, not seven.
+
+The walk stops at the first *empty* slot, which is the only reason a failed
+lookup is cheap: an empty slot proves the key was never inserted, because the
+insert would have stopped there too.
+
+## Try it
+
+```js
+insert(key) {
+  let i = key % this.capacity;
+  for (let n = 0; n < this.capacity; n++) {
+    if (this.slots[i] === null) {
+      this.slots[i] = key;
+      return true;
+    }
+    if (this.slots[i] === key) return true;
+    i = (i + 1) % this.capacity;
+  }
+  return false;
+}
+
+has(key) {
+  let i = key % this.capacity;
+  for (let n = 0; n < this.capacity; n++) {
+    if (this.slots[i] === key) return true;
+    if (this.slots[i] === null) return false;
+    i = (i + 1) % this.capacity;
+  }
+  return false;
+}
+```
+
+## Trade-offs
+
+The `load` variable is the number that matters: keys divided by slots. While
+the table is mostly empty, probes are short and lookups are effectively
+constant-time. As it fills, runs of occupied slots grow and probes lengthen,
+until at a full table a miss costs a whole lap. Real tables resize once load
+passes roughly 0.7 — and resizing rehashes everything, which is the
+[amortized cost](/complexity/amortized-analysis/) argument again.
+
+Two things a hash table gives up. Order is one: slots come out in hash order,
+nothing like sorted, so a [BST](/data-structures/bst/) still wins for range
+queries. Deletion is the sharper trap — blanking a slot breaks every probe
+chain running through it, stranding keys further along. Real implementations
+leave a *tombstone* marking the slot "used, but not this key".
+
+## Check your understanding
+
+1. **Why can't a lookup for 19 just check slot 5 and stop?**
+   - It could — the hash always gives the right slot
+   - Because a collision displaced 19 further along, so the lookup must
+     repeat the insert's walk
+   - Because slot 5 is empty
+   - Because the table is sorted by hash
+
+   <details>
+   <summary>Answer</summary>
+
+   The collision at slot 5 pushed 19 to the first free slot, so its hash is
+   where the search *starts*, not where the key is. Slot 5 is occupied — by
+   12 — which is exactly the problem. Nothing here is sorted at all.
+   </details>
+
+2. **You delete a key by setting its slot back to empty. What breaks?**
+   - Nothing — that is how deletion works
+   - Keys placed after it by probing past that slot become unreachable,
+     because a lookup now stops at the gap
+   - The table's capacity shrinks
+   - Only the deleted key is affected
+
+   <details>
+   <summary>Answer</summary>
+
+   An empty slot tells a lookup to give up, so a gap punched into a probe
+   chain hides everything beyond it — those keys are still there but can no
+   longer be found. Capacity is fixed and unaffected. Hence tombstones.
+   </details>
+
+3. **Your table has 7 slots and holds 6 keys. What has happened to lookups?**
+   - Nothing — hash tables are constant-time by definition
+   - They have got slower: long runs of occupied slots mean long probes
+   - They have got faster, since more keys are present
+   - They fail
+
+   <details>
+   <summary>Answer</summary>
+
+   A load factor of 0.86 leaves few gaps, so probe runs are long and a miss
+   may walk nearly the whole table. Constant-time is the *average* while load
+   stays low, not a guarantee — which is why real tables resize rather than
+   fill up. Lookups still succeed, just slowly.
+   </details>
+
+## Practice
+
+Try [Design HashMap on LeetCode](https://leetcode.com/problems/design-hashmap/)
+— building one without the language's own map is how you feel the collision
+handling.

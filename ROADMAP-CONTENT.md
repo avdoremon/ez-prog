@@ -119,6 +119,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView | `amortized-growth` | done |
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | done |
 | 11 | `/algorithms/selection-sort` | Selection Sort | 222 | ArrayView | `selection-sort` | done |
+| 5 | `/data-structures/hash-table` | Hash Tables | 214 | ArrayView (empty slots) | `hash-table` | done |
 | 6 | `/data-structures/tree` | Trees | 215 | **TreeView** | `tree-traversal` | done |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | done |
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | **GraphView** | `bfs` | done |
@@ -189,7 +190,7 @@ axe violation that appears on some runs and not others.
 | 2 | `/data-structures/linked-list` | Linked Lists | 211 | **LinkedList** (new) | `linked-list` | planned — engine change |
 | 3 | `/data-structures/stack` | Stacks | 212 | ArrayView | `stack` | **done** (see Shipped) |
 | 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | **done** (see Shipped) |
-| 5 | `/data-structures/hash-table` | Hash Tables | 214 | ArrayView (buckets as array slots)† | `hash-table` | planned |
+| 5 | `/data-structures/hash-table` | Hash Tables | 214 | ArrayView (open addressing; needed empty-slot support)† | `hash-table` | **done** (see Shipped) |
 | 6 | `/data-structures/tree` | Trees | 215 | TreeView | `tree-traversal` | **done** (see Shipped) |
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | **done** (see Shipped) |
 | 8 | `/data-structures/heap` | Heaps | 217 | ArrayView (array-backed binary heap) | `heap` | **done** (see Shipped) |
@@ -226,6 +227,24 @@ axe violation that appears on some runs and not others.
 table` and `trie` as Data Structures topics (§11) without specifying a renderer for
 either. `ArrayView` for hash tables and `Tree` for tries are this document's
 recommendation, not a verified decision — confirm before building the generator.
+
+**Hash tables: confirmed, but only after an engine change — the confirmation step
+earned its keep.** `ArrayView` was the right renderer *and* insufficient as it stood: it
+rendered its value directly and had no way to express an unoccupied slot, which for a
+hash table is the entire picture (a linear probe stops at the first empty slot; the load
+factor is how full the table looks). Widening its state to `(number | null)[]` shipped
+separately first, per §0. Two rejected alternatives are recorded in that commit: a
+sentinel number renders literally and cannot represent a table holding the key `0`, and
+passing `(number | null)[]` *without* widening the type would have compiled and worked
+by accident, because `VizEntry` names its renderer as a string and never ties the state
+type to it. The lesson uses **open addressing**, not separate chaining — chaining needs
+a bucket-of-lists renderer and would hide the thing worth watching, which is a collision
+being resolved by looking at the next slot along.
+
+**The trie half of this note is still unconfirmed**, and `TreeView` is a weaker fit than
+`ArrayView` was: it draws a *complete binary* tree from array indices (§4.6), while a
+trie node has one child per alphabet symbol. Expect an engine change there too, and
+scope it before starting rather than discovering it mid-lesson.
 
 ‡ `IMPLEMENTATION_PLAN.md` §11 gives Complexity a rough total of "3 lessons" but names
 only two topics (Big-O, amortized analysis). Row 24 is this document's proposal for the

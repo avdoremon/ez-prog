@@ -324,6 +324,30 @@ const registry = {
       })),
     code: () => import('./code/graph-intro/index.js'),
   },
+  'hash-table': {
+    renderer: 'ArrayView',
+    label: 'Hash table slots, empty ones shown as gaps, with the key being placed',
+    // Chosen so the run shows all three cases in order: four keys landing
+    // directly in a free slot, then 19 colliding at slot 5 and probing 5 -> 6
+    // -> 0, which also demonstrates the wrap around the end of the table.
+    // The lookup of 19 then retraces exactly that walk, which is the point
+    // the lesson turns on — a displaced key is not at its own hash.
+    defaultInput: { keys: [12, 25, 37, 6, 19], capacity: 7, lookup: 19 },
+    maxFrames: 400,
+    inputSchema: z
+      .object({
+        keys: z.array(z.number().int()).min(1).max(16),
+        // At least 2 so a collision has somewhere to probe to; the modulo
+        // would also be meaningless at 0.
+        capacity: z.number().int().min(2).max(16),
+        lookup: z.number().int(),
+      }),
+    load: () =>
+      import('@cs/viz-core/algorithms/hash-table').then((m) => ({
+        default: m.hashTable,
+      })),
+    code: () => import('./code/hash-table/index.js'),
+  },
   queue: {
     renderer: 'ArrayView',
     label: 'Queue contents, front at the left and back at the right',

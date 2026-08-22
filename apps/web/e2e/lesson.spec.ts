@@ -7,6 +7,7 @@ const ALL_LESSONS = [
   '/data-structures/array/',
   '/data-structures/stack/',
   '/data-structures/queue/',
+  '/data-structures/hash-table/',
   '/data-structures/heap/',
   '/data-structures/tree/',
   '/data-structures/bst/',
