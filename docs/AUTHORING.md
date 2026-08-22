@@ -505,7 +505,15 @@ Field by field:
   exhaustiveness check will fail to compile until it decides what to do with the new
   kind.
   - **`ArrayView`** draws the state as a flat row of cells. Use it for anything
-    positional: searches, sorts, windows, pointers, stacks and queues.
+    positional: searches, sorts, windows, pointers, stacks and queues. Its state is
+    `(number | null)[]`, where a `null` is a slot that exists but holds nothing and
+    draws as an empty cell (dashed border, plus a visually-hidden "empty" for
+    assistive tech). Most algorithms never emit one — an array being sorted is
+    occupied everywhere — and plain `number[]` is assignable, so this costs existing
+    generators nothing. Reach for it when *unoccupied* slots carry meaning, as in a
+    hash table, where a linear probe stops at the first empty slot and the load factor
+    is simply how full the table looks. Do not fake this with a sentinel number: a
+    table of `-1`s renders as data, and `0` is a perfectly good key.
   - **`TreeView`** draws the *same* `number[]` as a binary tree, taking index *i*'s
     children to be 2*i*+1 and 2*i*+2. Because positions are still array indexes, your
     `Mark` targets need no new shape and your generator is unchanged — the only

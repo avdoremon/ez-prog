@@ -25,6 +25,19 @@
  * component also renders a text tag (.array-view__tag) naming the kind
  * for every mark, independent of this CSS.
  */
+/*
+ * A slot that exists but holds nothing. Distinguished by border style and a
+ * recessed background, not by colour alone — and independently of both, the
+ * component renders a visually-hidden "empty" for assistive tech. Listed
+ * before the mark rules below so a marked empty cell (the probe landing on a
+ * free slot, which is how a hash-table insert ends) still shows its mark.
+ */
+.array-view__cell[data-empty] {
+  border-style: dashed;
+  border-color: var(--muted);
+  background: color-mix(in srgb, var(--muted) 8%, transparent);
+}
+
 .array-view__cell[data-marks~="compare"] { border-color: var(--signal);  border-style: dashed; }
 .array-view__cell[data-marks~="cursor"]  { border-color: var(--signal);  border-width: 4px; }
 .array-view__cell[data-marks~="swap"]    { border-color: var(--signal);  border-style: groove; border-width: 3px; }

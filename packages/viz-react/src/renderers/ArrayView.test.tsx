@@ -51,3 +51,55 @@ test('the list has an accessible name', () => {
   render(<ArrayView state={[1]} label="sorted values" />);
   expect(screen.getByRole('list', { name: 'sorted values' })).toBeInTheDocument();
 });
+
+/*
+ * Empty slots. `null` is a slot that exists and holds nothing — needed by
+ * fixed-size structures where the unoccupied slots are the point, such as a
+ * hash table, where a linear probe stops at the first empty slot and the load
+ * factor is just how full the table looks. A sentinel number cannot express
+ * it: a table of -1s reads as data.
+ */
+test('a null renders as a cell with no value, not as a missing cell', () => {
+  render(<ArrayView state={[3, null, 4]} label="table" />);
+  // Still three slots: an empty slot occupies a position, which is exactly
+  // what makes a probe sequence make sense.
+  expect(screen.getAllByRole('listitem')).toHaveLength(3);
+  expect(screen.queryByText('null')).not.toBeInTheDocument();
+  expect(screen.queryByText('-1')).not.toBeInTheDocument();
+});
+
+test('an empty slot is announced to assistive tech, not left blank', () => {
+  // A blank cell is only distinguishable visually. Without this, a screen
+  // reader hears the index and nothing else, and cannot tell an empty slot
+  // from one whose value failed to render.
+  render(<ArrayView state={[3, null]} label="table" />);
+  expect(screen.getByText('empty')).toBeInTheDocument();
+});
+
+test('a filled slot is not announced as empty', () => {
+  render(<ArrayView state={[3, 4]} label="table" />);
+  expect(screen.queryByText('empty')).not.toBeInTheDocument();
+});
+
+test('zero is a value, not an empty slot', () => {
+  // The distinction the sentinel approach could not make. 0 hashes and stores
+  // like any other key, so it must render as a value.
+  //
+  // Queried by class rather than by text: every cell also renders its index,
+  // so getByText('0') matches the value in slot 0 AND slot 0's own index
+  // label. That ambiguity is in the test, not the component.
+  const { container } = render(<ArrayView state={[0]} label="table" />);
+  expect(container.querySelector('.array-view__value')).toHaveTextContent('0');
+  expect(screen.queryByText('empty')).not.toBeInTheDocument();
+});
+
+test('an empty slot can still carry a mark', () => {
+  // The frame that ends a hash-table insert marks the free slot it landed on,
+  // so "empty" and "marked" have to be able to coexist.
+  render(
+    <ArrayView state={[3, null]} label="table"
+      marks={[{ kind: 'cursor', at: { t: 'index', i: 1 } }]} />,
+  );
+  expect(screen.getByText('cursor')).toBeInTheDocument();
+  expect(screen.getByText('empty')).toBeInTheDocument();
+});
