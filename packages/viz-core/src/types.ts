@@ -21,9 +21,17 @@ export interface GraphEdge {
  * State for graph-shaped visualizations. Nodes are identified by their index
  * into `values`, so `{ t: 'index' }` marks a node exactly as it marks an array
  * cell — the mark vocabulary is shared across renderers rather than forked.
+ *
+ * `values` allows `string` alongside `number` for node-shaped data whose
+ * natural label is a character or word fragment rather than a number — a
+ * trie is the motivating case. `GraphView` needs no change to support this:
+ * it already renders `{value}` via JSX, which draws a string exactly like a
+ * number, and `number[]` remains assignable to this wider type, so every
+ * existing generator (bfs, dfs, dijkstra, graph-intro, linked-list) is
+ * unaffected.
  */
 export interface GraphState {
-  values: number[];
+  values: (number | string)[];
   edges: GraphEdge[];
   directed?: boolean;
 }

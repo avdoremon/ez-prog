@@ -130,6 +130,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 2 | `/data-structures/linked-list` | Linked Lists | 211 | GraphView | `linked-list` | done |
 | 15 | `/algorithms/recursion` | Recursion Basics | 227 | ArrayView | `recursion` | done |
 | 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | ArrayView | `dp-fibonacci` | done |
+| 10 | `/data-structures/trie` | Tries | 219 | GraphView | `trie` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -296,7 +297,7 @@ schema accepts.
 | 7 | `/data-structures/bst` | Binary Search Trees | 216 | TreeView | `bst` | **done** (see Shipped) |
 | 8 | `/data-structures/heap` | Heaps | 217 | ArrayView (array-backed binary heap) | `heap` | **done** (see Shipped) |
 | 9 | `/data-structures/graph` | Graphs | 218 | GraphView | `graph-intro` | **done** (see Shipped) |
-| 10 | `/data-structures/trie` | Tries | 219 | TreeView†, but see the note | `trie` | planned — needs a decision |
+| 10 | `/data-structures/trie` | Tries | 219 | GraphView (needed a widened state type) | `trie` | **done** (see Shipped) |
 
 ## Algorithms (`algorithms/`)
 
@@ -342,10 +343,31 @@ type to it. The lesson uses **open addressing**, not separate chaining — chain
 a bucket-of-lists renderer and would hide the thing worth watching, which is a collision
 being resolved by looking at the next slot along.
 
-**The trie half of this note is still unconfirmed**, and `TreeView` is a weaker fit than
-`ArrayView` was: it draws a *complete binary* tree from array indices (§4.6), while a
-trie node has one child per alphabet symbol. Expect an engine change there too, and
-scope it before starting rather than discovering it mid-lesson.
+**The trie half of this note is resolved, and the recommendation above was wrong.**
+`TreeView` turned out to be exactly the weak fit predicted — it draws a *complete
+binary* tree from array indices, while a trie node has one child per alphabet symbol —
+but `GraphView` (not `TreeView`) was the fit, once one gap was closed. A trie is
+graph-shaped (nodes and directed edges) exactly like the `bfs`/`dfs`/`graph-intro`
+lessons, except its nodes are labeled by a *character*, not a number, and
+`GraphState.values` was typed `number[]`. The fix mirrors the hash-table widening
+exactly: `GraphState.values` is now `(number | string)[]`, an engine change confirmed
+and shipped separately first, per §0 — and, like the hash-table widening, it needed
+**no change at all** to `GraphView.tsx` itself, since it already renders `{value}` via
+JSX, which draws a string exactly like a number. Every existing `GraphState` consumer
+(`bfs`, `dfs`, `dijkstra`, `graph-intro`, `linked-list`) stayed untouched, because
+`number[]` remains assignable to the wider type.
+
+No new `Mark`/`Target` kind was needed either: `active`/`visited` distinguish a newly
+created node from a reused one (the mechanism that makes shared prefixes visible —
+"cat" and "car" share two nodes and diverge only at the third letter), `done` marks a
+complete word, and the existing `edge` target (already added for graphs) marks the
+edge being followed during a search. The shipped lesson's default input (`words: ["cat",
+"car", "cart"], search: "ca"`) is deliberately the trie-specific gotcha, not a plain
+success case: `"ca"` is a real path shared by all three words, but was never itself
+inserted, so it is a prefix, not a match — reaching a node by walking characters proves
+the path exists, not that it was ever marked a complete word. A conformance test pins
+this: every word actually inserted is found by searching for it, but a real, walkable
+prefix that was never itself inserted is reported as a prefix, never as "found."
 
 ‡ `IMPLEMENTATION_PLAN.md` §11 gives Complexity a rough total of "3 lessons" but names
 only two topics (Big-O, amortized analysis). Row 24 is this document's proposal for the

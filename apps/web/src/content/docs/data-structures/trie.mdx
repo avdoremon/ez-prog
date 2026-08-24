@@ -1,0 +1,109 @@
+---
+title: Tries
+description: A tree shaped by the words stored in it, where every shared prefix is one path instead of many.
+order: 219
+difficulty: beginner
+estimatedMinutes: 7
+viz: trie
+prerequisites: [/data-structures/tree]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+A trie stores a set of words by spelling them out one character at a time,
+one edge per letter. Two words that start the same way walk the same path
+for as long as they agree, and only split where they differ — so "cat"
+and "car" share two nodes before branching at the third letter.
+
+<Viz id="trie" />
+
+## How it works
+
+Inserting a word starts at the root and follows one edge per character. If
+an edge for the next letter already exists — because some earlier word
+passed through here too — it's reused; only a letter with no matching edge
+creates a new node. The last letter of a word marks its node as a
+**complete word**, not just a path that happens to exist.
+
+That last distinction is the trap. Searching for a string walks the same
+way: follow an edge per character, and fail immediately if one is
+missing. But reaching the end of the string only proves the string is a
+**path** in the trie — it does not prove the string was ever inserted as
+its own word. Step the visualization with the default input: `"ca"` walks
+fine, because `"cat"`, `"car"`, and `"cart"` all pass through it, but
+`"ca"` itself was never inserted, so it is a prefix, not a match.
+
+## Try it
+
+```js
+function insert(root, word) {
+  let node = root;
+  for (const ch of word) {
+    if (!node.children.has(ch)) {
+      node.children.set(ch, newNode());
+    }
+    node = node.children.get(ch);
+  }
+  node.isWord = true;
+}
+```
+
+## Trade-offs
+
+Reach for a trie when the operation you actually need is "does any stored
+word start with this" — autocomplete, spell-check candidates, IP routing
+tables — because that question falls out of the structure directly: walk
+to the prefix's node and everything below it is a match. A hash set of
+whole words cannot answer that without scanning every entry.
+
+Avoid it for plain membership testing ("is this word stored at all"),
+where a hash set answers in one computed slot and a trie costs one hop per
+character instead. A trie also spends more memory per word than storing
+the string once — each node can hold up to 26 potential children even
+when only one is used — though shared prefixes claw a lot of that back
+whenever the stored words overlap the way real language does.
+
+## Check your understanding
+
+1. **The trie holds "cat", "car", and "cart". Why does searching `"ca"`
+   not return "found"?**
+   - `"ca"` is misspelled
+   - Reaching a node by walking characters only proves the string is a
+     path in the trie, not that it was ever inserted as its own word
+   - The trie only stores words of the same length
+   - Searches are case-sensitive and `"ca"` is uppercase
+
+   <details>
+   <summary>Answer</summary>
+
+   Walking successfully to a node proves the *path* exists, which
+   happens whenever some longer word passes through it — here, all three
+   words do. Whether that node represents a complete word is a separate
+   flag, set only when a word actually ends there, and `"ca"` never does.
+   Nothing here is about spelling, word length, or case.
+   </details>
+
+2. **Why does inserting "car" after "cat" create only one new node
+   instead of three?**
+   - Because "car" is shorter to type
+   - Because the edges for 'c' and 'a' already exist from inserting
+     "cat", so only 'r' needs a new node
+   - Tries only store the first and last letter of each word
+   - It doesn't — three new nodes are always created per word
+
+   <details>
+   <summary>Answer</summary>
+
+   "cat" already built the path for 'c' and 'a'. Inserting "car" walks
+   that same path — reusing both existing edges — and only reaches new
+   ground at 'r', which is the one node actually created. Shared
+   prefixes are exactly what makes a trie smaller than storing every
+   word as its own separate chain.
+   </details>
+
+## Practice
+
+Try [Implement Trie (Prefix Tree) on LeetCode](https://leetcode.com/problems/implement-trie-prefix-tree/)
+— insert, search, and prefix-search are exactly the three operations this
+lesson walks through.

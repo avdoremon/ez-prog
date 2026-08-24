@@ -399,6 +399,26 @@ const registry = {
       })),
     code: () => import('./code/array-basics/index.js'),
   },
+  trie: {
+    renderer: 'GraphView',
+    label: 'Trie built from a set of words, root as a bullet, each node a character',
+    // "ca" is deliberately the *prefix-only* case: cat, car, and cart all
+    // share a path through 'c' -> 'a', so that path is a real node in the
+    // trie, but "ca" itself was never inserted as its own word. That is the
+    // single most trie-specific insight worth leading with. Try "car" for a
+    // successful search, or "cow" for a missing character.
+    defaultInput: { words: ['cat', 'car', 'cart'], search: 'ca' },
+    inputSchema: z.object({
+      words: z
+        .array(z.string().regex(/^[a-z]+$/, 'lowercase letters only').min(1).max(8))
+        .min(1)
+        .max(6),
+      search: z.string().regex(/^[a-z]+$/, 'lowercase letters only').min(1).max(8),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/trie').then((m) => ({ default: m.trie })),
+    code: () => import('./code/trie/index.js'),
+  },
   'dp-fibonacci': {
     renderer: 'ArrayView',
     label: 'Fibonacci table, filled in bottom-up, one cell at a time',

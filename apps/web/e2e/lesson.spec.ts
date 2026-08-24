@@ -13,6 +13,7 @@ const ALL_LESSONS = [
   '/data-structures/tree/',
   '/data-structures/bst/',
   '/data-structures/graph/',
+  '/data-structures/trie/',
   '/algorithms/bfs/',
   '/algorithms/binary-search/',
   '/algorithms/dfs/',
