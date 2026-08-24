@@ -100,6 +100,23 @@ test('rule 3: code blocks do NOT count toward the word limit', async () => {
   expect(errors.map((e) => e.rule)).not.toContain('prose-word-limit');
 });
 
+// The landing page is the one file this rule does not apply to. Its length
+// tracks the number of lessons, not an author's verbosity: every lesson adds
+// a `<Card>` to its grid, and it reached exactly 700 words at the 23rd — so
+// the 24th failed the build on a page whose prose it never touched. The
+// exemption is keyed on `template: splash`, which only the landing page uses.
+test('rule 3: the splash landing page is exempt from the word limit', async () => {
+  const errors = await lintContent(fixture('splash-too-long'));
+  expect(errors.map((e) => e.rule)).not.toContain('prose-word-limit');
+});
+
+// ...and the exemption is not a way for a lesson to opt out: `too-long` above
+// carries no `template`, and must still fail.
+test('rule 3: an ordinary lesson cannot dodge the limit without template: splash', async () => {
+  const errors = await lintContent(fixture('too-long'));
+  expect(errors.map((e) => e.rule)).toContain('prose-word-limit');
+});
+
 test('rule 4: a code block without a language is rejected', async () => {
   const errors = await lintContent(fixture('untagged-code'));
   expect(errors.map((e) => e.rule)).toContain('code-block-language');

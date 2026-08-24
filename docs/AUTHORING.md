@@ -138,7 +138,9 @@ A new lesson is not just its own file. Both of these are enforced — skip eithe
 2. **`apps/web/src/content/docs/index.mdx` → a card in the "Start here" grid.** The
    homepage test asserts that every path in `ALL_LESSONS` is linked from the homepage,
    so adding (1) without (2) fails with `expect(locator).toBeVisible()` on an `a[href]`
-   selector. That test exists so lessons cannot ship undiscoverable.
+   selector. That test exists so lessons cannot ship undiscoverable. Adding a card does
+   **not** put the homepage over the 700-word limit — it is `template: splash` and
+   exempt from that rule (§6, rule 3). Do not trim homepage copy to make room.
 
 ## 2. Frontmatter: every field, exactly
 
@@ -643,7 +645,12 @@ Source: `scripts/lint-content.ts`. Each rule's real error format is
    the leading slash.
 
 3. **`prose-word-limit`** — prose body (frontmatter and fenced code blocks excluded)
-   exceeds 700 words.
+   exceeds 700 words. **`template: splash` is exempt, and only it** — that is the site
+   landing page, whose length tracks how many lessons exist rather than how much anyone
+   wrote (every lesson adds a `<Card>`), and whose body is mostly JSX the counter scores
+   as words. It hit 700 exactly at the 23rd lesson, so the 24th failed the build on a page
+   whose prose it had not touched. Your lesson has no `template`, so the limit applies to
+   it in full.
    Real message (captured): `Prose is 750 words; the limit is 700 (code blocks excluded).`
    **Fix:** cut prose. Code inside triple-backtick fences never counts, so moving prose
    into a comment inside a code block to dodge the count is visible and against the

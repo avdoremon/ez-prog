@@ -156,8 +156,24 @@ export async function lintContent(
     }
 
     // Rule 3
+    //
+    // `template: splash` — the landing page — is exempt, and only it. The
+    // 700-word budget is a *lesson* budget (IMPLEMENTATION_PLAN.md §12,
+    // AUTHORING.md §7): it keeps a lesson readable in the <= 12 minutes its
+    // own frontmatter promises. The landing page is not a lesson. It is a
+    // card grid indexing every lesson that exists, so its length is set by
+    // how many lessons have shipped, not by how much anyone wrote — and its
+    // body is mostly JSX, where `<Card title="Binary Search" icon="magnifier">`
+    // scores five "words" no reader ever reads.
+    //
+    // Applied there, the rule was a countdown rather than a quality gate:
+    // the page sat at exactly 700 words once the 23rd lesson had added its
+    // card, so the 24th broke the build on a file whose prose it had not
+    // touched. The only way through would have been to delete unrelated
+    // homepage copy to buy room for one more link — not what this rule is
+    // for, and something every later lesson would have had to do again.
     const words = countWords(stripCodeBlocks(body));
-    if (words > WORD_LIMIT) {
+    if (front.template !== 'splash' && words > WORD_LIMIT) {
       errors.push({ rule: 'prose-word-limit', file: rel,
         message: `Prose is ${words} words; the limit is ${WORD_LIMIT} (code blocks excluded).` });
     }
