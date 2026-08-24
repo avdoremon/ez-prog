@@ -399,6 +399,24 @@ const registry = {
       })),
     code: () => import('./code/array-basics/index.js'),
   },
+  'dp-fibonacci': {
+    renderer: 'ArrayView',
+    label: 'Fibonacci table, filled in bottom-up, one cell at a time',
+    // n = 5 gives the table [0, 1, 1, 2, 3, 5]: two base cases plus three
+    // computed cells, small enough to read at a glance.
+    defaultInput: { n: 5 },
+    inputSchema: z.object({
+      // Capped at 15 so every cell's value stays a small, legible number
+      // (fib(15) = 610); frame count is linear in n regardless, so this is
+      // a pedagogy bound, not a frame-budget one.
+      n: z.number().int().min(0).max(15),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/dp-fibonacci').then((m) => ({
+        default: m.dpFibonacci,
+      })),
+    code: () => import('./code/dp-fibonacci/index.js'),
+  },
   recursion: {
     renderer: 'ArrayView',
     label: 'Call stack for factorial(n), one frame per pending call',

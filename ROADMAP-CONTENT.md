@@ -129,6 +129,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 24 | `/complexity/best-average-worst-case` | Best, Average, and Worst Case | 237 | ArrayView | reuses `linear-search` + `quick-sort` | done |
 | 2 | `/data-structures/linked-list` | Linked Lists | 211 | GraphView | `linked-list` | done |
 | 15 | `/algorithms/recursion` | Recursion Basics | 227 | ArrayView | `recursion` | done |
+| 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | ArrayView | `dp-fibonacci` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -265,6 +266,23 @@ by tracking "is this the first pop" instead of stack height; a conformance test 
 `n = 2` alongside the `n = 0`/`n = 1` edge cases specifically because those two alone
 would not have caught this.
 
+**Dynamic Programming Basics also needed no engine change — three for three now.**
+"Basics" as titled doesn't require two dimensions: a 1D recurrence (bottom-up Fibonacci,
+`dp[i] = dp[i-1] + dp[i-2]`) fits the lesson's scope and reuses `ArrayView`'s empty-slot
+support (the same feature the hash-table lesson needed) rather than a dedicated
+`Matrix2DView`. The table starts as `n+1` empty cells and fills in left to right, each
+cell read from two already-computed ones. A `Matrix2DView` may still be worth building
+for a genuinely 2D lesson later (edit distance, 0/1 knapsack, grid paths) — nothing here
+rules that out — but "Dynamic Programming Basics" specifically didn't need one.
+
+This lesson deliberately follows Recursion Basics (`prerequisites: [/algorithms/recursion]`)
+and reuses its exact hook: naive recursive `fib` recomputes overlapping subproblems
+exponentially (the shipped recursion lesson's own Practice link sends the reader to a
+Fibonacci problem), and this lesson is the direct answer — compute each subproblem once,
+in a table, instead. A conformance test pins the property this whole lesson is about:
+every cell in the final table is non-null, i.e. computed exactly once, for every `n` the
+schema accepts.
+
 ## Data Structures (`data-structures/` — sidebar group now exists in `astro.config.mjs`)
 
 | # | Slug | Title | `order` | Renderer needed | Viz id | Status |
@@ -294,7 +312,7 @@ would not have caught this.
 | 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | **done** (see Shipped) |
 | 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weights supported) | `dijkstra` | **done** (see Shipped) |
 | 19 | `/algorithms/greedy` | Greedy Algorithms | 232 | ArrayView | `greedy-coins` | **done** (see Shipped) |
-| 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | **Matrix2D** (new) | `dp-intro` | planned — engine change |
+| 20 | `/algorithms/dynamic-programming` | Dynamic Programming Basics | 233 | ArrayView (reused — see Shipped) | `dp-fibonacci` | **done** (see Shipped) |
 | 21 | `/algorithms/two-pointer` | Two-Pointer Technique | 234 | ArrayView | `two-pointer` | **done** (see Shipped) |
 | 22 | `/algorithms/sliding-window` | Sliding Window | 235 | ArrayView | `sliding-window` | **done** (see Shipped) |
 

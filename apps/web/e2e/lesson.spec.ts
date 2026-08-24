@@ -17,6 +17,7 @@ const ALL_LESSONS = [
   '/algorithms/binary-search/',
   '/algorithms/dfs/',
   '/algorithms/dijkstra/',
+  '/algorithms/dynamic-programming/',
   '/algorithms/bubble-sort/',
   '/algorithms/greedy/',
   '/algorithms/insertion-sort/',

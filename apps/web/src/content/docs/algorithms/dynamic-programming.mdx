@@ -1,0 +1,113 @@
+---
+title: Dynamic Programming Basics
+description: Recursion recomputes the same answer over and over. A table remembers it instead.
+order: 233
+difficulty: beginner
+estimatedMinutes: 7
+viz: dp-fibonacci
+prerequisites: [/algorithms/recursion]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+Recursive `fib(n)` calls `fib(n - 1)` and `fib(n - 2)` — but `fib(n - 1)`
+*also* calls `fib(n - 2)`, and both branches call `fib(n - 3)`, and so on.
+The same small answers get recomputed exponentially many times. Dynamic
+programming is the fix: compute each one once, and remember it.
+
+<Viz id="dp-fibonacci" />
+
+## How it works
+
+Instead of a call tree, keep a table with one cell per answer, and fill it
+**bottom-up**: the smallest cases first, each larger one built from cells
+already sitting in the table. `dp[0]` and `dp[1]` are base cases, filled
+directly. Every `dp[i]` after that reads `dp[i - 1]` and `dp[i - 2]` — both
+already computed — adds them, and writes the result. Step the
+visualization and watch the table fill left to right, never revisiting a
+cell once it's set.
+
+Two properties make this work, and both apply to `fib`. **Optimal
+substructure**: the answer to a bigger problem is built directly from
+answers to smaller ones (`fib(i)` is exactly `fib(i-1) + fib(i-2)`, nothing
+more). **Overlapping subproblems**: the naive recursive calls ask for the
+same smaller answers repeatedly — `fib(n - 2)` gets computed twice just
+one level down, and the duplication compounds every level after that. A
+table turns "recompute every time" into "compute once, look up the rest,"
+which is the entire trick.
+
+## Try it
+
+```js
+function fib(n) {
+  const dp = new Array(n + 1);
+  dp[0] = 0;
+  if (n >= 1) dp[1] = 1;
+  for (let i = 2; i <= n; i++) {
+    dp[i] = dp[i - 1] + dp[i - 2];
+  }
+  return dp[n];
+}
+```
+
+## Trade-offs
+
+Reach for a table when a problem has both properties above: a recurrence
+relating each answer to smaller ones, and recursion that would revisit the
+same smaller ones more than once. The payoff is real — naive recursive
+`fib` is exponential, while the table is linear in `n` — and the code
+usually stays about as short as the recursive version.
+
+Skip it when the recursive calls never overlap in the first place —
+factorial from the previous lesson never asks the same subproblem twice,
+so a table would just add bookkeeping for no savings. It's also not free:
+the table costs memory proportional to how many answers you keep, which a
+version that only remembers the last two values (as this `fib` could)
+would avoid entirely — that refinement is worth knowing exists, even
+though this lesson keeps the full table for clarity.
+
+## Check your understanding
+
+1. **Why is naive recursive `fib(n)` slow, when the table version is
+   fast?**
+   - Recursion is always slower than a loop, regardless of the problem
+   - The recursive calls solve the same smaller subproblems many times
+     over; the table solves each one exactly once
+   - The table uses a different, faster kind of arithmetic
+   - `fib` grows too large for recursion to represent
+
+   <details>
+   <summary>Answer</summary>
+
+   The recursive calls overlap: `fib(n - 2)` gets computed independently
+   by both `fib(n - 1)`'s branch and `fib(n)`'s own branch, and that
+   duplication compounds at every level below. The table computes each
+   `dp[i]` once and reuses it, which is the entire source of the speedup —
+   not some special arithmetic, and recursion itself is not inherently
+   slow (the previous lesson's factorial recursion never repeats work).
+   </details>
+
+2. **`dp[i]` is filled using `dp[i - 1]` and `dp[i - 2]`. Why can the
+   algorithm assume both are already correct?**
+   - It can't — it's a lucky guess that usually works
+   - The table is filled bottom-up, in order, so anything at a smaller
+     index was already computed and written before `dp[i]` is reached
+   - Because `i - 1` and `i - 2` are always base cases
+   - The values are filled in afterward, in a second pass
+
+   <details>
+   <summary>Answer</summary>
+
+   Bottom-up order guarantees it: the loop fills index 0, then 1, then 2,
+   and so on, so by the time it reaches `dp[i]` every smaller index has
+   already been written. Nothing is guessed and there is no second pass —
+   only `dp[0]` and `dp[1]` are base cases, the rest are computed exactly
+   once, in order.
+   </details>
+
+## Practice
+
+Try [Climbing Stairs on LeetCode](https://leetcode.com/problems/climbing-stairs/)
+— the same `dp[i] = dp[i - 1] + dp[i - 2]` recurrence, counting paths
+instead of Fibonacci numbers.
