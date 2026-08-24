@@ -127,6 +127,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 9 | `/data-structures/graph` | Graphs | 218 | GraphView | `graph-intro` | done |
 | 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weighted) | `dijkstra` | done |
 | 24 | `/complexity/best-average-worst-case` | Best, Average, and Worst Case | 237 | ArrayView | reuses `linear-search` + `quick-sort` | done |
+| 2 | `/data-structures/linked-list` | Linked Lists | 211 | GraphView | `linked-list` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -217,12 +218,38 @@ pass at 750 words, and `too-long` (no `template`) must still fail, so the exempt
 become a way for a lesson to opt out of the limit. Mutation-checked — removing the
 exemption fails the first test.
 
+**Linked lists needed no engine change after all — the "new renderer" premise didn't
+survive scoping.** A singly linked list is graph-shaped data: each node has at most one
+outgoing edge, which is exactly what `GraphView`'s `GraphState` (`{ values, edges,
+directed? }`) already models, having been built generically for "nodes and edges"
+(`docs/AUTHORING.md` §4.6) rather than for graphs specifically. Before writing a
+`LinkedListView`, the roadmap's own rule — don't add an 11th renderer before 3 lessons
+need it (`IMPLEMENTATION_PLAN.md` §4.4) — was the prompt to check whether an existing one
+already fit, the same question that led hash tables to widen `ArrayView` instead of
+building a bucket renderer. It did: the list renders as an adjacency list, one row per
+node reading `value → next value → ... → none`, and every mark kind the lesson needs
+(`cursor`/`visited` for the traversal pointer, `active` for the edge being followed,
+`swap` for the pointer being rewired, `done` for the result) was already supported.
+**This shipped as a content-only PR**, not an engine change: one new file under
+`packages/viz-core/src/algorithms/`, a registry entry, code samples, and the lesson —
+zero edits to any file that already existed under `packages/`.
+
+The generator (`linked-list.ts`) deliberately reuses `array-basics`' exact input shape —
+`{ arr, readIndex, insertAt, value }`, same default values — so the two lessons run on
+identical input and the trade-off is directly comparable: reading node *readIndex* costs
+one pointer hop per step (no index arithmetic), while splicing in a value at *insertAt*,
+once located, costs exactly one rewired pointer regardless of how many nodes follow —
+the mirror image of the array's one-step read and *n*-shift insert. A conformance test
+(`packages/viz-core/test/linked-list.conformance.test.ts`) pins both frame counts (STEP
+frames == `readIndex`, LOCATE frames == `insertAt`) so the prose's hop-counting claims
+cannot drift from the generator.
+
 ## Data Structures (`data-structures/` — sidebar group now exists in `astro.config.mjs`)
 
 | # | Slug | Title | `order` | Renderer needed | Viz id | Status |
 |---|---|---|---|---|---|---|
 | 1 | `/data-structures/array` | Arrays | 210 | ArrayView | `array-basics` | **done** (see Shipped) |
-| 2 | `/data-structures/linked-list` | Linked Lists | 211 | **LinkedList** (new) | `linked-list` | planned — engine change |
+| 2 | `/data-structures/linked-list` | Linked Lists | 211 | GraphView (reused — see Shipped) | `linked-list` | **done** (see Shipped) |
 | 3 | `/data-structures/stack` | Stacks | 212 | ArrayView | `stack` | **done** (see Shipped) |
 | 4 | `/data-structures/queue` | Queues | 213 | ArrayView | `queue` | **done** (see Shipped) |
 | 5 | `/data-structures/hash-table` | Hash Tables | 214 | ArrayView (open addressing; needed empty-slot support)† | `hash-table` | **done** (see Shipped) |

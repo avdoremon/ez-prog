@@ -1,0 +1,120 @@
+---
+title: Linked Lists
+description: Nodes that only know their neighbour — cheap to splice in, slow to reach by position.
+order: 211
+difficulty: beginner
+estimatedMinutes: 7
+viz: linked-list
+prerequisites: [/data-structures/array]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+An array packs its values side by side in memory, which is exactly what
+makes indexing instant and inserting expensive. A linked list gives up the
+"side by side" part entirely: every node lives wherever it happens to be
+allocated, holding only its value and a pointer to whoever comes next.
+
+<Viz id="linked-list" />
+
+## How it works
+
+A node is two fields: a **value**, and a **pointer to the next node** (or
+nothing, if it's last). The list is just a pointer to the first node — the
+**head**. There is no second pointer to skip ahead with, so reaching node 3
+means standing on node 0, then 1, then 2 first. Step the visualization and
+count the hops: reading by position costs one pointer chase per step, not
+an array's one-shot arithmetic.
+
+Inserting is the mirror image. Once you're standing at the right node —
+even after paying for the walk to get there — splicing in a new one is two
+pointer writes: the new node's `next` takes over what used to follow it,
+and the node before it now points at the new one. Nothing else moves, no
+matter how many nodes come after. That's the trade the array lesson set
+up: an array pays at insertion time, shifting everyone right; a linked
+list pays at *access* time, walking node by node — insertion itself is
+free once you've arrived.
+
+Deleting is the same rewire in reverse: point the previous node's `next`
+at whatever the removed node pointed to. No shifting, no gap to close.
+
+## Try it
+
+```js
+function readThenInsert(head, readIndex, insertAt, value) {
+  let node = head;
+  for (let i = 0; i < readIndex; i++) node = node.next;
+  const found = node.value;
+
+  let prev = null;
+  let cur = head;
+  for (let i = 0; i < insertAt; i++) {
+    prev = cur;
+    cur = cur.next;
+  }
+  const fresh = { value, next: cur };
+  if (prev) prev.next = fresh;
+  else head = fresh;
+
+  return { found, head };
+}
+```
+
+## Trade-offs
+
+Reach for a linked list when you insert or delete often at a position you
+already hold a reference to — the front of a queue, a splice you're
+already iterating toward. None of that shifts anything else.
+
+Avoid it when you need to reach a position by index: `list[500]` doesn't
+exist, and getting there costs 500 hops where an array computes the
+address directly. Iteration suffers too — an array's values sit in
+contiguous cache lines, while a linked list's nodes scatter across memory
+and each hop can miss cache, even though both are technically linear.
+
+The summary is the one the array lesson set up: an array is cheap to read
+and expensive to splice; a linked list is the opposite. The access pattern
+your problem needs decides which one pays less.
+
+## Check your understanding
+
+1. **Why does reading the node at index 3 cost more in a linked list than
+   in an array?**
+   - Linked lists store their values in reverse order
+   - There is no address arithmetic — you must follow one pointer at a
+     time, starting from the head
+   - Linked lists are always kept sorted, so the search is slower
+   - Every node duplicates the values of the ones before it
+
+   <details>
+   <summary>Answer</summary>
+
+   There is no address arithmetic. An array computes `start + index × size`
+   in one step; a linked list has no such formula, since nothing says node
+   3 lives any particular distance from node 0 — the only way to find it
+   is to follow `next` three times from the head.
+   </details>
+
+2. **You already hold a reference to the node right before where you want
+   to insert. What does the insertion itself cost?**
+   - O(n) — every later node has to shift right, same as an array
+   - O(1) — rewire two pointers; nothing else in the list moves
+   - O(log n), the same as a balanced tree
+   - It can't be done without rebuilding the whole list
+
+   <details>
+   <summary>Answer</summary>
+
+   O(1). The new node's `next` takes over what used to follow, and the
+   node you're standing at points to the new one — two writes, regardless
+   of how many nodes come after. The O(n) people associate with linked-list
+   insertion is almost always the walk to *find* the position, not the
+   splice itself.
+   </details>
+
+## Practice
+
+Try [Reverse Linked List on LeetCode](https://leetcode.com/problems/reverse-linked-list/)
+— rewiring every `next` pointer without ever shifting a value is the whole
+problem.
