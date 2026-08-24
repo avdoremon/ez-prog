@@ -399,6 +399,25 @@ const registry = {
       })),
     code: () => import('./code/array-basics/index.js'),
   },
+  recursion: {
+    renderer: 'ArrayView',
+    label: 'Call stack for factorial(n), one frame per pending call',
+    // Small enough that every frame's value stays a few digits, large enough
+    // that the stack visibly grows before it drains: 4 calls, a base case,
+    // 5 returns.
+    defaultInput: { n: 5 },
+    inputSchema: z.object({
+      // Capped at 10 (10! = 3628800) so every frame's value stays readable
+      // at a glance; the frame count is linear in n regardless, so this is
+      // a pedagogy bound, not a frame-budget one.
+      n: z.number().int().min(0).max(10),
+    }),
+    load: () =>
+      import('@cs/viz-core/algorithms/recursion').then((m) => ({
+        default: m.recursion,
+      })),
+    code: () => import('./code/recursion/index.js'),
+  },
   'linked-list': {
     renderer: 'GraphView',
     label: 'Singly linked list, one arrow per node pointing at the next',

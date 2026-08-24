@@ -128,6 +128,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weighted) | `dijkstra` | done |
 | 24 | `/complexity/best-average-worst-case` | Best, Average, and Worst Case | 237 | ArrayView | reuses `linear-search` + `quick-sort` | done |
 | 2 | `/data-structures/linked-list` | Linked Lists | 211 | GraphView | `linked-list` | done |
+| 15 | `/algorithms/recursion` | Recursion Basics | 227 | ArrayView | `recursion` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -244,6 +245,26 @@ the mirror image of the array's one-step read and *n*-shift insert. A conformanc
 frames == `readIndex`, LOCATE frames == `insertAt`) so the prose's hop-counting claims
 cannot drift from the generator.
 
+**Recursion also needed no engine change.** A recursive call stack is a stack — one
+frame pushed per call, one popped per return — which `ArrayView` already renders
+(`docs/AUTHORING.md`'s `stack` example is exactly this shape). Rather than a dedicated
+`StackFrameView` showing each frame's argument and partial result together, the shipped
+lesson (`factorial(n)`) represents each frame by its argument alone and narrates the
+running product through `vars`, the same mechanism the `stack` lesson uses for its
+`top`/`size` display. Shipped content-only: one new generator file, a registry entry,
+code samples, and the lesson.
+
+The generator surfaced a real bug during TDD, not a hypothetical one: an early version
+detected "this is the base-case frame" by checking `stack.length === 1`, which is only
+true when the base case is the *only* frame on the stack (`n <= 1`). For any `n > 1` the
+base-case frame sits on top of the frames pushed before it, so the check was wrong the
+moment a property test tried `n = 2` — `fast-check` shrank straight to it and caught a
+result of `1` where `2!` should be `2`. Hand-picked examples (`n = 0`, `n = 1`) both
+happen to have stack height 1 at the base case, so they would have shipped green. Fixed
+by tracking "is this the first pop" instead of stack height; a conformance test now pins
+`n = 2` alongside the `n = 0`/`n = 1` edge cases specifically because those two alone
+would not have caught this.
+
 ## Data Structures (`data-structures/` — sidebar group now exists in `astro.config.mjs`)
 
 | # | Slug | Title | `order` | Renderer needed | Viz id | Status |
@@ -268,7 +289,7 @@ cannot drift from the generator.
 | 13 | `/algorithms/merge-sort` | Merge Sort | 224 | ArrayView | `merge-sort` | **done** (see Shipped) |
 | 14 | `/algorithms/quick-sort` | Quick Sort | 225 | ArrayView | `quick-sort` | **done** (see Shipped) |
 | 4 | `/algorithms/linear-search` | Linear Search | 226 | ArrayView (viz already registered — see Shipped) | `linear-search` | **done** (see Shipped) |
-| 15 | `/algorithms/recursion` | Recursion Basics | 227 | **StackFrame** (new) | `recursion-intro` | planned — engine change |
+| 15 | `/algorithms/recursion` | Recursion Basics | 227 | ArrayView (reused — see Shipped) | `recursion` | **done** (see Shipped) |
 | 16 | `/algorithms/bfs` | Breadth-First Search | 228 | GraphView | `bfs` | **done** (see Shipped) |
 | 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | **done** (see Shipped) |
 | 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weights supported) | `dijkstra` | **done** (see Shipped) |

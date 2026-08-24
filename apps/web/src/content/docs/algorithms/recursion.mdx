@@ -1,0 +1,107 @@
+---
+title: Recursion Basics
+description: A function that calls itself is quietly building the same call stack every function uses — just watch it happen.
+order: 227
+difficulty: beginner
+estimatedMinutes: 7
+viz: recursion
+prerequisites: [/data-structures/stack]
+languages: [js, py, c]
+---
+
+import Viz from '../../../components/Viz.astro';
+
+The Stacks lesson mentioned, almost in passing, that every function call
+pushes a frame and every return pops one. Recursion is what happens when
+you can actually see that: a function calling itself pushes a new frame
+onto the very same stack, over and over, until something stops it.
+
+<Viz id="recursion" />
+
+## How it works
+
+Computing `factorial(5)` calls `factorial(4)`, which calls `factorial(3)`,
+and so on — each call pushes its argument onto the stack and then *waits*,
+because it needs the answer from the call below it before it can finish.
+Step the visualization through the growth: the stack reaches height 5
+before anything returns.
+
+That waiting has to stop somewhere, or the calls never end. The **base
+case** — here, `n <= 1` — is the call that returns immediately, without
+recursing further. Miss it, or get its condition wrong, and the stack
+grows forever; that is exactly what a *stack overflow* is, the same
+failure the Stacks lesson named.
+
+Once the base case returns, the stack **unwinds**: each waiting frame
+gets the value it was blocked on, multiplies it by its own argument, and
+returns that upward in turn. Watch the result panel as the stack drains —
+1, then 2, then 6, then 24, then 120 — each pop folding one more frame's
+argument into the answer below it.
+
+## Try it
+
+```js
+function factorial(n) {
+  if (n <= 1) {
+    return 1;
+  }
+  const smaller = factorial(n - 1);
+  return n * smaller;
+}
+```
+
+## Trade-offs
+
+Reach for recursion when the problem is naturally self-similar — a tree's
+children are themselves trees, a fractal's parts are themselves fractals.
+The code reads as a direct statement of the definition, with no explicit
+stack management.
+
+Avoid it when depth is large and unpredictable. The call stack is finite,
+and each frame costs real memory; a recursive scan of a million-element
+list can overflow where the equivalent loop, using no extra stack space,
+would not. Many recursive functions — this factorial included — have a
+straightforward iterative equivalent, trading the self-similar reading for
+a guarantee about how much stack the run will ever use.
+
+## Check your understanding
+
+1. **Why does `factorial(5)` need a base case?**
+   - To make the function run faster
+   - Without one, the calls never stop, and the stack grows until it
+     overflows
+   - So the result is a bigger number
+   - Base cases are only needed for negative input
+
+   <details>
+   <summary>Answer</summary>
+
+   Without a call that returns without recursing, every call would keep
+   pushing another frame with no frame ever popping — the stack grows
+   without bound and eventually overflows. It has nothing to do with speed
+   or the size of the answer, and ordinary positive input needs it just as
+   much as negative input would.
+   </details>
+
+2. **The stack for `factorial(5)` reaches height 5 before anything returns.
+   What is happening on the way down?**
+   - Nothing — the calls are wasted work
+   - Each call pushes its argument and waits for the call below it to
+     return first
+   - The values are being sorted
+   - Each call finishes immediately and only the last one matters
+
+   <details>
+   <summary>Answer</summary>
+
+   Each call pushes a frame and blocks, because `n * factorial(n - 1)`
+   cannot be computed until `factorial(n - 1)` has a value. That is why the
+   stack keeps growing on the way down — every one of those calls is real,
+   pending work, not wasted effort, and no sorting is involved.
+   </details>
+
+## Practice
+
+Try [Fibonacci Number on LeetCode](https://leetcode.com/problems/fibonacci-number/)
+— the same push-then-unwind shape, with two waiting calls per frame
+instead of one.
