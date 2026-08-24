@@ -126,6 +126,7 @@ unknown. Until it lands, treat every `planned` row as backlog, not a promise.
 | 17 | `/algorithms/dfs` | Depth-First Search | 229 | GraphView | `dfs` | done |
 | 9 | `/data-structures/graph` | Graphs | 218 | GraphView | `graph-intro` | done |
 | 18 | `/algorithms/dijkstra` | Dijkstra's Algorithm | 231 | GraphView (weighted) | `dijkstra` | done |
+| 24 | `/complexity/best-average-worst-case` | Best, Average, and Worst Case | 237 | ArrayView | reuses `linear-search` + `quick-sort` | done |
 
 Linear Search (row 4) reuses the `linear-search` viz that `/complexity/big-o` already
 embeds — no new generator, code samples, or registry entry were needed, only the lesson
@@ -182,6 +183,40 @@ rather than chosen — the rendered `<pre>` is 630px at a character advance of 8
 re-derive it. Authors now get a deterministic failure naming the line, instead of an
 axe violation that appears on some runs and not others.
 
+Best/average/worst (row 24) is the second lesson to take the cheapest shape `linear-search`
+found: **no generator, no code samples, no registry entry** — one `.mdx` pointed at two viz
+ids that already existed. It embeds `linear-search` and `quick-sort` deliberately, because
+the pair is the lesson: linear search's three cases differ by a constant factor (1, ~*n*/2
+and *n* checks, all reachable by editing `target` alone), while quick sort's differ by a
+growth class — the shipped Lomuto pivot turns sorted input into the quadratic worst case,
+so pasting `[1..8]` takes the comparison count from 16 to 28. Both numbers were measured
+against the real generators before the prose claimed them, not estimated.
+
+**It shipped with two quiz questions, not three.** The obvious third — "linear search
+averages *n*/2 checks, which growth class is that?" — restates the question
+`/complexity/big-o` already asks, and big-o is this lesson's declared prerequisite.
+`docs/AUTHORING.md` §3 asks for 2–3; two questions that test *this* lesson beat three where
+one is recycled from the page before it.
+
+### The homepage hit the word limit, and the rule was the wrong shape
+
+Adding this lesson's card to `index.mdx` failed `prose-word-limit` — **on the homepage, not
+on the lesson**. The landing page was sitting at exactly 700 words once the 23rd lesson had
+added its card, so the 24th broke the build on a file whose prose it never touched.
+
+That is not a lesson being too long; it is a lesson-shaped rule applied to a page that is
+not a lesson. `index.mdx` is a card grid indexing every lesson that exists, so its length
+tracks the catalogue rather than an author's verbosity, and its body is mostly JSX —
+`<Card title="Binary Search" icon="magnifier">` scores five "words" no reader ever reads.
+Trimming unrelated homepage copy would have bought exactly one more lesson before the next
+author faced the same bill.
+
+Fixed in `scripts/lint-content.ts` by exempting `template: splash`, which only the landing
+page uses — the derivation sits beside the rule. Two tests pin it: the splash fixture must
+pass at 750 words, and `too-long` (no `template`) must still fail, so the exemption cannot
+become a way for a lesson to opt out of the limit. Mutation-checked — removing the
+exemption fails the first test.
+
 ## Data Structures (`data-structures/` — sidebar group now exists in `astro.config.mjs`)
 
 | # | Slug | Title | `order` | Renderer needed | Viz id | Status |
@@ -221,7 +256,7 @@ axe violation that appears on some runs and not others.
 |---|---|---|---|---|---|---|
 | 0c | `/complexity/big-o` | How Fast Is Fast? | 230 | ArrayView | `linear-search` + `binary-search` | **done** (see Shipped) |
 | 23 | `/complexity/amortized-analysis` | Amortized Analysis | 236 | ArrayView | `amortized-growth` | **done** (see Shipped) |
-| 24 | `/complexity/best-average-worst-case` | Best, Average, and Worst Case | 237‡ | ArrayView (reuse existing search/sort vizzes) | reuse (e.g. `linear-search`) | planned |
+| 24 | `/complexity/best-average-worst-case` | Best, Average, and Worst Case | 237‡ | ArrayView (reuse existing search/sort vizzes) | reuses `linear-search` + `quick-sort` | **done** (see Shipped) |
 
 † Inferred, not named explicitly in `IMPLEMENTATION_PLAN.md`: the plan lists `hash
 table` and `trie` as Data Structures topics (§11) without specifying a renderer for

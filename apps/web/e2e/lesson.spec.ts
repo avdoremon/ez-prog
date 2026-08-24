@@ -26,6 +26,7 @@ const ALL_LESSONS = [
   '/algorithms/sliding-window/',
   '/algorithms/two-pointer/',
   '/complexity/amortized-analysis/',
+  '/complexity/best-average-worst-case/',
   '/complexity/big-o/',
 ];
 
