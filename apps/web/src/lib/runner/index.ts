@@ -15,7 +15,17 @@ const TIMEOUT_MESSAGE = 'Timed out after 3s — check for an infinite loop.';
  */
 export function runJs(source: string): Promise<RunResult> {
   return new Promise((resolve) => {
-    const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
+    let worker: Worker;
+    try {
+      worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
+    } catch {
+      // A CSP worker-src restriction, an enterprise/extension policy blocking
+      // workers, or a file:// origin can make the Worker constructor itself
+      // throw synchronously. runJs must never reject (see doc comment above),
+      // so this is resolved as an ordinary failed run instead of propagating.
+      resolve({ output: [], timedOut: false, error: 'The run failed unexpectedly.' });
+      return;
+    }
     let settled = false;
 
     const finish = (result: RunResult) => {

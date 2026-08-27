@@ -22,7 +22,12 @@ export default function RunnableCode({ source, run = runJs }: RunnableCodeProps)
   useEffect(() => {
     const view = new EditorView({
       doc: source,
-      extensions: [basicSetup, javascript(), EditorView.lineWrapping],
+      extensions: [
+        basicSetup,
+        javascript(),
+        EditorView.lineWrapping,
+        EditorView.contentAttributes.of({ 'aria-label': 'Editable code example' }),
+      ],
       parent: editorHostRef.current!,
     });
     viewRef.current = view;
@@ -34,10 +39,14 @@ export default function RunnableCode({ source, run = runJs }: RunnableCodeProps)
 
   async function handleRun() {
     setRunning(true);
+    setResult(null);
     const currentSource = viewRef.current?.state.doc.toString() ?? source;
-    const runResult = await run(currentSource);
-    setResult(runResult);
-    setRunning(false);
+    try {
+      const runResult = await run(currentSource);
+      setResult(runResult);
+    } finally {
+      setRunning(false);
+    }
   }
 
   function handleReset() {
