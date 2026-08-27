@@ -260,6 +260,11 @@ test('the 3D tree view is keyboard-operable and announces the focused node', asy
 
   const summary = page.locator('.tree-view-3d__summary');
   const beforeFocus = await summary.textContent();
+  // tree-traversal's defaultInput is a 7-node tree (see
+  // apps/web/src/viz/registry.ts and packages/viz-3d/src/sceneSummary.ts) --
+  // the idle summary should read as such before any node is focused, not
+  // just "changed" after.
+  expect(beforeFocus).toContain('Binary tree, 7 nodes, 3 levels.');
 
   await nodeButtons.nth(1).focus();
   await expect(summary).not.toHaveText(beforeFocus ?? '');
@@ -271,6 +276,10 @@ test('the 3D tree view is keyboard-operable and announces the focused node', asy
 
 test('/data-structures/tree/ does not shift layout while the 3D view hydrates', async ({ page }) => {
   await page.goto('/data-structures/tree/');
+  // Anchors this test to a genuinely hydrated page: without this, a 3D
+  // island that silently failed to hydrate at all would report zero shift
+  // (nothing rendered, nothing moved) and pass the CLS budget vacuously.
+  await expect(page.locator('.tree-view-3d__node-button').first()).toBeVisible();
   const cls = await page.evaluate(
     () =>
       new Promise<number>((resolve) => {
