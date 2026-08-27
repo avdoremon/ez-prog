@@ -461,11 +461,13 @@
 }
 
 /*
- * Starting estimate for the case where the 3D view's canvas + node strip
- * + summary push the figure past the plain .viz reservation above.
- * Task 4 measures the real hydrated height via e2e and corrects this
- * number -- do not treat it as verified until that test exists and
- * passes.
+ * 60rem covers the 3D view's canvas + node strip + summary pushing the
+ * figure past the plain .viz reservation above. This has since been
+ * checked against a real measurement: the "/data-structures/tree/ does not
+ * shift layout while the 3D view hydrates" test in
+ * apps/web/e2e/lesson.spec.ts (added in Task 4) measures accumulated
+ * layout-shift after navigating to the lesson and passes comfortably under
+ * the 0.1 budget -- 60rem needed no correction.
  */
 .js .viz:has(.tree-view-3d) {
   min-height: 60rem;
