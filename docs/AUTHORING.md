@@ -611,6 +611,56 @@ stranding the learner mid-sort with the final frame — the one carrying the res
 never reached. Every gate had been green, because every gate only ever ran
 `defaultInput`.
 
+### 4.9 Making a Try it block runnable
+
+By default a lesson's `## Try it` example is a plain fenced code block —
+static, not automated by anything, and covered only by the "verify by hand"
+line in the Definition of Done (§6). A lesson can opt in to an executable
+version instead, the same way `<Viz>` opts a lesson into a visualization:
+
+```mdx
+import RunnableCode from '../../../components/RunnableCode.tsx';
+
+## Try it
+
+<RunnableCode lang="js" source={`function insertInto(arr, index, value) {
+  ...
+}
+
+insertInto([4, 8, 15, 16, 23, 42], 1, 9);
+`} />
+```
+
+`lang` is `"js"` today — the only language the runner
+(`apps/web/src/lib/runner/`) supports; see
+`docs/superpowers/specs/2026-08-24-code-runner-design.md` for the sandbox
+design and its Python/Tier 2 seam. `source` is the initial editor content,
+written as a template literal so multi-line code and embedded quotes need no
+escaping — the one thing to avoid inside it is a literal `` ` `` or `${`,
+either of which would end the template literal early.
+
+**End the source with a call, not just a definition.** The runner shows
+whichever of two things the *last top-level statement* produces:
+
+- If it's a bare expression (e.g. `insertInto(...)` with no `console.log`
+  wrapper), its value is shown as a `=>` line — use this when the function's
+  return value is the point, as `array.mdx` does.
+- If it's a `console.log(...)` call, its arguments are shown as output, in
+  call order — use this when watching the *side effect* is the point, as
+  `recursion.mdx` does with `console.log(factorial(5))`.
+
+**`<RunnableCode>`'s source counts toward the 700-word prose limit.** Unlike
+a triple-backtick fence, `lint-content`'s `prose-word-limit` rule (§5) has no
+way to recognise a `source={...}` template literal as code — every word
+inside it counts toward the lesson's budget. Budget for that when writing
+the surrounding prose, and re-run `pnpm lint:content` after adding a
+`<RunnableCode>` block, the same way you'd check any other content change.
+
+**Accessibility, non-negotiable if you touch this component:** the output
+panel is `role="status"` `aria-live="polite"` — the same "announce a result
+without the user having to go looking for it" pattern the `Player` note
+region and §4.7's input-editor error region already use.
+
 ## 5. Running the gates
 
 | Command | What it does | Needs a prior build? |

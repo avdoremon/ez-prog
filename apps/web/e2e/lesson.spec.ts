@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 
 const LESSON = '/algorithms/binary-search/';
 
@@ -109,6 +109,64 @@ for (const path of ALL_LESSONS) {
     expect(cls).toBeLessThan(0.1);
   });
 }
+
+const RUNNABLE_LESSONS: { path: string; expectedText: string }[] = [
+  { path: '/data-structures/array/', expectedText: '=> [4,9,8,15,16,23,42]' },
+  { path: '/algorithms/recursion/', expectedText: '120' },
+];
+
+/*
+ * RunnableCode hydrates with client:visible (matching Viz.astro's pattern),
+ * not client:load: the CodeMirror + worker bundle only loads once the
+ * "Try it" block scrolls into view. That is invisible to a human — by the
+ * time someone scrolls this far and reaches for Run, hydration is long done
+ * — but Playwright's own actionability scroll-then-click happens on one
+ * tick, faster than the intersection-observer → dynamic-import → mount
+ * chain. A click fired at an unhydrated island lands on inert static HTML
+ * with no listener yet attached, and is lost — no amount of waiting
+ * afterwards recovers it, since Astro islands don't replay past DOM events.
+ * scrollIntoViewIfNeeded() plus an explicit wait for `.cm-content` (which
+ * only exists once CodeMirror has mounted) makes the hydration finish
+ * before the real interaction begins.
+ */
+async function waitForRunnableCodeHydrated(runnable: Locator) {
+  await runnable.scrollIntoViewIfNeeded();
+  await expect(runnable.locator('.cm-content')).toBeVisible();
+}
+
+for (const { path, expectedText } of RUNNABLE_LESSONS) {
+  test(`${path} Run produces the expected output`, async ({ page }) => {
+    await page.goto(path);
+    const runnable = page.locator('.runnable-code');
+    await waitForRunnableCodeHydrated(runnable);
+    await runnable.getByRole('button', { name: /^run$/i }).click();
+    await expect(runnable.locator('.runnable-code__output')).toContainText(expectedText);
+  });
+
+  test(`${path} Reset clears the output panel`, async ({ page }) => {
+    await page.goto(path);
+    const runnable = page.locator('.runnable-code');
+    await waitForRunnableCodeHydrated(runnable);
+    await runnable.getByRole('button', { name: /^run$/i }).click();
+    await expect(runnable.locator('.runnable-code__output')).toContainText(expectedText);
+    await runnable.getByRole('button', { name: /^reset$/i }).click();
+    await expect(runnable.locator('.runnable-code__output')).toBeEmpty();
+  });
+}
+
+test('an infinite loop in RunnableCode times out with a helpful message, no crash', async ({ page }) => {
+  await page.goto('/data-structures/array/');
+  const runnable = page.locator('.runnable-code');
+  await waitForRunnableCodeHydrated(runnable);
+  await runnable.locator('.cm-content').click();
+  await page.keyboard.press('Control+A');
+  await page.keyboard.type('while (true) {}');
+  await runnable.getByRole('button', { name: /^run$/i }).click();
+  await expect(runnable.locator('.runnable-code__output')).toContainText(
+    /timed out after 3s/i,
+    { timeout: 6000 },
+  );
+});
 
 test('a reader with JavaScript disabled gets no reserved blank space', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
