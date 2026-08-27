@@ -623,13 +623,22 @@ import RunnableCode from '../../../components/RunnableCode.tsx';
 
 ## Try it
 
-<RunnableCode lang="js" source={`function insertInto(arr, index, value) {
+<RunnableCode lang="js" client:visible source={`function insertInto(arr, index, value) {
   ...
 }
 
 insertInto([4, 8, 15, 16, 23, 42], 1, 9);
 `} />
 ```
+
+**`client:visible` is required, not optional.** Astro server-renders a
+React component used in MDX to static HTML and only hydrates it in the
+browser when an explicit `client:*` directive is present — the same rule
+`<Viz>` follows with `<VizIsland ... client:visible />`. Omit it and the
+editor and Run/Reset buttons render but stay permanently inert: no error,
+no console warning, just a "Try it" block that looks right and does
+nothing. `client:visible` (rather than `client:load`) matches `<Viz>`'s
+choice to defer hydration until the block scrolls into view.
 
 `lang` is `"js"` today — the only language the runner
 (`apps/web/src/lib/runner/`) supports; see
