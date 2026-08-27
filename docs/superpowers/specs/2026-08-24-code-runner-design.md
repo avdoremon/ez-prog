@@ -216,6 +216,11 @@ console.log(insertInto([4, 8, 15, 16, 23, 42], 1, 9));
 `} />
 ````
 
+> **Note:** this example predates the `client:visible` fix (see the plan's
+> "Decisions the spec left open" §3) and does not show it. `docs/AUTHORING.md`
+> §4.9 is the up-to-date, authoritative form — it includes the required
+> `client:visible` directive. Follow that, not this example, when authoring.
+
 This is additive to `AUTHORING.md` (new section, "Making a Try it block
 runnable") — not a silent transform of every fenced block in every lesson. A
 lesson can still ship a plain, non-runnable ` ```js ` example if that's ever

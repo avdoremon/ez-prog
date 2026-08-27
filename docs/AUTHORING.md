@@ -670,6 +670,31 @@ panel is `role="status"` `aria-live="polite"` — the same "announce a result
 without the user having to go looking for it" pattern the `Player` note
 region and §4.7's input-editor error region already use.
 
+**Learner code runs in strict mode.** The worker that runs it is an ES
+module, and ES modules are always strict — so e.g. `x = 5` with no prior
+declaration throws a `ReferenceError` instead of silently creating a global,
+unlike a browser console's default (sloppy) mode. Write samples that declare
+everything they assign to, or a correct-looking sample will error for a
+learner who never sees why.
+
+**Synchronous output only — nothing streams.** The runner captures whatever
+`console.log`/`console.warn`/`console.error` calls and return value the
+*synchronous* portion of the run produces; the worker is torn down the
+moment that synchronous execution finishes. A `setTimeout` callback, or a
+promise's `.then()`, that would log something afterward produces no visible
+output at all — it fires, if at all, after the worker sandboxing it is
+already gone. This matches the design spec's "no streaming output" decision
+(§0); do not write a sample whose interesting output happens after the
+initial run completes.
+
+**Escaping a literal backslash inside `source={\`...\`}`.** `source` is a JS
+template literal embedded in the MDX author's own source, so it goes through
+two rounds of interpretation. A literal backslash meant for the *learner's*
+code — e.g. writing `"a\nb"` so the learner's string contains a literal
+backslash-n — must be written `\\n` in the sample. A single `\n` is consumed
+by the *outer* template literal as an actual newline character before the
+learner ever sees it, silently shipping different code than intended.
+
 ## 5. Running the gates
 
 | Command | What it does | Needs a prior build? |
