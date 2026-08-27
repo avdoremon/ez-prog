@@ -432,8 +432,13 @@ function successResult(overrides: Partial<RunResult> = {}): RunResult {
 }
 
 test('the editor pre-fills with the given source', async () => {
-  render(<RunnableCode lang="js" source={SOURCE} run={vi.fn()} />);
-  expect(await screen.findByText(/const value = 6 \* 7;/)).toBeInTheDocument();
+  // `basicSetup` syntax-highlights every token into its own <span>, so no
+  // single element's DIRECT text (what *ByText matches) is ever the full
+  // line -- assert on the editor host's full text content instead.
+  const { container } = render(<RunnableCode lang="js" source={SOURCE} run={vi.fn()} />);
+  await waitFor(() => {
+    expect(container.querySelector('.cm-content')?.textContent).toContain('const value = 6 * 7;');
+  });
 });
 
 test('Run calls the injected run function with the current editor content and shows the return value', async () => {
@@ -486,7 +491,7 @@ test('a timeout shows the timeout message and no output', async () => {
 test('Reset restores the original source and clears the output panel', async () => {
   const user = userEvent.setup();
   const run = vi.fn().mockResolvedValue(successResult({ returnValue: '42' }));
-  render(<RunnableCode lang="js" source={SOURCE} run={run} />);
+  const { container } = render(<RunnableCode lang="js" source={SOURCE} run={run} />);
 
   await user.click(screen.getByRole('button', { name: /^run$/i }));
   expect(await screen.findByText('=> 42')).toBeInTheDocument();
@@ -494,7 +499,10 @@ test('Reset restores the original source and clears the output panel', async () 
   await user.click(screen.getByRole('button', { name: /^reset$/i }));
 
   expect(screen.queryByText('=> 42')).not.toBeInTheDocument();
-  expect(await screen.findByText(/const value = 6 \* 7;/)).toBeInTheDocument();
+  // Same span-per-token reason as the pre-fill test above.
+  await waitFor(() => {
+    expect(container.querySelector('.cm-content')?.textContent).toContain('const value = 6 * 7;');
+  });
 });
 
 test('the output region is announced politely', () => {
