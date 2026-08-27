@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 The Stacks lesson mentioned, almost in passing, that every function call
 pushes a frame and every return pops one. Recursion is what happens when
@@ -40,15 +41,16 @@ argument into the answer below it.
 
 ## Try it
 
-```js
-function factorial(n) {
+<RunnableCode lang="js" source={`function factorial(n) {
   if (n <= 1) {
     return 1;
   }
   const smaller = factorial(n - 1);
   return n * smaller;
 }
-```
+
+console.log(factorial(5));
+`} />
 
 ## Trade-offs
 

@@ -9,6 +9,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 An array is not a list of things so much as a single block of memory with the
 values packed side by side. Almost everything arrays are good and bad at
@@ -25,9 +26,9 @@ does not *search* for index 3 — it computes where it must be:
 address = start + index × size
 ```
 
-That is one multiplication and one addition, whatever the array's length. An
-array of ten and an array of ten million cost the same to read from. This is
-what "random access" means: no position is harder to reach than any other.
+One multiplication, one addition, regardless of length — an array of ten
+costs the same to read from as one of ten million. That is what "random
+access" means: no position is harder to reach than any other.
 
 The same layout is what makes inserting expensive. There is no spare room
 between neighbours, so to put a value at index 1, everything from index 1
@@ -40,8 +41,7 @@ right slides left to close the hole.
 
 ## Try it
 
-```js
-function insertInto(arr, index, value) {
+<RunnableCode lang="js" source={`function insertInto(arr, index, value) {
   arr.length = arr.length + 1;
   for (let i = arr.length - 1; i > index; i--) {
     arr[i] = arr[i - 1];
@@ -49,7 +49,9 @@ function insertInto(arr, index, value) {
   arr[index] = value;
   return arr;
 }
-```
+
+insertInto([4, 8, 15, 16, 23, 42], 1, 9);
+`} />
 
 ## Trade-offs
 
@@ -58,15 +60,14 @@ iteration genuinely faster than the step count suggests: memory arrives in
 cache lines, so reading one value drags its neighbours along for free.
 Structures that scatter their values across memory lose that.
 
-Avoid it when you insert or delete in the middle often — that is the shifting
-cost, paid per operation. A structure that stores each value with a pointer to
-the next can splice in one step, at the cost of losing indexing and cache
-locality. That is the trade this whole topic keeps circling.
+Avoid it when you insert or delete in the middle often — that shifting cost is
+paid per operation. A structure that stores each value with a pointer to the
+next can splice in one step, at the cost of losing indexing and cache
+locality.
 
-One wrinkle: the arrays in JavaScript and Python grow on demand, which the
-fixed block above cannot do. They manage it by allocating spare capacity and,
-when it runs out, moving everything into a larger block. Individual appends
-are therefore usually free and occasionally expensive.
+One wrinkle: JavaScript and Python arrays grow on demand by allocating spare
+capacity and, once it runs out, copying everything into a larger block — so
+individual appends are usually free and occasionally expensive.
 
 ## Check your understanding
 
