@@ -42,6 +42,7 @@ apps/web/            Astro + Starlight site, lesson content, viz registry
   e2e/               Playwright suite
 packages/viz-core/   framework-free model: Frame, snap, collect, generators
 packages/viz-react/  React renderers, Player, transport hook
+packages/viz-3d/     TreeView3D, a Three.js renderer loaded on demand for one lesson
 scripts/             the content lint and offline-asset gates
 docs/                authoring guide, exit-gate record, spikes
 ```

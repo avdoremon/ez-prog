@@ -15,8 +15,10 @@ each shows a different shape:
   whether the guide is sufficient.
 - `algorithms/linear-search.mdx` - reuses an existing registry entry and adds no new
   generator at all: the cheapest shape a lesson can take.
-- `data-structures/tree.mdx` - uses `TreeView` instead of `ArrayView`, and lets the
-  learner change the traversal order from the input editor.
+- `data-structures/tree.mdx` - uses `TreeView3D`, a camera-controllable 3D view,
+  instead of `ArrayView`, and lets the learner change the traversal order from the
+  input editor. It is also the one lesson so far that reaches for the
+  heavy-dependency renderer pattern (§4.6) rather than the lightweight one.
 
 ## 0. The one constraint that shapes everything below
 
@@ -40,7 +42,8 @@ already exists under `packages/`.** Concretely:
 
 So: **adding a lesson that reuses the `ArrayView` renderer touches zero existing files
 under `packages/`.** If your lesson idea needs anything the existing pieces don't
-provide — a fourth renderer (`ArrayView`, `TreeView` and `GraphView` exist today), a
+provide — a new renderer (`ArrayView`, `TreeView`, `GraphView`, and `TreeView3D`
+exist today — see §4.6 for the two different ways a renderer can be added), a
 new `Mark`/`Target` shape,
 a change to how `snap`, `collect`, or `parseAnchors` behave — that is an **engine
 change**. It means editing an *existing* file under `packages/viz-core` or
@@ -51,11 +54,14 @@ content edit. When this was last measured, exercising a new lesson end to end su
 four pre-existing engine defects (see `docs/PHASE0-EXIT.md`); reporting beats absorbing.
 
 Everything in this document about adding a visualization assumes you are reusing one of
-the three existing renderers: `ArrayView` for anything positional (sorting, searching,
+the existing renderers: `ArrayView` for anything positional (sorting, searching,
 two-pointer, sliding-window, stacks, queues), `TreeView` for a complete binary tree held
-in an array, `GraphView` for nodes and edges. The first two take the same `number[]`
-state and the same index-based marks, so choosing between them is a one-word change in
-the registry; `GraphView` takes a `GraphState` instead (§4.6).
+in an array, `GraphView` for nodes and edges, or `TreeView3D` for the same complete
+binary tree drawn as a camera-controllable 3D scene. The first two take the same
+`number[]` state and the same index-based marks, so choosing between them is a
+one-word change in the registry; `GraphView` takes a `GraphState` instead (§4.6).
+`TreeView3D` also takes the same `number[]`/index-based-marks state as `TreeView` — the
+difference is entirely in *how it's loaded* (§4.6), not in the data it consumes.
 
 ## 1. Where lesson files go, and how a slug is derived
 
@@ -495,17 +501,40 @@ Verbatim shape, from the real `binary-search` entry:
 
 Field by field:
 
-- `renderer` — `'ArrayView'`, `'TreeView'` or `'GraphView'`; the union in
+- `renderer` — `'ArrayView'`, `'TreeView'`, `'GraphView'` or `'TreeView3D'`; the union in
   `apps/web/src/viz/types.ts` is what the type allows. Choosing between them is ordinary
-  content work. **Writing a fourth one is still an engine change** (§0), but a small
-  one: renderers are pluggable, so a new renderer is a new file in
-  `packages/viz-react/src/renderers/` plus two lines — a name in that union, and an
-  entry in the `RENDERERS` map in `apps/web/src/components/VizIsland.tsx`. `Player` is
-  generic over the state type and needs no change. You only touch `viz-core` if your
-  renderer needs a **new `Target` kind**, as `GraphView` did for edges — and that is
-  deliberately noisy, because `Target` is a closed union and every existing renderer's
-  exhaustiveness check will fail to compile until it decides what to do with the new
-  kind.
+  content work. **Writing a new one is still an engine change** (§0), and there are now
+  two different shapes that change can take, depending on whether the renderer's
+  dependencies are light or heavy:
+  - **Lightweight renderer (the original pattern; use this unless you have a specific
+    reason not to).** A new file in `packages/viz-react/src/renderers/`, statically
+    imported at the top of `apps/web/src/components/VizIsland.tsx`, plus a name in the
+    `renderer` union and an entry in `VizIsland.tsx`'s `RENDERERS` map. `Player` is
+    generic over the state type and needs no change. This is what `ArrayView`,
+    `TreeView`, and `GraphView` do, and it's the right choice as long as the renderer's
+    dependencies are small — the whole `RENDERERS` map is bundled into every lesson page
+    that uses `<Viz>`, so a heavy dependency here is a heavy dependency on all 27+ other
+    lessons too, whether or not they use that renderer.
+  - **Heavy-dependency renderer (new, added for `TreeView3D`).** `TreeView3D` lives in
+    its own workspace package, `packages/viz-3d`, wrapping
+    `@react-three/fiber`/`@react-three/drei`/`three` — roughly 250KB+ gzipped, far more
+    than every other renderer's dependencies combined. Statically importing that into
+    `VizIsland.tsx` the same way as the lightweight renderers would ship Three.js to
+    every lesson in the site, not just `data-structures/tree.mdx`. Instead, `VizIsland.tsx`
+    has a `loadRenderer(rendererName)` function that returns the lightweight `RENDERERS`
+    map entry for every ordinary renderer name, but for `'TreeView3D'` specifically
+    returns a *dynamic* `import('@cs/viz-3d')` — so the Three.js stack is only fetched
+    when a viz entry actually names it. If your new renderer pulls in a comparably heavy
+    dependency (a physics engine, another rendering library, anything past a rounding
+    error on the bundle), follow this pattern: its own `packages/viz-<name>` package, and
+    a branch in `loadRenderer` rather than a static entry in `RENDERERS`. If it doesn't,
+    use the lightweight pattern — it's simpler, and dynamic `import()` has its own cost
+    (an extra network round-trip before the renderer appears) that isn't worth paying for
+    a small dependency.
+  - Either way, you only touch `viz-core` if your renderer needs a **new `Target`
+    kind**, as `GraphView` did for edges — and that is deliberately noisy, because
+    `Target` is a closed union and every existing renderer's exhaustiveness check will
+    fail to compile until it decides what to do with the new kind.
   - **`ArrayView`** draws the state as a flat row of cells. Use it for anything
     positional: searches, sorts, windows, pointers, stacks and queues. Its state is
     `(number | null)[]`, where a `null` is a slot that exists but holds nothing and
@@ -521,6 +550,17 @@ Field by field:
     `Mark` targets need no new shape and your generator is unchanged — the only
     difference is how the state is drawn. It expects a complete tree; gaps have no
     representation.
+  - **`TreeView3D`** draws that same complete-binary-tree-shaped `number[]` as a
+    camera-controllable 3D scene (`@react-three/fiber` Canvas, orbit/zoom, a
+    radial layout with deeper levels lower and wider) instead of `TreeView`'s nested
+    DOM tree. Same state shape, same marks — swapping `TreeView` for `TreeView3D` in a
+    registry entry's `renderer` field is a one-word change, same as `ArrayView`/`TreeView`.
+    It carries its own accessible interaction (a visible, focusable "jump to node"
+    button strip below the canvas, plus a live-region summary) because the WebGL canvas
+    itself is `aria-hidden`. Currently used by exactly one lesson
+    (`data-structures/tree.mdx`, `tree-traversal` in the registry) as a pilot; see
+    `docs/superpowers/plans/2026-08-27-viz-3d-tree-pilot.md` before migrating another
+    `TreeView` lesson to it.
   - **`GraphView`** is the one renderer whose state is *not* `number[]`. It takes a
     `GraphState` — `{ values, edges, directed? }` from `@cs/viz-core` — and draws an
     adjacency list, one row per node listing its neighbours, rather than a node-and-edge
