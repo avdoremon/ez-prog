@@ -393,3 +393,66 @@
 .js .runnable-code__editor {
   min-height: 12rem;
 }
+
+.tree-view-3d {
+  margin-top: .5rem;
+}
+
+.tree-view-3d--empty {
+  padding: 1rem;
+  text-align: center;
+}
+
+/*
+ * A fixed, unconditional height -- unlike RunnableCode's editor (which
+ * grows from an empty mount point and needed a measure-then-reserve
+ * min-height), this box never changes size between server-render and
+ * hydration; only its contents do. Nothing to reserve space for. Task 4's
+ * e2e CLS test verifies this claim rather than just asserting it.
+ */
+.tree-view-3d__canvas-wrap {
+  height: 24rem;
+  border: 2px solid var(--muted);
+}
+
+.tree-view-3d__canvas-wrap canvas {
+  display: block;
+}
+
+.tree-view-3d__nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-top: .5rem;
+}
+
+.tree-view-3d__node-button {
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  border: 2px solid var(--muted);
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.tree-view-3d__node-button:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.tree-view-3d__summary {
+  margin-top: .5rem;
+  font-weight: 600;
+}
+
+/*
+ * Starting estimate for the case where the 3D view's canvas + node strip
+ * + summary push the figure past the plain .viz reservation above.
+ * Task 4 measures the real hydrated height via e2e and corrects this
+ * number -- do not treat it as verified until that test exists and
+ * passes.
+ */
+.js .viz:has(.tree-view-3d) {
+  min-height: 60rem;
+}

@@ -156,7 +156,7 @@ const registry = {
     code: () => import('./code/greedy-coins/index.js'),
   },
   'tree-traversal': {
-    renderer: 'TreeView',
+    renderer: 'TreeView3D',
     label: 'Binary tree being walked depth-first',
     // A BST-shaped tree, so in-order comes out sorted — which is the hook for
     // the Binary Search Trees lesson.

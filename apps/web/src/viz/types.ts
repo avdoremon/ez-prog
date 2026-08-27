@@ -3,7 +3,7 @@ import type { z } from 'zod';
 import type { Lang } from '../lib/langs.js';
 
 export interface VizEntry<I = unknown, S = unknown> {
-  renderer: 'ArrayView' | 'TreeView' | 'GraphView';
+  renderer: 'ArrayView' | 'TreeView' | 'GraphView' | 'TreeView3D';
   label: string;
   defaultInput: I;
   inputSchema: z.ZodType<I>;

@@ -2,6 +2,7 @@ import { useEffect, useId, useState } from 'react';
 import { collect, parseAnchors, type Frame, type ParsedCode } from '@cs/viz-core';
 import { ArrayView, GraphView, Player, TreeView, type Renderer } from '@cs/viz-react';
 import { VIZ, type VizId } from '../viz/registry.js';
+import type { VizEntry } from '../viz/types.js';
 
 // The state shape varies by renderer — number[] for ArrayView and TreeView, a
 // GraphState for GraphView — so frames are held loosely here. The registry
@@ -18,6 +19,7 @@ interface RunData {
    * them into the middle of a run they never saw start.
    */
   runId: number;
+  renderer: Renderer<never>;
 }
 
 // Registry entries name their renderer as a string so the registry stays
@@ -31,6 +33,20 @@ const RENDERERS: Record<'ArrayView' | 'TreeView' | 'GraphView', Renderer<never>>
   TreeView: TreeView as Renderer<never>,
   GraphView: GraphView as Renderer<never>,
 };
+
+/**
+ * TreeView3D pulls in three/@react-three/fiber/@react-three/drei --
+ * roughly 250KB+ gzipped, far heavier than every other renderer combined.
+ * Loading it only when a viz entry actually asks for it (a dynamic
+ * import, not the static RENDERERS map above) keeps that cost off every
+ * lesson that doesn't use it.
+ */
+function loadRenderer(rendererName: VizEntry['renderer']): Promise<Renderer<never>> {
+  if (rendererName === 'TreeView3D') {
+    return import('@cs/viz-3d').then((m) => m.TreeView3D as Renderer<never>);
+  }
+  return Promise.resolve(RENDERERS[rendererName]);
+}
 
 function defaultInputText(defaultInput: unknown): string {
   return JSON.stringify(defaultInput, null, 2);
@@ -50,14 +66,16 @@ export default function VizIsland({ id }: { id: VizId }) {
     let cancelled = false;
     setInputText(defaultInputText(entry.defaultInput));
     setInputError(null);
-    Promise.all([entry.load(), entry.code()])
-      .then(([algo, codeMod]) => {
+    Promise.all([entry.load(), entry.code(), loadRenderer(entry.renderer)])
+      .then(([algo, codeMod, renderer]) => {
         if (cancelled) return;
         const { frames, truncated } = collect(
           algo.default(entry.defaultInput) as Generator<Frame<never>>,
           entry.maxFrames,
         );
-        setData({ frames, truncated, code: parseAnchors(codeMod.default.js), runId: 0 });
+        setData({
+          frames, truncated, code: parseAnchors(codeMod.default.js), runId: 0, renderer,
+        });
       })
       .catch((e: unknown) => {
         if (!cancelled) setError(e instanceof Error ? e.message : String(e));
@@ -112,7 +130,7 @@ export default function VizIsland({ id }: { id: VizId }) {
     <>
       <Player key={data.runId} frames={data.frames} truncated={data.truncated}
               label={entry.label} code={data.code}
-              renderer={RENDERERS[entry.renderer]} />
+              renderer={data.renderer} />
 
       <details className="viz-input-editor">
         <summary>Try your own input</summary>

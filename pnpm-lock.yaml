@@ -56,6 +56,9 @@ importers:
       '@codemirror/lang-javascript':
         specifier: 6.2.5
         version: 6.2.5
+      '@cs/viz-3d':
+        specifier: workspace:*
+        version: link:../../packages/viz-3d
       '@cs/viz-core':
         specifier: workspace:*
         version: link:../../packages/viz-core
