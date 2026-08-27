@@ -11,6 +11,7 @@ export default defineConfig({
           environment: 'node',
           include: [
             'packages/viz-core/**/*.{test,spec}.{ts,tsx}',
+            'packages/viz-3d/**/*.{test,spec}.{ts,tsx}',
             'scripts/**/*.{test,spec}.ts',
             'apps/web/**/*.{test,spec}.ts',
           ],

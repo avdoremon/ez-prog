@@ -16,6 +16,7 @@
   "files": [],
   "references": [
     { "path": "./packages/viz-core" },
-    { "path": "./packages/viz-react" }
+    { "path": "./packages/viz-react" },
+    { "path": "./packages/viz-3d" }
   ]
 }
