@@ -327,3 +327,55 @@
 .graph-view__edge[data-marks~="active"]  { border-color: var(--probe); border-style: solid; }
 .graph-view__edge[data-marks~="visited"] { border-color: var(--probe); }
 .graph-view__edge[data-marks~="done"]    { border-color: var(--commit); border-style: solid; }
+
+.runnable-code {
+  margin-top: 1rem;
+}
+
+.runnable-code__editor {
+  border: 2px solid var(--muted);
+}
+
+.runnable-code__editor .cm-editor {
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+}
+
+.runnable-code__actions {
+  display: flex;
+  gap: .5rem;
+  margin-top: .5rem;
+}
+
+.runnable-code__output {
+  margin-top: .5rem;
+}
+
+.runnable-code__line,
+.runnable-code__return {
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  margin: 0 0 .25rem;
+}
+
+.runnable-code__error {
+  border: 2px solid var(--discard);
+  border-style: dashed;
+  padding: .5rem .75rem;
+  font-weight: 600;
+}
+
+/*
+ * RunnableCode's CodeMirror instance mounts client-side only (useEffect);
+ * server-rendered HTML has an empty editor host. Reserving space up front
+ * avoids the same hydration layout shift documented above for `.viz` — see
+ * that comment for the mechanism (the `.js` class, the CLS budget). 12rem is
+ * a starting estimate for a short (~10-line) sample; Task 5's CLS e2e test
+ * against the real pilot lessons is the actual check — raise this if it
+ * still fails there.
+ */
+.js .runnable-code__editor {
+  min-height: 12rem;
+}
