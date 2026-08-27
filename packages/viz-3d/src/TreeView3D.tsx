@@ -1,4 +1,3 @@
-// packages/viz-3d/src/TreeView3D.tsx
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Line, OrbitControls, Text } from '@react-three/drei';
@@ -7,13 +6,21 @@ import { Vector3 } from 'three';
 import type { Mark, MarkKind } from '@cs/viz-core';
 import { layoutTree3D, type Position3D } from './layout.js';
 import { buildSceneSummary } from './sceneSummary.js';
-import { colorForMarks } from './markColors.js';
+import { colorForMarks, DEFAULT_COLOR, INK_COLOR } from './markColors.js';
 
 export interface TreeView3DProps {
   state: number[];
   marks?: Mark[];
   label: string;
 }
+
+/**
+ * A stable empty-array reference for the `marks` default parameter. A fresh
+ * `[]` literal used as a default is a new object identity on every render,
+ * which would defeat the `useMemo([state, marks])` below whenever a caller
+ * omits `marks` entirely.
+ */
+const NO_MARKS: Mark[] = [];
 
 function marksForIndex(marks: Mark[], i: number): MarkKind[] {
   return marks.filter((m) => m.at.t === 'index' && m.at.i === i).map((m) => m.kind);
@@ -68,7 +75,7 @@ function CameraRig({ focus, instant }: { focus: Position3D | null; instant: bool
   return <OrbitControls ref={controls} makeDefault />;
 }
 
-export function TreeView3D({ state, marks = [], label }: TreeView3DProps) {
+export function TreeView3D({ state, marks = NO_MARKS, label }: TreeView3DProps) {
   const positions = useMemo(() => layoutTree3D(state), [state]);
   const edges = useMemo(() => edgesFor(state.length), [state.length]);
   const summary = useMemo(() => buildSceneSummary(state, marks), [state, marks]);
@@ -79,13 +86,20 @@ export function TreeView3D({ state, marks = [], label }: TreeView3DProps) {
     return <p className="tree-view-3d tree-view-3d--empty">{label}: empty</p>;
   }
 
-  const focusedPosition = focusedIndex !== null ? (positions.get(focusedIndex) ?? null) : null;
-  const focusedKinds = focusedIndex !== null ? marksForIndex(marks, focusedIndex) : [];
-  const announced =
-    focusedIndex !== null
-      ? `Node ${focusedIndex}, value ${state[focusedIndex]}` +
-        `${focusedKinds.length ? `, ${focusedKinds.join(' ')}` : ''}.`
-      : summary;
+  // Guards against a stale focusedIndex pointing past the end of a shrunk
+  // `state` array. In practice Player remounts on every run (key={runId}),
+  // resetting focusedIndex along with it, but this keeps the render safe
+  // even if that ever changes.
+  const hasFocusedNode = focusedIndex !== null && state[focusedIndex] !== undefined;
+  const focusedPosition = hasFocusedNode ? (positions.get(focusedIndex!) ?? null) : null;
+  const focusedKinds = hasFocusedNode ? marksForIndex(marks, focusedIndex!) : [];
+  const focusedAnnouncement = hasFocusedNode
+    ? `Node ${focusedIndex}, value ${state[focusedIndex!]}` +
+      `${focusedKinds.length ? `, ${focusedKinds.join(' ')}` : ''}.`
+    : null;
+  // The text shown below the button strip: the focused node's detail while
+  // a node is focused, the resting scene summary otherwise.
+  const displayed = focusedAnnouncement ?? summary;
 
   return (
     <div className="tree-view-3d">
@@ -104,7 +118,7 @@ export function TreeView3D({ state, marks = [], label }: TreeView3DProps) {
                   [a.x, a.y, a.z],
                   [b.x, b.y, b.z],
                 ]}
-                color="#7A8493"
+                color={DEFAULT_COLOR}
                 lineWidth={1}
               />
             );
@@ -118,7 +132,13 @@ export function TreeView3D({ state, marks = [], label }: TreeView3DProps) {
                   <sphereGeometry args={[0.4, 24, 24]} />
                   <meshStandardMaterial color={color} />
                 </mesh>
-                <Text position={[0, 0.65, 0]} fontSize={0.32} color="#12161C" anchorX="center">
+                <Text
+                  position={[0, 0.65, 0]}
+                  fontSize={0.32}
+                  color={INK_COLOR}
+                  anchorX="center"
+                  font="/fonts/IBMPlexMono-Regular.ttf"
+                >
                   {String(value)}
                 </Text>
               </group>
@@ -138,6 +158,7 @@ export function TreeView3D({ state, marks = [], label }: TreeView3DProps) {
               aria-label={`Node ${i}, value ${value}${kinds.length ? `, ${kinds.join(' ')}` : ''}`}
               onFocus={() => setFocusedIndex(i)}
               onBlur={() => setFocusedIndex(null)}
+              onClick={() => setFocusedIndex(i)}
             >
               {value}
             </button>
@@ -145,8 +166,22 @@ export function TreeView3D({ state, marks = [], label }: TreeView3DProps) {
         })}
       </div>
 
-      <p role="status" aria-live="polite" className="tree-view-3d__summary">
-        {announced}
+      {/*
+       * Visible, but deliberately not aria-live: Player's own aria-live
+       * note region (packages/viz-react/src/Player.tsx) already announces
+       * one sentence per frame regardless of which renderer is active. If
+       * this element were also aria-live, its invariant "Binary tree, N
+       * nodes, M levels." prefix would re-announce on every autoplay frame
+       * alongside Player's note -- redundant noise, not new information.
+       * Sighted users still see it update live (it's plain visible text);
+       * screen-reader users get the one genuinely NEW piece of information
+       * -- which node currently has keyboard focus -- from the hidden
+       * live region below instead.
+       */}
+      <p className="tree-view-3d__summary">{displayed}</p>
+
+      <p role="status" aria-live="polite" className="tree-view-3d__announcer visually-hidden">
+        {focusedAnnouncement ?? ''}
       </p>
     </div>
   );

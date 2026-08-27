@@ -17,8 +17,11 @@ const MARK_COLORS: Partial<Record<MarkKind, string>> = {
   discard: '#E5654B',
 };
 
-/** tokens.css's --muted -- the default, unmarked node color. */
-const DEFAULT_COLOR = '#7A8493';
+/** tokens.css's --muted -- the default, unmarked node color. Also used for edge lines. */
+export const DEFAULT_COLOR = '#7A8493';
+
+/** tokens.css's --ink -- the body-text color, used for 3D node value labels. */
+export const INK_COLOR = '#12161C';
 
 export function colorForMarks(kinds: MarkKind[]): string {
   for (const kind of kinds) {
