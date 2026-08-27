@@ -54,3 +54,13 @@ test('a syntax error is returned as an error, not thrown', () => {
   expect(result.output).toEqual([]);
   expect(result.error).toBeTruthy();
 });
+
+test('console.log(undefined) shows the literal word "undefined", not a blank line', () => {
+  const result = run('console.log(undefined);');
+  expect(result.output).toEqual(['undefined']);
+});
+
+test('console.log(NaN) shows "NaN", not the misleading "null" JSON.stringify would give', () => {
+  const result = run('console.log(NaN);');
+  expect(result.output).toEqual(['NaN']);
+});

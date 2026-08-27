@@ -26,6 +26,9 @@ export function buildSandboxedSource(userSource: string): string {
   var __output = [];
   function __stringify(v) {
     if (typeof v === 'string') return v;
+    if (v === undefined) return 'undefined';
+    if (typeof v === 'function') return String(v);
+    if (typeof v === 'number' && !Number.isFinite(v)) return String(v);
     try { return JSON.stringify(v); } catch (e) { return String(v); }
   }
   function __capture() {
