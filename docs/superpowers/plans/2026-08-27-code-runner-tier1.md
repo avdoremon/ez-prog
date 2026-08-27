@@ -57,11 +57,14 @@ time, not this spec." Resolved here, so no task below carries a placeholder:
    (validating the `id` prop against the registry and supplying a static
    `<noscript>` fallback), neither of which `RunnableCode` needs from a
    wrapper: it has no id to validate, and its own `<noscript>` fallback is
-   simple enough to render inline. Task 4's dev-server check is where this
-   assumption gets its first real test; if `client:visible` turns out not to
-   hydrate `RunnableCode` from `.mdx` directly, add a one-line
-   `RunnableCode.astro` wrapper mirroring `Viz.astro` and import that from
-   the lesson instead — everything else in this plan is unaffected.
+   simple enough to render inline. **Confirmed by Task 5's e2e run:** the
+   directive does work directly in `.mdx` — but Task 4's own `<RunnableCode>`
+   JSX was first shipped with the `client:visible` attribute itself missing
+   (an authoring slip in this plan, not a framework limitation), which Task
+   4's implementer couldn't catch (no browser available to click-verify) and
+   only surfaced once Task 5's real-browser Playwright run tried to click
+   Run. Fixed by adding `client:visible` to both lessons' `<RunnableCode>`
+   tags (ruling recorded in the SDD ledger). No `.astro` wrapper was needed.
 4. **Package set: `codemirror` (6.0.2) + `@codemirror/lang-javascript`
    (6.2.5)**, not the individual `@codemirror/state`/`@codemirror/view`
    packages the spec's prose lists. The `codemirror` meta-package re-exports
@@ -754,7 +757,7 @@ right slides left to close the hole.
 
 ## Try it
 
-<RunnableCode lang="js" source={`function insertInto(arr, index, value) {
+<RunnableCode lang="js" client:visible source={`function insertInto(arr, index, value) {
   arr.length = arr.length + 1;
   for (let i = arr.length - 1; i > index; i--) {
     arr[i] = arr[i - 1];
@@ -884,7 +887,7 @@ argument into the answer below it.
 
 ## Try it
 
-<RunnableCode lang="js" source={`function factorial(n) {
+<RunnableCode lang="js" client:visible source={`function factorial(n) {
   if (n <= 1) {
     return 1;
   }
@@ -1068,7 +1071,7 @@ import RunnableCode from '../../../components/RunnableCode.tsx';
 
 ## Try it
 
-<RunnableCode lang="js" source={`function insertInto(arr, index, value) {
+<RunnableCode lang="js" client:visible source={`function insertInto(arr, index, value) {
   ...
 }
 
