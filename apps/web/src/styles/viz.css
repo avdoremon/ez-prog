@@ -371,10 +371,24 @@
  * RunnableCode's CodeMirror instance mounts client-side only (useEffect);
  * server-rendered HTML has an empty editor host. Reserving space up front
  * avoids the same hydration layout shift documented above for `.viz` — see
- * that comment for the mechanism (the `.js` class, the CLS budget). 12rem is
- * a starting estimate for a short (~10-line) sample; Task 5's CLS e2e test
- * against the real pilot lessons is the actual check — raise this if it
- * still fails there.
+ * that comment for the mechanism (the `.js` class, the CLS budget).
+ *
+ * 12rem was originally an unverified estimate. It has since been checked
+ * against a real measurement: the "does not shift layout while RunnableCode
+ * hydrates" tests in apps/web/e2e/lesson.spec.ts scroll each pilot lesson's
+ * `.runnable-code` island into view (the same trigger that fires
+ * `client:visible` hydration) and sum PerformanceObserver `layout-shift`
+ * entries the same way the `.viz` CLS test does. Both pilot lessons pass
+ * comfortably under the 0.1 budget (measured ~0.019 on
+ * /algorithms/recursion/ and ~0.023 on /data-structures/array/), even though
+ * the editor's actual post-hydration height (~25-27rem for these two
+ * samples, measured via `.runnable-code__editor`'s getBoundingClientRect())
+ * is well above this 12rem reservation — the Layout Instability score is
+ * weighted by how much of the viewport is affected and how far it moves, not
+ * by raw pixel growth, so the shortfall here does not translate into a
+ * budget-busting shift for either lesson. Raise this value, and re-run those
+ * tests, if a future lesson's sample is long/tall enough to push the score
+ * over budget.
  */
 .js .runnable-code__editor {
   min-height: 12rem;

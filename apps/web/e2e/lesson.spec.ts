@@ -168,6 +168,80 @@ test('an infinite loop in RunnableCode times out with a helpful message, no cras
   );
 });
 
+test('Reset restores edited RunnableCode content back to the original source', async ({ page }) => {
+  await page.goto('/data-structures/array/');
+  const runnable = page.locator('.runnable-code');
+  await waitForRunnableCodeHydrated(runnable);
+  await runnable.locator('.cm-content').click();
+  await page.keyboard.press('Control+A');
+  await page.keyboard.type('const somethingElseEntirely = 1;');
+  await expect(runnable.locator('.cm-content')).toContainText('somethingElseEntirely');
+
+  await runnable.getByRole('button', { name: /^reset$/i }).click();
+
+  await expect(runnable.locator('.cm-content')).not.toContainText('somethingElseEntirely');
+  await expect(runnable.locator('.cm-content')).toContainText('insertInto');
+});
+
+/*
+ * RunnableCode hydrates with client:visible (see waitForRunnableCodeHydrated
+ * above), so a naive axe run — like the ALL_LESSONS loop above, which never
+ * scrolls the page — never triggers hydration for a "Try it" block this far
+ * down the lesson, and silently never examines it. These two tests scroll
+ * the island into view first, closing that gate blindness for the pages that
+ * actually ship RunnableCode.
+ */
+for (const { path } of RUNNABLE_LESSONS) {
+  test(`${path} RunnableCode has no accessibility violations once hydrated`, async ({ page }) => {
+    await page.goto(path);
+    const runnable = page.locator('.runnable-code');
+    await waitForRunnableCodeHydrated(runnable);
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa'])
+      .analyze();
+    expect(results.violations).toEqual([]);
+  });
+}
+
+/*
+ * Same gate-blindness problem as the axe test above, applied to the CLS
+ * budget: the ALL_LESSONS CLS loop measures for 1000ms without scrolling, so
+ * it never triggers client:visible hydration for RunnableCode and the
+ * `.js .runnable-code__editor { min-height }` reservation in viz.css has
+ * never actually been checked against a real measurement. This test starts
+ * the layout-shift observer before navigating away from the initial paint,
+ * then scrolls the island into view and waits for it to hydrate (the same
+ * point the reservation exists to protect against), then reads the
+ * accumulated shift back out.
+ */
+for (const { path } of RUNNABLE_LESSONS) {
+  test(`${path} does not shift layout while RunnableCode hydrates`, async ({ page }) => {
+    await page.goto(path);
+    await page.evaluate(() => {
+      (window as unknown as { __cls: number }).__cls = 0;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries() as (PerformanceEntry & {
+          value: number;
+          hadRecentInput: boolean;
+        })[]) {
+          if (!entry.hadRecentInput) {
+            (window as unknown as { __cls: number }).__cls += entry.value;
+          }
+        }
+      }).observe({ type: 'layout-shift', buffered: true });
+    });
+
+    const runnable = page.locator('.runnable-code');
+    await waitForRunnableCodeHydrated(runnable);
+    // Give any shift triggered by hydration a moment to be recorded by the
+    // observer before reading the total back out.
+    await page.waitForTimeout(500);
+
+    const cls = await page.evaluate(() => (window as unknown as { __cls: number }).__cls);
+    expect(cls).toBeLessThan(0.1);
+  });
+}
+
 test('a reader with JavaScript disabled gets no reserved blank space', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
