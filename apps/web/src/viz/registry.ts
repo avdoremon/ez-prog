@@ -172,7 +172,7 @@ const registry = {
     code: () => import('./code/tree-traversal/index.js'),
   },
   bst: {
-    renderer: 'TreeView',
+    renderer: 'TreeView3D',
     label: 'Binary search tree being searched, discarded subtrees dimmed',
     defaultInput: { values: [8, 3, 10, 1, 6, 9, 14], target: 6 },
     inputSchema: z.object({
