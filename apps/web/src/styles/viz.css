@@ -462,15 +462,16 @@
 
 /*
  * 60rem covers a 3D view's canvas + node strip + summary pushing the
- * figure past the plain .viz reservation above. Verified for TreeView3D
- * against a real measurement (see the "/data-structures/tree/ does not
- * shift layout" e2e test) -- 60rem needed no correction there. Shared by
- * both 3D renderers via the common `viz-3d` marker class (see
- * TreeView3D.tsx and GraphView3D.tsx) rather than duplicating this rule
- * per renderer. GraphView3D gets its own real CLS measurement in its own
- * pilot task (a force-directed layout spreads nodes differently than the
- * tree's compact radial one) -- 60rem here is a starting point to
- * re-verify, not assumed to already be correct for it.
+ * figure past the plain .viz reservation above. Shared by both 3D
+ * renderers via the common `viz-3d` marker class (see TreeView3D.tsx and
+ * GraphView3D.tsx) rather than duplicating this rule per renderer. Verified
+ * against a real measurement for both: TreeView3D via the
+ * "/data-structures/tree/ does not shift layout while the 3D view
+ * hydrates" e2e test, and GraphView3D (a force-directed layout, which
+ * spreads nodes differently than the tree's compact radial one) via the
+ * "/algorithms/bfs/ does not shift layout while the 3D view hydrates" e2e
+ * test -- both apps/web/e2e/lesson.spec.ts. 60rem needed no correction for
+ * either.
  */
 .js .viz:has(.viz-3d) {
   min-height: 60rem;

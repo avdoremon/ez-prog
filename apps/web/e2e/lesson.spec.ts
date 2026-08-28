@@ -329,8 +329,7 @@ test('the 3D graph view is keyboard-operable and announces neighbours', async ({
 
   await nodeButtons.nth(0).focus();
   const announcer = page.locator('.graph-view-3d__announcer');
-  await expect(announcer).toContainText('Node 0, value 0');
-  await expect(announcer).toContainText('neighbours');
+  await expect(announcer).toContainText('Node 0, value 0, neighbours 1, 2.');
 
   await page.keyboard.press('Tab');
   await expect(announcer).toContainText('Node 1, value 1');
@@ -338,6 +337,9 @@ test('the 3D graph view is keyboard-operable and announces neighbours', async ({
 
 test('/algorithms/bfs/ does not shift layout while the 3D view hydrates', async ({ page }) => {
   await page.goto('/algorithms/bfs/');
+  // Anchors this test to a genuinely hydrated page: without this, a 3D
+  // island that silently failed to hydrate at all would report zero shift
+  // (nothing rendered, nothing moved) and pass the CLS budget vacuously.
   await expect(page.locator('.graph-view-3d__node-button').first()).toBeVisible();
   const cls = await page.evaluate(
     () =>

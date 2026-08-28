@@ -17,8 +17,13 @@ each shows a different shape:
   generator at all: the cheapest shape a lesson can take.
 - `data-structures/tree.mdx` - uses `TreeView3D`, a camera-controllable 3D view,
   instead of `ArrayView`, and lets the learner change the traversal order from the
-  input editor. It is also the one lesson so far that reaches for the
-  heavy-dependency renderer pattern (§4.6) rather than the lightweight one.
+  input editor. It reaches for the heavy-dependency renderer pattern (§4.6) rather
+  than the lightweight one.
+- `algorithms/bfs.mdx` - uses `GraphView3D`, the same heavy-dependency 3D pattern as
+  `TreeView3D` but for arbitrary node-and-edge graphs (a force-directed layout
+  instead of a radial tree). Together with `data-structures/tree.mdx`, it is one of
+  the two lessons so far that reach for the heavy-dependency renderer pattern
+  (§4.6) rather than the lightweight one.
 
 ## 0. The one constraint that shapes everything below
 
@@ -42,9 +47,9 @@ already exists under `packages/`.** Concretely:
 
 So: **adding a lesson that reuses the `ArrayView` renderer touches zero existing files
 under `packages/`.** If your lesson idea needs anything the existing pieces don't
-provide — a new renderer (`ArrayView`, `TreeView`, `GraphView`, and `TreeView3D`
-exist today — see §4.6 for the two different ways a renderer can be added), a
-new `Mark`/`Target` shape,
+provide — a new renderer (`ArrayView`, `TreeView`, `GraphView`, `TreeView3D`, and
+`GraphView3D` exist today — see §4.6 for the two different ways a renderer can be
+added), a new `Mark`/`Target` shape,
 a change to how `snap`, `collect`, or `parseAnchors` behave — that is an **engine
 change**. It means editing an *existing* file under `packages/viz-core` or
 `packages/viz-react`. Do not make that change as part of a content PR. Stop and report
@@ -56,12 +61,15 @@ four pre-existing engine defects (see `docs/PHASE0-EXIT.md`); reporting beats ab
 Everything in this document about adding a visualization assumes you are reusing one of
 the existing renderers: `ArrayView` for anything positional (sorting, searching,
 two-pointer, sliding-window, stacks, queues), `TreeView` for a complete binary tree held
-in an array, `GraphView` for nodes and edges, or `TreeView3D` for the same complete
-binary tree drawn as a camera-controllable 3D scene. The first two take the same
-`number[]` state and the same index-based marks, so choosing between them is a
-one-word change in the registry; `GraphView` takes a `GraphState` instead (§4.6).
-`TreeView3D` also takes the same `number[]`/index-based-marks state as `TreeView` — the
-difference is entirely in *how it's loaded* (§4.6), not in the data it consumes.
+in an array, `GraphView` for nodes and edges, `TreeView3D` for the same complete
+binary tree drawn as a camera-controllable 3D scene, or `GraphView3D` for the same
+node-and-edge graph as `GraphView` drawn as a camera-controllable, force-directed 3D
+scene. The first two take the same `number[]` state and the same index-based marks, so
+choosing between them is a one-word change in the registry; `GraphView` and
+`GraphView3D` take a `GraphState` instead (§4.6). `TreeView3D` also takes the same
+`number[]`/index-based-marks state as `TreeView`, and `GraphView3D` also takes the same
+`GraphState` as `GraphView` — the difference is entirely in *how it's loaded* (§4.6),
+not in the data either consumes.
 
 ## 1. Where lesson files go, and how a slug is derived
 
@@ -501,7 +509,8 @@ Verbatim shape, from the real `binary-search` entry:
 
 Field by field:
 
-- `renderer` — `'ArrayView'`, `'TreeView'`, `'GraphView'` or `'TreeView3D'`; the union in
+- `renderer` — `'ArrayView'`, `'TreeView'`, `'GraphView'`, `'TreeView3D'` or
+  `'GraphView3D'`; the union in
   `apps/web/src/viz/types.ts` is what the type allows. Choosing between them is ordinary
   content work. **Writing a new one is still an engine change** (§0), and there are now
   two different shapes that change can take, depending on whether the renderer's
@@ -515,18 +524,23 @@ Field by field:
     dependencies are small — the whole `RENDERERS` map is bundled into every lesson page
     that uses `<Viz>`, so a heavy dependency here is a heavy dependency on all 27+ other
     lessons too, whether or not they use that renderer.
-  - **Heavy-dependency renderer (new, added for `TreeView3D`).** `TreeView3D` lives in
-    its own workspace package, `packages/viz-3d`, wrapping
+  - **Heavy-dependency renderer (new, added for `TreeView3D`; `GraphView3D` now
+    follows the same pattern).** `TreeView3D` and `GraphView3D` both live in the same
+    workspace package, `packages/viz-3d`, wrapping
     `@react-three/fiber`/`@react-three/drei`/`three` — roughly 250KB+ gzipped, far more
     than every other renderer's dependencies combined. Statically importing that into
     `VizIsland.tsx` the same way as the lightweight renderers would ship Three.js to
-    every lesson in the site, not just `data-structures/tree.mdx`. Instead, `VizIsland.tsx`
-    has a `loadRenderer(rendererName)` function that returns the lightweight `RENDERERS`
-    map entry for every ordinary renderer name, but for `'TreeView3D'` specifically
-    returns a *dynamic* `import('@cs/viz-3d')` — so the Three.js stack is only fetched
-    when a viz entry actually names it. If your new renderer pulls in a comparably heavy
+    every lesson in the site, not just `data-structures/tree.mdx` and `algorithms/bfs.mdx`.
+    Instead, `VizIsland.tsx` has a `loadRenderer(rendererName)` function that returns the
+    lightweight `RENDERERS` map entry for every ordinary renderer name, but has a
+    separate branch each for `'TreeView3D'` and `'GraphView3D'` that both return a
+    *dynamic* `import('@cs/viz-3d')` (picking the matching named export off the module)
+    — so the Three.js stack is only fetched when a viz entry actually names one of them.
+    If your new renderer pulls in a comparably heavy
     dependency (a physics engine, another rendering library, anything past a rounding
-    error on the bundle), follow this pattern: its own `packages/viz-<name>` package, and
+    error on the bundle), follow this pattern: its own `packages/viz-<name>` package (or
+    an existing heavy-dependency package if it shares one, as `GraphView3D` shares
+    `packages/viz-3d` with `TreeView3D`), and
     a branch in `loadRenderer` rather than a static entry in `RENDERERS`. If it doesn't,
     use the lightweight pattern — it's simpler, and dynamic `import()` has its own cost
     (an extra network round-trip before the renderer appears) that isn't worth paying for
@@ -561,12 +575,31 @@ Field by field:
     (`data-structures/tree.mdx`, `tree-traversal` in the registry) as a pilot; see
     `docs/superpowers/plans/2026-08-27-viz-3d-tree-pilot.md` before migrating another
     `TreeView` lesson to it.
-  - **`GraphView`** is the one renderer whose state is *not* `number[]`. It takes a
+  - **`GraphView`** is the one 2D renderer whose state is *not* `number[]`. It takes a
     `GraphState` — `{ values, edges, directed? }` from `@cs/viz-core` — and draws an
     adjacency list, one row per node listing its neighbours, rather than a node-and-edge
     diagram. Nodes are still marked by `{ t: 'index' }`; edges use `{ t: 'edge', from,
     to }`, and on an undirected graph a single edge mark lights up both listings of that
-    edge. Weights render when present, which is what a Dijkstra lesson will need.
+    edge. Weights render when present, which is what a Dijkstra lesson will need. Used by
+    `dfs` and `dijkstra` in the registry today; `bfs` moved off it onto `GraphView3D`
+    (below) as that renderer's pilot.
+  - **`GraphView3D`** draws that same `GraphState` — same `{ values, edges, directed? }`
+    shape, same node/edge marks — as a camera-controllable 3D scene instead of
+    `GraphView`'s adjacency list. Unlike `TreeView3D`'s radial layout (which can derive
+    positions straight from each index's place in a complete binary tree), a graph's
+    shape isn't implied by its indexes, so `GraphView3D` runs an actual force-directed
+    physics simulation (`packages/viz-3d/src/graphLayout.ts`, via `d3-force-3d`) to
+    settle node positions, then rescales the result to a fixed radius so any graph shape
+    fits the shared camera regardless of node count. Same state shape, same marks as
+    `GraphView` — swapping `GraphView` for `GraphView3D` in a registry entry's
+    `renderer` field is a one-word change, same as `TreeView`/`TreeView3D`. It carries
+    the same kind of accessible interaction as `TreeView3D` (a visible, focusable
+    "jump to node" button strip below the canvas, plus a live-region summary that
+    includes each focused node's neighbours) because the WebGL canvas itself is
+    `aria-hidden`. Currently used by exactly one lesson (`algorithms/bfs.mdx`, `bfs` in
+    the registry) as a pilot; see
+    `docs/superpowers/plans/2026-08-28-graphview-3d-pilot.md` before migrating another
+    `GraphView` lesson (`dfs`, `dijkstra`, or a future `graph-intro`) to it.
 - `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
   `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
   screen-reader user or a JS-disabled reader can act on.
