@@ -70,7 +70,17 @@ function ArrowHead({ from, to, color }: { from: Position3D; to: Position3D; colo
 
 export function GraphView3D({ state, marks = NO_MARKS, label }: GraphView3DProps) {
   const { values, edges, directed = false } = state;
-  const positions = useMemo(() => layoutGraph3D(values.length, edges), [values, edges]);
+  // `state` comes from `snap()` (packages/viz-core/src/snap.ts), which deep-clones
+  // on every frame -- `values`/`edges` get a fresh object identity each render even
+  // when the graph's actual shape hasn't changed. Memoizing on those identities would
+  // never hit (this is a real physics simulation, ~300 ticks, measurably expensive to
+  // rerun every frame), so memoize on a structural key instead.
+  const edgeKey = edges.map((e) => `${e.from}-${e.to}`).join(',');
+  const positions = useMemo(
+    () => layoutGraph3D(values.length, edges),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- edgeKey is edges' structural identity; values.length covers node count
+    [values.length, edgeKey],
+  );
   const summary = useMemo(
     () => buildGraphSummary(values.length, edges.length, directed),
     [values.length, edges.length, directed],
@@ -172,7 +182,7 @@ export function GraphView3D({ state, marks = NO_MARKS, label }: GraphView3DProps
       </div>
 
       <p className="graph-view-3d__summary">
-        {hasFocusedNode ? `Node ${focusedIndex}, value ${values[focusedIndex!]}.` : summary}
+        {hasFocusedNode ? focusedAnnouncement : summary}
       </p>
       <p role="status" aria-live="polite" className="graph-view-3d__announcer visually-hidden">
         {focusedAnnouncement}

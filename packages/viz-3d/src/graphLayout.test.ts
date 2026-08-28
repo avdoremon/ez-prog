@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { layoutGraph3D } from './graphLayout.js';
+import { LAYOUT_RADIUS, layoutGraph3D } from './graphLayout.js';
 import type { Position3D } from './layout.js';
 
 function distance(a: Position3D, b: Position3D): number {
@@ -31,16 +31,28 @@ test('layout is deterministic', () => {
   expect([...a.entries()]).toEqual([...b.entries()]);
 });
 
-test('no two nodes settle at the exact same position', () => {
+test('no two nodes settle closer than the sphere diameter', () => {
   const edges = [
     { from: 0, to: 1 }, { from: 0, to: 2 }, { from: 1, to: 3 },
     { from: 2, to: 3 }, { from: 3, to: 4 }, { from: 4, to: 5 },
   ];
   const positions = [...layoutGraph3D(6, edges).values()];
+  const SPHERE_DIAMETER = 0.8; // matches GraphView3D.tsx's sphereGeometry radius (0.4) * 2
   for (let i = 0; i < positions.length; i++) {
     for (let j = i + 1; j < positions.length; j++) {
-      expect(distance(positions[i]!, positions[j]!)).toBeGreaterThan(0);
+      expect(distance(positions[i]!, positions[j]!)).toBeGreaterThan(SPHERE_DIAMETER);
     }
+  }
+});
+
+test('every settled node fits within the camera-framed radius', () => {
+  const edges = [
+    { from: 0, to: 1 }, { from: 0, to: 2 }, { from: 1, to: 3 },
+    { from: 2, to: 3 }, { from: 3, to: 4 }, { from: 4, to: 5 },
+  ];
+  const positions = layoutGraph3D(6, edges);
+  for (const p of positions.values()) {
+    expect(Math.hypot(p.x, p.y, p.z)).toBeLessThanOrEqual(LAYOUT_RADIUS + 1e-6);
   }
 });
 

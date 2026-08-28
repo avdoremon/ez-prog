@@ -17,14 +17,29 @@ const SETTLE_TICKS = 300;
 /** Repulsion between every pair of nodes (negative = push apart). */
 const CHARGE_STRENGTH = -60;
 
-/** Target rest length for an edge once settled. */
+/**
+ * Influences edge length relative to other forces -- NOT a literal target
+ * distance once charge/collide are also in play; the post-simulation
+ * rescale (LAYOUT_RADIUS) is what actually bounds the final scale.
+ */
 const LINK_DISTANCE = 3;
 
 /**
- * Minimum center-to-center distance between two node spheres (radius 0.4
- * each, matching TreeView3D's node size, plus a visible gap).
+ * Passed to forceCollide as each node's own collision radius; in practice,
+ * at this graph's charge/link scale, repulsion already keeps nodes farther
+ * apart than this constraint would require on its own.
  */
 const COLLIDE_RADIUS = 1;
+
+/**
+ * Settled layouts are rescaled to this radius (about the origin, which
+ * forceCenter already keeps as the layout's centroid) so any graph fits
+ * the camera regardless of node count -- the force constants set
+ * relative structure (which nodes are close/far), not absolute scale.
+ * Matches layoutTree3D's own ~6-unit extent, the scale TreeView3D's
+ * camera was calibrated against.
+ */
+export const LAYOUT_RADIUS = 5;
 
 /**
  * Deterministic force-directed layout: same graph in, same settled
@@ -52,9 +67,19 @@ export function layoutGraph3D(
 
   for (let i = 0; i < SETTLE_TICKS; i++) simulation.tick();
 
+  const maxRadius = nodes.reduce(
+    (max, n) => Math.max(max, Math.hypot(n.x ?? 0, n.y ?? 0, n.z ?? 0)),
+    0,
+  );
+  const scale = maxRadius === 0 ? 1 : LAYOUT_RADIUS / maxRadius;
+
   const positions = new Map<number, Position3D>();
   nodes.forEach((n, i) => {
-    positions.set(i, { x: n.x ?? 0, y: n.y ?? 0, z: n.z ?? 0 });
+    positions.set(i, {
+      x: (n.x ?? 0) * scale,
+      y: (n.y ?? 0) * scale,
+      z: (n.z ?? 0) * scale,
+    });
   });
   return positions;
 }
