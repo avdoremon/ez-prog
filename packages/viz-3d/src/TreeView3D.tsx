@@ -102,7 +102,7 @@ export function TreeView3D({ state, marks = NO_MARKS, label }: TreeView3DProps) 
   const displayed = focusedAnnouncement ?? summary;
 
   return (
-    <div className="tree-view-3d">
+    <div className="tree-view-3d viz-3d">
       <div className="tree-view-3d__canvas-wrap" aria-hidden="true">
         <Canvas camera={{ position: [0, 3, 10], fov: 50 }}>
           <ambientLight intensity={0.7} />

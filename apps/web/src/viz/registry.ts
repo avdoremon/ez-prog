@@ -186,7 +186,7 @@ const registry = {
     code: () => import('./code/bst-search/index.js'),
   },
   bfs: {
-    renderer: 'GraphView',
+    renderer: 'GraphView3D',
     label: 'Graph explored breadth-first from a starting node',
     defaultInput: {
       values: [0, 1, 2, 3, 4, 5],

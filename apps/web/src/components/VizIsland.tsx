@@ -45,6 +45,9 @@ function loadRenderer(rendererName: VizEntry['renderer']): Promise<Renderer<neve
   if (rendererName === 'TreeView3D') {
     return import('@cs/viz-3d').then((m) => m.TreeView3D as Renderer<never>);
   }
+  if (rendererName === 'GraphView3D') {
+    return import('@cs/viz-3d').then((m) => m.GraphView3D as Renderer<never>);
+  }
   return Promise.resolve(RENDERERS[rendererName]);
 }
 
