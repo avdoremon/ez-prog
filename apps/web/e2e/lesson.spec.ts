@@ -319,6 +319,55 @@ test.describe('reduced motion', () => {
   });
 });
 
+test('the 3D graph view is keyboard-operable and announces neighbours', async ({ page }) => {
+  await page.goto('/algorithms/bfs/');
+  const nodeButtons = page.locator('.graph-view-3d__node-button');
+  await expect(nodeButtons.first()).toBeVisible();
+
+  const summary = page.locator('.graph-view-3d__summary');
+  await expect(summary).toContainText('Graph, 6 nodes, 6 edges.');
+
+  await nodeButtons.nth(0).focus();
+  const announcer = page.locator('.graph-view-3d__announcer');
+  await expect(announcer).toContainText('Node 0, value 0');
+  await expect(announcer).toContainText('neighbours');
+
+  await page.keyboard.press('Tab');
+  await expect(announcer).toContainText('Node 1, value 1');
+});
+
+test('/algorithms/bfs/ does not shift layout while the 3D view hydrates', async ({ page }) => {
+  await page.goto('/algorithms/bfs/');
+  await expect(page.locator('.graph-view-3d__node-button').first()).toBeVisible();
+  const cls = await page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let total = 0;
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as (PerformanceEntry & {
+            value: number;
+            hadRecentInput: boolean;
+          })[]) {
+            if (!entry.hadRecentInput) total += entry.value;
+          }
+        }).observe({ type: 'layout-shift', buffered: true });
+        setTimeout(() => resolve(total), 1500);
+      }),
+  );
+  expect(cls).toBeLessThan(0.1);
+});
+
+test.describe('reduced motion (graph)', () => {
+  test.use({ contextOptions: { reducedMotion: 'reduce' } });
+
+  test('focusing a graph node snaps the camera instead of animating it', async ({ page }) => {
+    await page.goto('/algorithms/bfs/');
+    const nodeButtons = page.locator('.graph-view-3d__node-button');
+    await nodeButtons.nth(2).focus();
+    await expect(page.locator('.graph-view-3d__announcer')).toContainText('Node 2, value 2');
+  });
+});
+
 /*
  * The dark-scheme runs are the check that was missing. Starlight hardcodes
  * data-theme="dark" on <html> and switches its text to white, which against
