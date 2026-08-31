@@ -216,7 +216,7 @@ const registry = {
     code: () => import('./code/bfs/index.js'),
   },
   dfs: {
-    renderer: 'GraphView',
+    renderer: 'GraphView3D',
     label: 'Graph explored depth-first from a starting node',
     // Deliberately the same graph as the 'bfs' entry, so the two lessons can
     // be compared directly.
