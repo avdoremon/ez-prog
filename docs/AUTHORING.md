@@ -21,9 +21,11 @@ each shows a different shape:
   than the lightweight one.
 - `algorithms/bfs.mdx` - uses `GraphView3D`, the same heavy-dependency 3D pattern as
   `TreeView3D` but for arbitrary node-and-edge graphs (a force-directed layout
-  instead of a radial tree). Together with `data-structures/tree.mdx`, it is one of
-  the two lessons so far that reach for the heavy-dependency renderer pattern
-  (§4.6) rather than the lightweight one.
+  instead of a radial tree). `algorithms/dfs.mdx`, `algorithms/dijkstra.mdx`, and
+  `data-structures/graph.mdx` (`graph-intro` in the registry) now use it too.
+  Together with `data-structures/tree.mdx`/`data-structures/bst.mdx`, these are the
+  lessons so far that reach for the heavy-dependency renderer pattern (§4.6) rather
+  than the lightweight one.
 
 ## 0. The one constraint that shapes everything below
 
@@ -580,9 +582,12 @@ Field by field:
     adjacency list, one row per node listing its neighbours, rather than a node-and-edge
     diagram. Nodes are still marked by `{ t: 'index' }`; edges use `{ t: 'edge', from,
     to }`, and on an undirected graph a single edge mark lights up both listings of that
-    edge. Weights render when present, which is what a Dijkstra lesson will need. Used by
-    `dfs` and `dijkstra` in the registry today; `bfs` moved off it onto `GraphView3D`
-    (below) as that renderer's pilot.
+    edge. Weights render when present. Used by `linked-list` and `trie` in the registry
+    today — both acyclic (a chain and a tree, not a binary one), which is why they're
+    candidates for extending `TreeView3D`'s deterministic layout rather than
+    `GraphView3D`'s force-directed one (see the `GraphView3D` pilot spec's scope
+    section), not migration targets for this renderer. `bfs`, `dfs`, `dijkstra`, and
+    `graph-intro` have all moved off `GraphView` onto `GraphView3D` (below).
   - **`GraphView3D`** draws that same `GraphState` — same `{ values, edges, directed? }`
     shape, same node/edge marks — as a camera-controllable 3D scene instead of
     `GraphView`'s adjacency list. Unlike `TreeView3D`'s radial layout (which can derive
@@ -590,16 +595,24 @@ Field by field:
     shape isn't implied by its indexes, so `GraphView3D` runs an actual force-directed
     physics simulation (`packages/viz-3d/src/graphLayout.ts`, via `d3-force-3d`) to
     settle node positions, then rescales the result to a fixed radius so any graph shape
-    fits the shared camera regardless of node count. Same state shape, same marks as
-    `GraphView` — swapping `GraphView` for `GraphView3D` in a registry entry's
-    `renderer` field is a one-word change, same as `TreeView`/`TreeView3D`. It carries
-    the same kind of accessible interaction as `TreeView3D` (a visible, focusable
-    "jump to node" button strip below the canvas, plus a live-region summary that
-    includes each focused node's neighbours) because the WebGL canvas itself is
-    `aria-hidden`. Currently used by exactly one lesson (`algorithms/bfs.mdx`, `bfs` in
-    the registry) as a pilot; see
-    `docs/superpowers/plans/2026-08-28-graphview-3d-pilot.md` before migrating another
-    `GraphView` lesson (`dfs`, `dijkstra`, or a future `graph-intro`) to it.
+    fits the shared camera regardless of node count — including a weak centering pull
+    on every axis (`GRAVITY_STRENGTH`) added after `graph-intro`'s migration exposed
+    that an edgeless node could otherwise drift far enough to make the rescale crush
+    the rest of the graph together. Same state shape, same marks as `GraphView` —
+    swapping `GraphView` for `GraphView3D` in a registry entry's `renderer` field is a
+    one-word change, same as `TreeView`/`TreeView3D`. It carries the same kind of
+    accessible interaction as `TreeView3D` (a visible, focusable "jump to node" button
+    strip below the canvas, plus a live-region summary that includes each focused
+    node's neighbours) because the WebGL canvas itself is `aria-hidden`. Used by
+    `bfs`, `dfs`, `dijkstra`, and `graph-intro` (`algorithms/bfs.mdx`,
+    `algorithms/dfs.mdx`, `algorithms/dijkstra.mdx`, `data-structures/graph.mdx`) —
+    `bfs` was the pilot (undirected, unweighted); `dfs` was mechanical (identical
+    graph shape to `bfs`); `dijkstra` was the first real exercise of the weighted-edge
+    `<Text>` labels; `graph-intro` was the first real exercise of the directed
+    toggle's arrowheads (only reachable via the input editor — its `defaultInput`
+    ships `directed: false`) and, incidentally, of the layout bug above. See
+    `docs/superpowers/plans/2026-08-28-graphview-3d-pilot.md` for the design
+    reasoning behind all of this.
 - `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
   `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
   screen-reader user or a JS-disabled reader can act on.
