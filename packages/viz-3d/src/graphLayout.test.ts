@@ -56,6 +56,23 @@ test('every settled node fits within the camera-framed radius', () => {
   }
 });
 
+test('an isolated node (no edges at all) does not crush the connected cluster together', () => {
+  // graph-intro's exact default shape: nodes 0-1-2 mutually connected plus
+  // 2-3, and node 4 with no edges touching it at all -- the case that
+  // exposed the bug this test guards (see GRAVITY_STRENGTH's doc comment
+  // in graphLayout.ts): an untethered node drifting far enough to become
+  // the rescale's outlier crushed the connected cluster below the sphere
+  // diameter.
+  const edges = [{ from: 0, to: 1 }, { from: 0, to: 2 }, { from: 1, to: 2 }, { from: 2, to: 3 }];
+  const positions = [...layoutGraph3D(5, edges).values()];
+  const SPHERE_DIAMETER = 0.8;
+  for (let i = 0; i < positions.length; i++) {
+    for (let j = i + 1; j < positions.length; j++) {
+      expect(distance(positions[i]!, positions[j]!)).toBeGreaterThan(SPHERE_DIAMETER);
+    }
+  }
+});
+
 test('two disconnected edges settle with each pair closer together than across pairs', () => {
   // 0-1 is one edge; 2-3 is a separate edge; no path connects the two pairs.
   const positions = layoutGraph3D(4, [{ from: 0, to: 1 }, { from: 2, to: 3 }]);

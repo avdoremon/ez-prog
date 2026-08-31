@@ -1,5 +1,6 @@
 import {
   forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation,
+  forceX, forceY, forceZ,
 } from 'd3-force-3d';
 import type { SimulationNodeDatum3D } from 'd3-force-3d';
 import type { Position3D } from './layout.js';
@@ -30,6 +31,25 @@ const LINK_DISTANCE = 3;
  * apart than this constraint would require on its own.
  */
 const COLLIDE_RADIUS = 1;
+
+/**
+ * Weak pull toward the origin on every axis, on top of forceCenter's mere
+ * recentering. Without this, a node with no edges at all (graph-intro's
+ * default input has one) has nothing to check forceManyBody's repulsion --
+ * it drifts arbitrarily far from every connected node before the
+ * simulation cools. The post-simulation rescale then fits the camera to
+ * that one outlier, uniformly shrinking the actually-connected cluster
+ * along with it -- confirmed by reproducing graph-intro's exact shape: at
+ * gravity 0 the cluster's closest pair settled 0.552 apart post-rescale,
+ * under the 0.8 sphere-diameter floor the connected-graph shapes (bfs,
+ * dijkstra) never violated. 0.08 was chosen empirically: the smallest of
+ * {0.05, 0.08, 0.1} tested that leaves a comfortable margin above 0.8 for
+ * graph-intro's isolated-node shape (1.520) while barely perturbing the
+ * already-shipped, already-visually-verified bfs/dijkstra layouts (their
+ * own minimum pairwise distance moves from ~1.9-2.6 to ~2.0-2.7, not a
+ * visible change in spread).
+ */
+const GRAVITY_STRENGTH = 0.08;
 
 /**
  * Settled layouts are rescaled to this radius (about the origin, which
@@ -63,6 +83,9 @@ export function layoutGraph3D(
     .force('link', forceLink(links).distance(LINK_DISTANCE))
     .force('center', forceCenter())
     .force('collide', forceCollide(COLLIDE_RADIUS))
+    .force('x', forceX(0).strength(GRAVITY_STRENGTH))
+    .force('y', forceY(0).strength(GRAVITY_STRENGTH))
+    .force('z', forceZ(0).strength(GRAVITY_STRENGTH))
     .stop();
 
   for (let i = 0; i < SETTLE_TICKS; i++) simulation.tick();

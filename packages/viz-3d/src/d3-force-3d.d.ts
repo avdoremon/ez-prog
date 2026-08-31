@@ -45,4 +45,11 @@ declare module 'd3-force-3d' {
     strength(value: number): CollideForce;
   }
   export function forceCollide(radius?: number): CollideForce;
+
+  export interface PositioningForce {
+    strength(value: number): PositioningForce;
+  }
+  export function forceX(x?: number): PositioningForce;
+  export function forceY(y?: number): PositioningForce;
+  export function forceZ(z?: number): PositioningForce;
 }
