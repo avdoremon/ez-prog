@@ -335,6 +335,21 @@ test('the 3D graph view is keyboard-operable and announces neighbours', async ({
   await expect(announcer).toContainText('Node 1, value 1');
 });
 
+test('the 3D graph view labels weighted edges and announces them per neighbour', async ({ page }) => {
+  await page.goto('/algorithms/dijkstra/');
+  const nodeButtons = page.locator('.graph-view-3d__node-button');
+  await expect(nodeButtons.first()).toBeVisible();
+
+  const summary = page.locator('.graph-view-3d__summary');
+  await expect(summary).toContainText('Graph, 6 nodes, 7 edges.');
+
+  await nodeButtons.nth(0).focus();
+  const announcer = page.locator('.graph-view-3d__announcer');
+  await expect(announcer).toContainText(
+    'Node 0, value 0, neighbours 1 (weight 2), 2 (weight 1), 4 (weight 9).',
+  );
+});
+
 test('/algorithms/bfs/ does not shift layout while the 3D view hydrates', async ({ page }) => {
   await page.goto('/algorithms/bfs/');
   // Anchors this test to a genuinely hydrated page: without this, a 3D

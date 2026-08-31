@@ -248,7 +248,7 @@ const registry = {
     code: () => import('./code/dfs/index.js'),
   },
   dijkstra: {
-    renderer: 'GraphView',
+    renderer: 'GraphView3D',
     label: 'Weighted graph with the cheapest known cost to reach each node',
     // The same six nodes as the 'bfs' and 'dfs' entries, now carrying weights,
     // so the three lessons can be compared directly. Edge 0-4 is deliberately
