@@ -100,6 +100,19 @@ Layout is a pure, directly unit-testable function:
 // packages/viz-3d/src/hierarchyLayout.ts
 export interface Position3D { x: number; y: number; z: number } // from ./layout.js, not redeclared
 
+/**
+ * This renderer's own bounding radius -- NOT graphLayout.ts's LAYOUT_RADIUS
+ * (5). See "Why a bigger, renderer-specific bounding radius" below: at
+ * GraphView3D's radius, a chain longer than ~7 nodes crushes below the
+ * sphere-diameter floor no matter how the layout is shaped. 15 was chosen
+ * empirically (not derived from a formula and trusted -- computed with a
+ * throwaway script, the same discipline graph-intro's gravity fix used):
+ * a 16-node chain settles at exactly 1.0 unit of spacing at this radius (a
+ * comfortable 25% margin over the 0.8 floor), and trie's existing,
+ * unchanged worst case (6 words x 8 chars, 49 nodes) settles at 1.5.
+ */
+export const HIERARCHY_LAYOUT_RADIUS = 15;
+
 export function layoutHierarchy3D(state: GraphState): Map<number, Position3D> {
   // 1. Root: the node with in-degree 0, computed from state.edges;
   //    falls back to index 0 if none or multiple exist.
@@ -113,12 +126,10 @@ export function layoutHierarchy3D(state: GraphState): Map<number, Position3D> {
   //    this task exports them, rather than redeclaring the same two
   //    numbers a third time) per depth, for visual consistency with the
   //    already-shipped tree/graph views.
-  // 5. Rescale: the same LAYOUT_RADIUS-normalizing uniform rescale
-  //    layoutGraph3D.ts already uses (fit the single farthest node to a
-  //    fixed radius, about the origin) -- needed because, unlike a bushy
-  //    binary tree, a 16-node linked-list chain would otherwise extend far
-  //    past the fixed camera. LAYOUT_RADIUS is imported from graphLayout.ts,
-  //    not redeclared, so both renderers stay fit to the same shared camera.
+  // 5. Rescale: a uniform rescale (fit the single farthest node to
+  //    HIERARCHY_LAYOUT_RADIUS, about the origin) -- the same technique
+  //    layoutGraph3D.ts uses, but against this renderer's OWN constant,
+  //    not graphLayout.ts's LAYOUT_RADIUS (see above).
 }
 ```
 
@@ -127,11 +138,34 @@ Reingold-Tilford-style layout would give each subtree an angular slice
 proportional to its descendant leaf count, so a bushy branch doesn't get
 visually squeezed next to a single-leaf one. Deliberately not built:
 simpler to implement and test, and correct enough at these lessons' small
-sizes (`trie`'s branching factor is bounded by its word count, capped at 5
-by this spec — see §5.1). A linked-list chain (every node has exactly one
-child) degenerates naturally to a straight line under equal subdivision too:
-the wedge never splits, so every node inherits the same angle and the chain
-extends outward as a straight radial line, not a spiral.
+sizes. A linked-list chain (every node has exactly one child) degenerates
+naturally to a straight line under equal subdivision too: the wedge never
+splits, so every node inherits the same angle and the chain extends
+outward as a straight radial line, not a spiral.
+
+**Why a bigger, renderer-specific bounding radius (not a spiral, not a
+tighter cap alone).** The first version of this spec proposed sharing
+`graphLayout.ts`'s `LAYOUT_RADIUS = 5` and capping `linked-list` at 16
+nodes. That number turns out to be wrong by more than 2x: for *any* chain
+under a uniform-rescale-to-fit-the-farthest-node layout, the tightest pair
+is always the root and its first child, at distance `LEVEL_RADIUS_STEP *
+(LAYOUT_RADIUS / deepestNodeRadius)` — a quantity that shrinks linearly as
+chain length grows, independent of `LEVEL_RADIUS_STEP`/`LEVEL_HEIGHT_STEP`'s
+actual values. At `LAYOUT_RADIUS = 5`, a 16-node chain settles at 0.333
+units of spacing, well under the 0.8 sphere-diameter floor `graph-intro`'s
+bug (`e1d59a5`) already established as a real failure mode — not a
+hypothetical one. A golden-angle spiral (rotating each depth's wedge by a
+fixed increment, so a chain coils instead of running straight) was
+considered next and **numerically disproven**: the root always sits at the
+origin, and distance-from-origin depends only on radius, never on angle,
+so the root-to-first-child gap — the actual bottleneck — is completely
+unaffected by any angular scheme. The only lever that actually works is
+the ratio of bounding radius to sphere size, so this renderer gets its own,
+larger `HIERARCHY_LAYOUT_RADIUS` and its own camera distance (§3), rather
+than sharing `GraphView3D`'s. This also means `trie`'s registry schema
+needs **no tightening at all** (§5.2) — its current worst case fits
+comfortably at the new radius, unlike the first version of this spec
+assumed.
 
 **No rendering component work beyond swapping the layout function.**
 `HierarchyView3D.tsx` is structurally a near-copy of `GraphView3D.tsx`
@@ -151,7 +185,12 @@ only in which layout function it calls.
 
 Structurally mirrors `GraphView3D.tsx` exactly, importing
 `layoutHierarchy3D` from `./hierarchyLayout.js` in place of `layoutGraph3D`.
-A graph-shaped idle scene-summary reuses `buildGraphSummary` from
+Its `<Canvas>` gets its own camera calibration, pulled back proportionally
+to `HIERARCHY_LAYOUT_RADIUS` being 3x `GraphView3D`'s bounding radius —
+`camera={{ position: [0, 9, 36], fov: 50 }}` versus `GraphView3D`'s
+`[0, 3, 12]` (same fov, same viewing angle, further back so the larger
+bounding sphere still fills the frame the same way). A graph-shaped idle
+scene-summary reuses `buildGraphSummary` from
 `graphSummary.ts` unchanged (its wording — "Graph, *n* nodes, *m* edges" —
 doesn't claim anything tree-specific like levels/depth that would need a
 hierarchy-shaped variant; `buildGraphSummary`'s own doc comment already
@@ -188,12 +227,13 @@ the existing pattern — it doesn't.
   inherited from sharing `array-basics`'s exact shape for direct 2D-lesson
   comparability, not chosen for viz legibility — the 2D `GraphView`
   renders a chain as a scrollable adjacency list, where length doesn't hurt
-  legibility. A 3D spatial layout is different: `layoutHierarchy3D`'s
-  rescale-to-fit-camera step (§2) would otherwise shrink a 32-node chain's
-  inter-node spacing well under the sphere-diameter floor the
-  `graph-intro` bug (`e1d59a5`) already established as a real failure
-  mode. 16 matches the cap the three quadratic-sort lessons already use for
-  an analogous legibility reason. `array-basics` itself is untouched (still
+  legibility. A 3D spatial layout is different: even at this renderer's
+  own, larger `HIERARCHY_LAYOUT_RADIUS` (§2), a 32-node chain still settles
+  at 0.484 units of spacing — under the 0.8 sphere-diameter floor. 16 is
+  the largest chain length that clears that floor with a real margin (1.0
+  units, computed directly, not assumed) at this radius, and happens to
+  match the cap the three quadratic-sort lessons already use for an
+  analogous legibility reason. `array-basics` itself is untouched (still
   32) — it uses `ArrayView`, which has no spatial-crowding concern — so a
   comment on `linked-list`'s entry should note the two lessons no longer
   share an identical input ceiling, and why.
@@ -201,14 +241,13 @@ the existing pattern — it doesn't.
 
 ### 5.2 `trie`
 
-- `renderer: 'GraphView'` → `'HierarchyView3D'`.
-- `inputSchema.words` max **6 → 5**; per-word length max **8 → 6**. Same
-  reasoning as `linked-list`: worst case (no shared prefixes) is
-  `words.length * word.length` nodes at up to `word.length` deep — the
-  current bound (6 × 8 = 48 nodes, 8 levels deep) is comfortably larger
-  than what a small fixed camera frame can render legibly. 5 × 6 = 30 nodes
-  worst case, 6 levels deep, is a meaningfully tighter bound while leaving
-  room for `defaultInput`'s 3 words well below it.
+- `renderer: 'GraphView'` → `'HierarchyView3D'`. **No schema change.** At
+  this renderer's own `HIERARCHY_LAYOUT_RADIUS` (§2), `trie`'s existing
+  worst case (6 words × 8 chars, no shared prefixes → 49 nodes, 8 levels
+  deep) settles at 1.5 units of spacing — comfortably clear of the 0.8
+  floor, computed directly rather than assumed. An earlier version of this
+  spec proposed tightening this schema too, before the bounding-radius fix
+  (§2) made it unnecessary.
 - `defaultInput` (`['cat', 'car', 'cart']`, `search: 'ca'`) is unaffected.
 
 ---
@@ -227,11 +266,13 @@ fully unit-tested in Node/Vitest —
   every node at the same angle.
 - Determinism: two calls with the same input produce identical output.
 - No two nodes settle closer than the sphere diameter (0.8), on both a
-  wide/shallow shape (a 5-word trie near its new cap) and a deep/narrow one
-  (a 16-node chain at its new cap) — the two shapes this spec's schema
-  changes (§5) were sized around.
-- Every settled node fits within `LAYOUT_RADIUS` (imported, not
-  redeclared, from `graphLayout.ts`).
+  deep/narrow shape (a 16-node chain, `linked-list`'s new cap) and a
+  wide/deep one (a 6-word × 8-char, no-shared-prefix trie — `trie`'s
+  existing, unchanged worst case) — the two real shapes §5's numbers were
+  computed against, not just the lessons' small `defaultInput`s.
+- Every settled node fits within `HIERARCHY_LAYOUT_RADIUS` (exported from
+  `hierarchyLayout.ts`, not `graphLayout.ts`'s `LAYOUT_RADIUS` — this
+  renderer does not share `GraphView3D`'s bounding radius; see §2).
 - An empty graph and a single-root-only graph (no children) don't throw.
 
 `HierarchyView3D.tsx` has no dedicated unit test — same reasoning as
@@ -258,12 +299,12 @@ either lesson done.
       for `hierarchyLayout.ts` to reuse.
 - [ ] `data-structures/linked-list.mdx` and `data-structures/trie.mdx`
       migrated: `<Viz id="...">` unchanged, only each registry entry's
-      `renderer` field changes, plus the two schema tightenings (§5) —
-      verified by hand that both lessons' prose still reads sensibly with
-      no edits needed.
-- [ ] `layoutHierarchy3D` unit-tested per §6, including both shapes this
-      spec's schema changes were sized around (16-node chain, 5-word trie
-      near its cap).
+      `renderer` field changes (plus `linked-list`'s schema tightening,
+      §5.1 — `trie`'s schema is unchanged, §5.2) — verified by hand that
+      both lessons' prose still reads sensibly with no edits needed.
+- [ ] `layoutHierarchy3D` unit-tested per §6, including both real shapes
+      §5's numbers were computed against (a 16-node chain, a 49-node
+      worst-case trie).
 - [ ] Accessibility (§4) verified by e2e test for both lessons: neighbor-
       describing button labels, camera-pan-on-focus, live-region
       announcement, `prefers-reduced-motion`, axe zero-violations.
