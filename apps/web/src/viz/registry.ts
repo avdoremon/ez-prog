@@ -297,7 +297,7 @@ const registry = {
     code: () => import('./code/dijkstra/index.js'),
   },
   'graph-intro': {
-    renderer: 'GraphView',
+    renderer: 'GraphView3D',
     label: 'Graph tour: each node with its neighbours and degree',
     defaultInput: {
       values: [0, 1, 2, 3, 4],

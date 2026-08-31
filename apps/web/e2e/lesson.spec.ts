@@ -350,6 +350,35 @@ test('the 3D graph view labels weighted edges and announces them per neighbour',
   );
 });
 
+test('the 3D graph view switches to directed wording and renders arrowheads when the learner sets directed:true', async ({ page }) => {
+  await page.goto('/data-structures/graph/');
+  const nodeButtons = page.locator('.graph-view-3d__node-button');
+  await expect(nodeButtons.first()).toBeVisible();
+
+  const summary = page.locator('.graph-view-3d__summary');
+  const announcer = page.locator('.graph-view-3d__announcer');
+  await expect(summary).toContainText('Graph, 5 nodes, 4 edges.');
+  await nodeButtons.nth(0).focus();
+  await expect(announcer).toContainText('Node 0, value 0, neighbours 1, 2.');
+
+  await page.getByText('Try your own input').click();
+  const editor = page.locator('.viz-input-editor');
+  await editor.locator('textarea').fill(JSON.stringify({
+    values: [0, 1, 2, 3, 4],
+    edges: [{ from: 0, to: 1 }, { from: 0, to: 2 }, { from: 1, to: 2 }, { from: 2, to: 3 }],
+    directed: true,
+  }));
+  await editor.getByRole('button', { name: 'Run' }).click();
+
+  // graphIntro's defaultInput ships directed: false, so this input-editor
+  // round trip is the only way the directed formatting (marksForNode's
+  // wording, the arrowhead <mesh> in GraphView3D.tsx) ever gets rendered --
+  // designed during the pilot but, until this migration, never exercised.
+  await expect(summary).toContainText('Graph, 5 nodes, 4 directed edges.');
+  await nodeButtons.nth(0).focus();
+  await expect(announcer).toContainText('Node 0, value 0, points at 1, 2.');
+});
+
 test('/algorithms/bfs/ does not shift layout while the 3D view hydrates', async ({ page }) => {
   await page.goto('/algorithms/bfs/');
   // Anchors this test to a genuinely hydrated page: without this, a 3D
