@@ -400,7 +400,7 @@ const registry = {
     code: () => import('./code/array-basics/index.js'),
   },
   trie: {
-    renderer: 'GraphView',
+    renderer: 'HierarchyView3D',
     label: 'Trie built from a set of words, root as a bullet, each node a character',
     // "ca" is deliberately the *prefix-only* case: cat, car, and cart all
     // share a path through 'c' -> 'a', so that path is a real node in the
@@ -457,15 +457,23 @@ const registry = {
     code: () => import('./code/recursion/index.js'),
   },
   'linked-list': {
-    renderer: 'GraphView',
+    renderer: 'HierarchyView3D',
     label: 'Singly linked list, one arrow per node pointing at the next',
-    // Deliberately the same values and readIndex/insertAt/value as the
-    // 'array-basics' entry, so the two lessons can be compared directly on
-    // identical input — one pays for reading, the other pays for inserting.
+    // Deliberately the same values and readIndex/insertAt/value SHAPE as
+    // the 'array-basics' entry, so the two lessons can be compared
+    // directly on identical input — one pays for reading, the other pays
+    // for inserting. The two entries no longer share an identical `arr`
+    // length ceiling, though: array-basics' ArrayView has no spatial
+    // legibility concern, but HierarchyView3D lays this list out in 3D
+    // space, and 32 nodes would crush well under the sphere-diameter
+    // floor once rescaled to fit the camera (see hierarchyLayout.ts's
+    // HIERARCHY_LAYOUT_RADIUS doc comment for the exact numbers). 16
+    // matches the cap the three quadratic-sort lessons already use for
+    // an analogous legibility reason.
     defaultInput: { arr: [4, 8, 15, 16, 23, 42], readIndex: 3, insertAt: 1, value: 9 },
     inputSchema: z
       .object({
-        arr: z.array(z.number()).min(1).max(32),
+        arr: z.array(z.number()).min(1).max(16),
         readIndex: z.number().int().min(0),
         insertAt: z.number().int().min(0),
         value: z.number(),
