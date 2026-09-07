@@ -23,9 +23,11 @@ each shows a different shape:
   `TreeView3D` but for arbitrary node-and-edge graphs (a force-directed layout
   instead of a radial tree). `algorithms/dfs.mdx`, `algorithms/dijkstra.mdx`, and
   `data-structures/graph.mdx` (`graph-intro` in the registry) now use it too.
-  Together with `data-structures/tree.mdx`/`data-structures/bst.mdx`, these are the
-  lessons so far that reach for the heavy-dependency renderer pattern (§4.6) rather
-  than the lightweight one.
+  Together with `data-structures/tree.mdx`/`data-structures/bst.mdx`,
+  `data-structures/linked-list.mdx`, and `data-structures/trie.mdx` (which use
+  `HierarchyView3D`, another heavy-dependency 3D renderer with a deterministic
+  radial layout), these are the lessons so far that reach for the heavy-dependency
+  renderer pattern (§4.6) rather than the lightweight one.
 
 ## 0. The one constraint that shapes everything below
 
@@ -49,8 +51,8 @@ already exists under `packages/`.** Concretely:
 
 So: **adding a lesson that reuses the `ArrayView` renderer touches zero existing files
 under `packages/`.** If your lesson idea needs anything the existing pieces don't
-provide — a new renderer (`ArrayView`, `TreeView`, `GraphView`, `TreeView3D`, and
-`GraphView3D` exist today — see §4.6 for the two different ways a renderer can be
+provide — a new renderer (`ArrayView`, `TreeView`, `GraphView`, `TreeView3D`,
+`GraphView3D`, and `HierarchyView3D` exist today — see §4.6 for the two different ways a renderer can be
 added), a new `Mark`/`Target` shape,
 a change to how `snap`, `collect`, or `parseAnchors` behave — that is an **engine
 change**. It means editing an *existing* file under `packages/viz-core` or
@@ -64,14 +66,16 @@ Everything in this document about adding a visualization assumes you are reusing
 the existing renderers: `ArrayView` for anything positional (sorting, searching,
 two-pointer, sliding-window, stacks, queues), `TreeView` for a complete binary tree held
 in an array, `GraphView` for nodes and edges, `TreeView3D` for the same complete
-binary tree drawn as a camera-controllable 3D scene, or `GraphView3D` for the same
+binary tree drawn as a camera-controllable 3D scene, `GraphView3D` for the same
 node-and-edge graph as `GraphView` drawn as a camera-controllable, force-directed 3D
-scene. The first two take the same `number[]` state and the same index-based marks, so
-choosing between them is a one-word change in the registry; `GraphView` and
-`GraphView3D` take a `GraphState` instead (§4.6). `TreeView3D` also takes the same
-`number[]`/index-based-marks state as `TreeView`, and `GraphView3D` also takes the same
-`GraphState` as `GraphView` — the difference is entirely in *how it's loaded* (§4.6),
-not in the data either consumes.
+scene, or `HierarchyView3D` for the same node-and-edge graph drawn as a camera-controllable
+3D scene with a deterministic radial layout (acyclic graphs: chains and trees). The first
+two take the same `number[]` state and the same index-based marks, so choosing between them
+is a one-word change in the registry; `GraphView`, `GraphView3D`, and `HierarchyView3D`
+take a `GraphState` instead (§4.6). `TreeView3D` also takes the same
+`number[]`/index-based-marks state as `TreeView`, while `GraphView3D` and `HierarchyView3D`
+also take the same `GraphState` as `GraphView` — the difference is entirely in *how it's
+loaded* (§4.6), not in the data either consumes.
 
 ## 1. Where lesson files go, and how a slug is derived
 
