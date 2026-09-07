@@ -8,3 +8,7 @@ export { buildGraphSummary } from './graphSummary.js';
 export {
   describeNeighbors, marksForEdge, marksForNode, neighborsOf, type Neighbor,
 } from './graphAccessibility.js';
+export {
+  HIERARCHY_LAYOUT_RADIUS, layoutHierarchy3D,
+} from './hierarchyLayout.js';
+export { HierarchyView3D, type HierarchyView3DProps } from './HierarchyView3D.js';
