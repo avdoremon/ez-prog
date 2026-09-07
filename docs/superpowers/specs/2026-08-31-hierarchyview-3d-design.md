@@ -222,6 +222,15 @@ the existing pattern — it doesn't.
 
 ### 5.1 `linked-list`
 
+> **Superseded (final review):** the `arr` cap below shipped at 16, but 16
+> was derived from 3D spacing alone. The whole-branch review then showed 3D
+> distance doesn't predict on-screen legibility: the generator splices in an
+> inserted node, so a max-16 `arr` renders a 17-node chain, which projects to
+> **overlapping** spheres (−2.32px) through the shipped camera. The cap is now
+> **7** (an 8-node rendered chain, +3.69px), set by
+> `packages/viz-3d/src/hierarchyProjection.test.ts`. Everything below is
+> retained as the record of the original, narrower derivation.
+
 - `renderer: 'GraphView'` → `'HierarchyView3D'`.
 - `inputSchema.arr` max **32 → 16**: the existing 32-node ceiling was
   inherited from sharing `array-basics`'s exact shape for direct 2D-lesson

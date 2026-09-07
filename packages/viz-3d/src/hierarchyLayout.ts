@@ -13,11 +13,24 @@ export type { Position3D };
  * independent of LEVEL_RADIUS_STEP/LEVEL_HEIGHT_STEP's actual values and
  * shrinks linearly with chain length (see the design spec's "Why a
  * bigger, renderer-specific bounding radius" section for the full
- * derivation, including why a golden-angle spiral does NOT fix this --
- * distance from the origin depends only on radius, never angle). 15 gives
- * a 16-node chain (linked-list's registry cap, Task 3) exactly 1.0 units
- * of spacing (a 25% margin over 0.8), and lets trie's existing, unchanged
- * worst case (6 words x 8 chars, 49 nodes) settle at 1.5.
+ * derivation).
+ *
+ * That derivation also shows a golden-angle spiral does NOT fix the
+ * crush -- distance from the origin depends only on radius, never angle.
+ * Scope that disproof carefully: it settles the BOUNDING-RADIUS question
+ * and nothing else. It says nothing about the separate screen-space
+ * problem (a well-spaced 3D arrangement can still project to overlapping
+ * pixels when a run of nodes lines up with the camera's view direction --
+ * see HierarchyView3D.tsx's camera constants and
+ * hierarchyProjection.test.ts), where changing the angular scheme is
+ * still an unexplored lever, not a ruled-out one.
+ *
+ * 15 gives a 16-node chain exactly 1.0 units of spacing (a 25% margin
+ * over 0.8) -- that length is this constant's calibration anchor, not any
+ * lesson's cap: linked-list's registry cap is 7, rendering at most 8
+ * nodes once its generator splices in the inserted one, and it is bound
+ * by screen projection long before this 3D floor. Trie's existing,
+ * unchanged worst case (6 words x 8 chars, 49 nodes) settles at 1.5.
  */
 export const HIERARCHY_LAYOUT_RADIUS = 15;
 

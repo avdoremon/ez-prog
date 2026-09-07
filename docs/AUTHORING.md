@@ -578,8 +578,9 @@ Field by field:
     registry entry's `renderer` field is a one-word change, same as `ArrayView`/`TreeView`.
     It carries its own accessible interaction (a visible, focusable "jump to node"
     button strip below the canvas, plus a live-region summary) because the WebGL canvas
-    itself is `aria-hidden`. Currently used by exactly one lesson
-    (`data-structures/tree.mdx`, `tree-traversal` in the registry) as a pilot; see
+    itself is `aria-hidden`. Used by two lessons — `data-structures/tree.mdx`
+    (`tree-traversal` in the registry), which was the pilot, and
+    `data-structures/bst.mdx` (`bst`), migrated after it; see
     `docs/superpowers/plans/2026-08-27-viz-3d-tree-pilot.md` before migrating another
     `TreeView` lesson to it.
   - **`GraphView`** is the one 2D renderer whose state is *not* `number[]`. It takes a
@@ -630,14 +631,40 @@ Field by field:
     `GraphView3D`'s `LAYOUT_RADIUS` (5), a chain longer than ~7 nodes crushes below the
     sphere-diameter floor regardless of layout shape (the root-to-first-child gap is the
     bottleneck, and it's angle-invariant — a golden-angle spiral was tried and
-    numerically disproven as a fix). `HierarchyView3D` gets its own, larger
-    `HIERARCHY_LAYOUT_RADIUS` (15, in `hierarchyLayout.ts`) and a proportionally
-    pulled-back camera instead. Used by `linked-list` and `trie`
-    (`data-structures/linked-list.mdx`, `data-structures/trie.mdx`) — `linked-list`
-    needed its registry schema tightened (32 → 16 nodes) to fit legibly at that radius;
-    `trie`'s existing schema already fit with no change. See
+    numerically disproven as a fix **for that bounding-radius question specifically**;
+    that disproof says nothing about the separate screen-projection problem below, where
+    an angular scheme remains an unexplored lever rather than a ruled-out one).
+    `HierarchyView3D` gets its own, larger `HIERARCHY_LAYOUT_RADIUS` (15, in
+    `hierarchyLayout.ts`) and a proportionally pulled-back camera instead. Like its two
+    siblings it carries its own accessible interaction — a visible, focusable "jump to
+    node" button strip below the canvas plus a live-region summary naming each focused
+    node's neighbours — because the WebGL canvas itself is `aria-hidden`. Used by
+    `linked-list` and `trie` (`data-structures/linked-list.mdx`,
+    `data-structures/trie.mdx`) — `linked-list` needed its registry schema tightened
+    (32 → 7 values, i.e. an 8-node chain once its generator splices in the inserted
+    node) to fit legibly; `trie`'s existing schema was left unchanged by an explicit
+    spec decision.
+
+    Two *different* legibility constraints apply here, and it is worth keeping them
+    apart. The first is 3D spacing — nodes crushing closer than the sphere diameter —
+    which is what `HIERARCHY_LAYOUT_RADIUS` and `hierarchyLayout.test.ts` address. The
+    second is **screen-space** separation: because the layout rescales any shape to a
+    fixed radius and the camera is fixed too, a long chain can stay comfortably apart in
+    3D while projecting to overlapping pixels, simply by lining up with the camera's
+    view direction. 3D distance does not predict it, so
+    `packages/viz-3d/src/hierarchyProjection.test.ts` measures it directly — projecting
+    real layout output through a real `THREE.PerspectiveCamera` built from the
+    component's exported `HIERARCHY_CAMERA_POSITION`/`HIERARCHY_CAMERA_FOV` and
+    asserting a pixel gap between adjacent spheres. **If you change either camera
+    constant, the layout radius, or one of these two lessons' input schemas, re-run that
+    test** — it is the only thing checking the property a learner actually sees. It also
+    records one known, parked limitation as a `test.todo`: trie's schema-permitted worst
+    case (6 words × 8 characters with no shared prefix, 49 nodes) does overlap on
+    screen, under this camera and under the original one alike. See
     `docs/superpowers/specs/2026-08-31-hierarchyview-3d-design.md` for the full
-    derivation before touching `hierarchyLayout.ts`'s constants.
+    derivation before touching `hierarchyLayout.ts`'s constants, and
+    `.superpowers/sdd/2026-08-31-hierarchyview-3d/progress.md`'s final-review section
+    for that parked case.
 - `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
   `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
   screen-reader user or a JS-disabled reader can act on.

@@ -65,7 +65,13 @@ test('layout is deterministic', () => {
   expect([...a.entries()]).toEqual([...b.entries()]);
 });
 
-test('no two nodes settle closer than the sphere diameter, for a 16-node chain (linked-list at its registry cap)', () => {
+test('no two nodes settle closer than the sphere diameter, for a 16-node chain (HIERARCHY_LAYOUT_RADIUS\'s calibration length)', () => {
+  // 16 is the length HIERARCHY_LAYOUT_RADIUS = 15 was sized against (it
+  // yields exactly 1.0 units of spacing, a 25% margin over the 0.8 floor)
+  // -- NOT any lesson's cap. linked-list caps `arr` at 7 and renders at
+  // most 8 nodes after its generator splices in the inserted one; that cap
+  // is set by screen projection (hierarchyProjection.test.ts), a bound this
+  // 3D-distance test does not and cannot speak to.
   const edges: { from: number; to: number }[] = [];
   for (let i = 0; i < 15; i++) edges.push({ from: i, to: i + 1 });
   const positions = [...layoutHierarchy3D(16, edges).values()];
