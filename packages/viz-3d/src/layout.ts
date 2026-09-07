@@ -4,8 +4,8 @@ export interface Position3D {
   z: number;
 }
 
-const LEVEL_RADIUS_STEP = 2.4;
-const LEVEL_HEIGHT_STEP = 1.8;
+export const LEVEL_RADIUS_STEP = 2.4;
+export const LEVEL_HEIGHT_STEP = 1.8;
 
 function depthOf(index: number): number {
   return Math.floor(Math.log2(index + 1));
