@@ -20,6 +20,36 @@ export interface HierarchyView3DProps {
 const NO_MARKS: Mark[] = [];
 const NODE_FONT = '/fonts/IBMPlexMono-Regular.ttf';
 
+/*
+ * Rotated 45 degrees off the z-axis (not the original [0, 9, 36]) so a
+ * node's first two-way branch -- which this layout centers at angles pi/2
+ * and 3*pi/2, i.e. purely along z (see hierarchyLayout.ts) -- doesn't
+ * foreshorten to nearly the same screen position, the way it did head-on.
+ * A smaller rotation (~26 degrees) measurably helped but left that pair
+ * still touching on screen; sweeping the full 0-180 degree range (the
+ * branch pair's screen-space separation grows monotonically with the
+ * angle, while an unrelated chain along the x-axis foreshortens the more
+ * the camera turns toward it) put 45 degrees at the best trade-off *for
+ * the two lessons' actual shipped defaultInputs* (linked-list's 6-value
+ * chain and trie's 'cat'/'car'/'cart'), plus linked-list's tightened
+ * registry cap. That is the whole of the claim: a later hemisphere sweep
+ * found NO single camera position that keeps every schema-permitted input
+ * legible -- trie's 49-node worst case projects to overlapping spheres
+ * from this position and from the original one alike. See the
+ * final-review section of
+ * .superpowers/sdd/2026-08-31-hierarchyview-3d/progress.md for that
+ * parked, pre-existing limitation.
+ *
+ * [25.5, 9, 25.5] keeps the same distance from the origin as the original
+ * ~37.1, preserving the intended framing/zoom. Exported (rather than left
+ * inline in the JSX) because hierarchyProjection.test.ts measures real
+ * on-screen node separation through a camera built from these exact
+ * values -- the layout/camera dependency is expressed in code, not only
+ * in prose. Changing either number invalidates that test's margins.
+ */
+export const HIERARCHY_CAMERA_POSITION: [number, number, number] = [25.5, 9, 25.5];
+export const HIERARCHY_CAMERA_FOV = 50;
+
 function usePrefersReducedMotion(): boolean {
   const [reduced, setReduced] = useState(
     () =>
@@ -73,6 +103,14 @@ export function HierarchyView3D({ state, marks = NO_MARKS, label }: HierarchyVie
   // on every frame -- `values`/`edges` get a fresh object identity each render even
   // when the graph's actual shape hasn't changed. Memoizing on those identities would
   // never hit, so memoize on a structural key instead (same pattern GraphView3D uses).
+  //
+  // Unlike GraphView3D's, this memo is NOT saving an expensive computation:
+  // layoutHierarchy3D is a single O(V+E) BFS plus one rescale pass, not a
+  // force simulation, and building `edgeKey` costs the same O(E) anyway. It
+  // is kept for the one thing it does buy -- a stable `positions` Map
+  // identity across frames that don't change the graph's shape, so the
+  // scene's node/edge props don't churn -- and because it keeps this
+  // component's shape identical to its sibling renderers'.
   const edgeKey = edges.map((e) => `${e.from}-${e.to}`).join(',');
   const positions = useMemo(
     () => layoutHierarchy3D(values.length, edges),
@@ -100,20 +138,9 @@ export function HierarchyView3D({ state, marks = NO_MARKS, label }: HierarchyVie
   return (
     <div className="hierarchy-view-3d viz-3d">
       <div className="hierarchy-view-3d__canvas-wrap" aria-hidden="true">
-        {/* Rotated 45 degrees off the z-axis (not [0, 9, 36]) so a node's
-            first two-way branch -- which this layout centers at angles
-            pi/2 and 3*pi/2, i.e. purely along z (see hierarchyLayout.ts)
-            -- doesn't foreshorten to nearly the same screen position, the
-            way it did head-on. A smaller rotation (~26 degrees) measurably
-            helped but left that pair still touching on screen; swept the
-            full 0-180 degree range (screen-space separation of that pair
-            grows monotonically with the angle, while the unrelated
-            root/c/a chain -- which lies along the x-axis -- foreshortens
-            the more the camera turns toward it) and 45 degrees is close to
-            the best balance point for both. [25.5, 9, 25.5] keeps the same
-            distance from the origin as the original ~37.1, preserving the
-            intended framing/zoom. */}
-        <Canvas camera={{ position: [25.5, 9, 25.5], fov: 50 }}>
+        {/* Camera position/fov and the reasoning behind them: see
+            HIERARCHY_CAMERA_POSITION at the top of this file. */}
+        <Canvas camera={{ position: HIERARCHY_CAMERA_POSITION, fov: HIERARCHY_CAMERA_FOV }}>
           <ambientLight intensity={0.7} />
           <pointLight position={[8, 10, 8]} />
           <CameraRig focus={focusedPosition} instant={reducedMotion} />

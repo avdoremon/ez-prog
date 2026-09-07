@@ -11,4 +11,7 @@ export {
 export {
   HIERARCHY_LAYOUT_RADIUS, layoutHierarchy3D,
 } from './hierarchyLayout.js';
-export { HierarchyView3D, type HierarchyView3DProps } from './HierarchyView3D.js';
+export {
+  HierarchyView3D, HIERARCHY_CAMERA_FOV, HIERARCHY_CAMERA_POSITION,
+  type HierarchyView3DProps,
+} from './HierarchyView3D.js';

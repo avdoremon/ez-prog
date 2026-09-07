@@ -462,18 +462,39 @@ const registry = {
     // Deliberately the same values and readIndex/insertAt/value SHAPE as
     // the 'array-basics' entry, so the two lessons can be compared
     // directly on identical input — one pays for reading, the other pays
-    // for inserting. The two entries no longer share an identical `arr`
-    // length ceiling, though: array-basics' ArrayView has no spatial
-    // legibility concern, but HierarchyView3D lays this list out in 3D
-    // space, and 32 nodes would crush well under the sphere-diameter
-    // floor once rescaled to fit the camera (see hierarchyLayout.ts's
-    // HIERARCHY_LAYOUT_RADIUS doc comment for the exact numbers). 16
-    // matches the cap the three quadratic-sort lessons already use for
-    // an analogous legibility reason.
+    // for inserting. The two entries do NOT share an `arr` length
+    // ceiling, though: array-basics' ArrayView has no spatial legibility
+    // concern, but HierarchyView3D lays this list out in 3D space and
+    // then projects it through a fixed camera.
+    //
+    // 7, not the previous 16, and the binding constraint is screen
+    // projection, not 3D spacing. This generator splices an inserted node
+    // into the chain, so the rendered worst case is arr.length + 1 = 8
+    // nodes. hierarchyLayout.ts rescales any chain to
+    // HIERARCHY_LAYOUT_RADIUS, so a longer chain doesn't get bigger — it
+    // gets denser, and the chain lies almost along the camera's view
+    // direction, so the on-screen gap between adjacent sphere silhouettes
+    // closes far sooner than 3D distance suggests. Measured by projecting
+    // layoutHierarchy3D's real output through a THREE.PerspectiveCamera
+    // at the shipped HIERARCHY_CAMERA_POSITION/FOV onto the real 380px
+    // canvas (24rem box minus its 2px border-box border), sphere radius
+    // 0.4: an 8-node chain leaves 3.69px between adjacent spheres (53% of
+    // a sphere's own ~7px projected diameter), 9 nodes leaves 2.34px, 10
+    // leaves 1.29px, 11 leaves 0.46px, and 12 already OVERLAP at -0.22px.
+    // The cutoff isn't taste: trie's default under this renderer's
+    // ORIGINAL camera measured +2.47px and was rejected on screenshot as
+    // "nearly on top of each other", so 9 nodes (2.34px) would ship
+    // something already judged illegible. 8 is the longest chain that
+    // clears that bar, hence arr.max(7).
+    //
+    // The old 16 permitted a 17-node chain rendering at -2.32px — actual
+    // overlap, at a length a learner reached just by filling the input to
+    // its stated max. packages/viz-3d/src/hierarchyProjection.test.ts
+    // measures all of this on every run so it can't silently regress.
     defaultInput: { arr: [4, 8, 15, 16, 23, 42], readIndex: 3, insertAt: 1, value: 9 },
     inputSchema: z
       .object({
-        arr: z.array(z.number()).min(1).max(16),
+        arr: z.array(z.number()).min(1).max(7),
         readIndex: z.number().int().min(0),
         insertAt: z.number().int().min(0),
         value: z.number(),
