@@ -414,6 +414,80 @@ test.describe('reduced motion (graph)', () => {
   });
 });
 
+test('the 3D hierarchy view (linked-list) is keyboard-operable and announces the next pointer', async ({ page }) => {
+  await page.goto('/data-structures/linked-list/');
+  const nodeButtons = page.locator('.hierarchy-view-3d__node-button');
+  await expect(nodeButtons.first()).toBeVisible();
+
+  const summary = page.locator('.hierarchy-view-3d__summary');
+  await expect(summary).toContainText('Graph, 6 nodes, 5 directed edges.');
+
+  await nodeButtons.nth(0).focus();
+  const announcer = page.locator('.hierarchy-view-3d__announcer');
+  await expect(announcer).toContainText('Node 0, value 4, points at 8.');
+
+  await page.keyboard.press('Tab');
+  await expect(announcer).toContainText('Node 1, value 8, points at 15.');
+});
+
+test('/data-structures/linked-list/ does not shift layout while the 3D view hydrates', async ({ page }) => {
+  await page.goto('/data-structures/linked-list/');
+  // Anchors this test to a genuinely hydrated page, same reasoning as the
+  // tree/bfs pilots' own CLS tests.
+  await expect(page.locator('.hierarchy-view-3d__node-button').first()).toBeVisible();
+  const cls = await page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let total = 0;
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as (PerformanceEntry & {
+            value: number;
+            hadRecentInput: boolean;
+          })[]) {
+            if (!entry.hadRecentInput) total += entry.value;
+          }
+        }).observe({ type: 'layout-shift', buffered: true });
+        setTimeout(() => resolve(total), 1500);
+      }),
+  );
+  expect(cls).toBeLessThan(0.1);
+});
+
+test.describe('reduced motion (hierarchy)', () => {
+  test.use({ contextOptions: { reducedMotion: 'reduce' } });
+
+  test('focusing a hierarchy node snaps the camera instead of animating it', async ({ page }) => {
+    await page.goto('/data-structures/linked-list/');
+    const nodeButtons = page.locator('.hierarchy-view-3d__node-button');
+    await nodeButtons.nth(2).focus();
+    await expect(page.locator('.hierarchy-view-3d__announcer')).toContainText('Node 2, value 15');
+  });
+});
+
+test('the 3D hierarchy view (trie) is keyboard-operable and announces the next character', async ({ page }) => {
+  await page.goto('/data-structures/trie/');
+  const nodeButtons = page.locator('.hierarchy-view-3d__node-button');
+  await expect(nodeButtons.first()).toBeVisible();
+
+  // Unlike linked-list's chain (whose full shape exists from frame 0), the
+  // trie's algorithm (packages/viz-core/src/algorithms/trie.ts) builds nodes
+  // one character at a time, so the player opens on frame 0 with only the
+  // root. Jump to the last frame, where all three words are inserted and the
+  // full 6-node/5-edge trie exists, before asserting its shape.
+  await page.getByRole('button', { name: 'Last step' }).click();
+  await expect(nodeButtons).toHaveCount(6);
+
+  const summary = page.locator('.hierarchy-view-3d__summary');
+  await expect(summary).toContainText('Graph, 6 nodes, 5 directed edges.');
+
+  await nodeButtons.nth(0).focus();
+  const announcer = page.locator('.hierarchy-view-3d__announcer');
+  await expect(announcer).toContainText('Node 0, value •, points at c.');
+
+  await page.keyboard.press('Tab');
+  await expect(announcer).toContainText('Node 1, value c, points at a.');
+});
+
 /*
  * The dark-scheme runs are the check that was missing. Starlight hardcodes
  * data-theme="dark" on <html> and switches its text to white, which against

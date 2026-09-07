@@ -100,7 +100,20 @@ export function HierarchyView3D({ state, marks = NO_MARKS, label }: HierarchyVie
   return (
     <div className="hierarchy-view-3d viz-3d">
       <div className="hierarchy-view-3d__canvas-wrap" aria-hidden="true">
-        <Canvas camera={{ position: [0, 9, 36], fov: 50 }}>
+        {/* Rotated 45 degrees off the z-axis (not [0, 9, 36]) so a node's
+            first two-way branch -- which this layout centers at angles
+            pi/2 and 3*pi/2, i.e. purely along z (see hierarchyLayout.ts)
+            -- doesn't foreshorten to nearly the same screen position, the
+            way it did head-on. A smaller rotation (~26 degrees) measurably
+            helped but left that pair still touching on screen; swept the
+            full 0-180 degree range (screen-space separation of that pair
+            grows monotonically with the angle, while the unrelated
+            root/c/a chain -- which lies along the x-axis -- foreshortens
+            the more the camera turns toward it) and 45 degrees is close to
+            the best balance point for both. [25.5, 9, 25.5] keeps the same
+            distance from the origin as the original ~37.1, preserving the
+            intended framing/zoom. */}
+        <Canvas camera={{ position: [25.5, 9, 25.5], fov: 50 }}>
           <ambientLight intensity={0.7} />
           <pointLight position={[8, 10, 8]} />
           <CameraRig focus={focusedPosition} instant={reducedMotion} />
