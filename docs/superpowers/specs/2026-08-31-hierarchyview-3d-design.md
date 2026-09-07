@@ -250,6 +250,21 @@ the existing pattern — it doesn't.
 
 ### 5.2 `trie`
 
+> **Superseded (post-final-review follow-up):** the "no schema change"
+> claim below held only for 3D distance. The whole-branch review that
+> caught `linked-list`'s regression (§5.1) also found `trie`'s worst case
+> was never screen-legible, under either camera — 6 words × 8 chars (49
+> nodes, no shared prefix) projects a parent/child pair to **−1.44px**
+> (overlapping) through the shipped camera, and to a still-negative value
+> under the original camera too, so this was pre-existing, not a
+> regression. Parked as a `test.todo` at final review pending a human
+> decision; resolved by tightening the per-word length cap **8 → 4**
+> (`words.max(6)` stays — word count is the more pedagogically useful axis
+> for this lesson). The new worst case (6 words × 4 chars, 25 nodes)
+> measures **+3.93px** on the tightest parent/child pair, set by
+> `packages/viz-3d/src/hierarchyProjection.test.ts`. Everything below is
+> retained as the record of the original, 3D-distance-only derivation.
+
 - `renderer: 'GraphView'` → `'HierarchyView3D'`. **No schema change.** At
   this renderer's own `HIERARCHY_LAYOUT_RADIUS` (§2), `trie`'s existing
   worst case (6 words × 8 chars, no shared prefixes → 49 nodes, 8 levels

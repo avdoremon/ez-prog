@@ -32,13 +32,14 @@ const NODE_FONT = '/fonts/IBMPlexMono-Regular.ttf';
  * the camera turns toward it) put 45 degrees at the best trade-off *for
  * the two lessons' actual shipped defaultInputs* (linked-list's 6-value
  * chain and trie's 'cat'/'car'/'cart'), plus linked-list's tightened
- * registry cap. That is the whole of the claim: a later hemisphere sweep
- * found NO single camera position that keeps every schema-permitted input
- * legible -- trie's 49-node worst case projects to overlapping spheres
- * from this position and from the original one alike. See the
- * final-review section of
- * .superpowers/sdd/2026-08-31-hierarchyview-3d/progress.md for that
- * parked, pre-existing limitation.
+ * registry cap. That is the whole of the claim: a hemisphere sweep found
+ * NO single camera position that keeps every conceivable input legible --
+ * a camera fix alone cannot substitute for a legibility-aware schema cap.
+ * (trie's own registry cap was tightened separately, on the schema side,
+ * once this same limitation showed its worst case -- 6 words x 8 chars --
+ * projecting to overlapping spheres from this position and the original
+ * one alike; see apps/web/src/viz/registry.ts's `trie` entry and
+ * hierarchyProjection.test.ts for that fix and its numbers.)
  *
  * [25.5, 9, 25.5] keeps the same distance from the origin as the original
  * ~37.1, preserving the intended framing/zoom. Exported (rather than left

@@ -83,12 +83,18 @@ test('no two nodes settle closer than the sphere diameter, for a 16-node chain (
   }
 });
 
-test('no two nodes settle closer than the sphere diameter, for a worst-case trie shape (6 words, 8 chars, no shared prefix)', () => {
-  // 6 separate 8-node chains hanging off the root: the real worst case
-  // trie's unchanged registry schema (words.max(6), each word.max(8))
-  // allows -- no shared prefixes means every word is its own chain from
-  // the root, so this is topologically equivalent to a real trie built
-  // from 6 words that share no letters.
+test('no two nodes settle closer than the sphere diameter, for trie\'s ORIGINAL worst-case shape (6 words, 8 chars, no shared prefix) -- kept as a calibration check, not the current registry cap', () => {
+  // 6 separate 8-node chains hanging off the root. This was trie's actual
+  // registry-permitted worst case when HIERARCHY_LAYOUT_RADIUS was
+  // calibrated; a later screen-projection check (hierarchyProjection.test.ts)
+  // found it projects to OVERLAPPING spheres despite clearing this 3D
+  // floor comfortably (1.5 units), and the registry's per-word length cap
+  // was tightened 8 -> 4 as a result (see apps/web/src/viz/registry.ts's
+  // `trie` entry). This 3D-distance test is kept anyway, unmodified, as a
+  // calibration/regression anchor for HIERARCHY_LAYOUT_RADIUS itself,
+  // against a strictly harder shape than anything the schema permits
+  // today -- mirroring the 16-node chain test above, which plays the same
+  // role for linked-list's own now-tighter cap.
   const edges: { from: number; to: number }[] = [];
   let next = 1;
   for (let branch = 0; branch < 6; branch++) {

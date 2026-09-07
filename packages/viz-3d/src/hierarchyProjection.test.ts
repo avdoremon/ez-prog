@@ -88,11 +88,29 @@ function silhouetteRadiusPx(
   return Math.hypot(edge.x - centre.x, edge.y - centre.y);
 }
 
+/** The screen-space gap between two nodes' sphere silhouettes. */
+function gapPx(
+  a: Position3D, b: Position3D, camera: PerspectiveCamera, width: number, height: number,
+): number {
+  const pa = toPixels(a, camera, width, height);
+  const pb = toPixels(b, camera, width, height);
+  return (
+    Math.hypot(pa.x - pb.x, pa.y - pb.y) -
+    silhouetteRadiusPx(a, camera, width, height) -
+    silhouetteRadiusPx(b, camera, width, height)
+  );
+}
+
 /**
  * The smallest screen-space gap between the silhouettes of any two nodes
- * joined by an edge. Parent-child pairs are the only ones this layout can
- * ever place adjacent -- every node sits on its own angular wedge at its
- * own depth, so non-adjacent pairs are strictly farther apart.
+ * joined by an edge (parent-child pairs). This is the semantically serious
+ * case: two CONNECTED nodes overlapping reads as "this is one node," which
+ * is exactly what the original camera defect looked like. It is NOT the
+ * only pair that can end up close on screen, though -- trie's branching
+ * shape can put two UNRELATED nodes near each other too (see
+ * minAnyPairGapPx below); an earlier version of this docstring claimed
+ * parent-child pairs were the only ones that could ever be adjacent, which
+ * this file's own trie worst-case test disproves.
  */
 function minEdgeGapPx(
   nodeCount: number, edges: Edge[], width = CANVAS_WIDTH, height = CANVAS_HEIGHT,
@@ -103,13 +121,27 @@ function minEdgeGapPx(
   for (const edge of edges) {
     const a = positions.get(edge.from)!;
     const b = positions.get(edge.to)!;
-    const pa = toPixels(a, camera, width, height);
-    const pb = toPixels(b, camera, width, height);
-    const gap =
-      Math.hypot(pa.x - pb.x, pa.y - pb.y) -
-      silhouetteRadiusPx(a, camera, width, height) -
-      silhouetteRadiusPx(b, camera, width, height);
-    min = Math.min(min, gap);
+    min = Math.min(min, gapPx(a, b, camera, width, height));
+  }
+  return min;
+}
+
+/**
+ * The smallest screen-space gap between ANY two nodes' silhouettes,
+ * connected or not. Milder than minEdgeGapPx: two unrelated nodes sitting
+ * close together is visual crowding, not a misread of graph structure, so
+ * callers hold this to a lower bar (see the trie worst-case test below).
+ */
+function minAnyPairGapPx(
+  nodeCount: number, edges: Edge[], width = CANVAS_WIDTH, height = CANVAS_HEIGHT,
+): number {
+  const camera = shippedCamera(width, height);
+  const positions = [...layoutHierarchy3D(nodeCount, edges).values()];
+  let min = Infinity;
+  for (let i = 0; i < positions.length; i++) {
+    for (let j = i + 1; j < positions.length; j++) {
+      min = Math.min(min, gapPx(positions[i]!, positions[j]!, camera, width, height));
+    }
   }
   return min;
 }
@@ -176,25 +208,56 @@ test("trie's default input ('cat', 'car', 'cart') stays visibly separated on scr
   expect(gap).toBeCloseTo(12.05, 1);
 });
 
-/*
- * KNOWN FAILING CASE -- deliberately a todo, not an assertion, and not
- * omitted. trie's registry schema permits 6 words of 8 characters; with no
- * shared prefix that is 49 nodes, and projecting them through the shipped
- * camera gives -1.44px between an adjacent parent/child pair (and -7.03px
- * between the closest pair overall) -- i.e. real overlap.
- *
- * This is PRE-EXISTING, not a regression: it measures negative under the
- * original [0, 9, 36] camera too, and the design spec's §5.2 claim that
- * this case "settles at 1.5 units, comfortably clear" was only ever a
- * 3D-distance claim (hierarchyLayout.test.ts still checks it, and it still
- * holds) -- never a screen-projection one. Resolving it needs a decision
- * this fix pass was explicitly scoped out of: shrink trie's schema
- * (against spec §5.2), scale sphere radius with node count, or accept and
- * document it. A camera-hemisphere sweep found no single position that
- * fixes it. Parked for a human in the final-review section of
- * .superpowers/sdd/2026-08-31-hierarchyview-3d/progress.md.
+/**
+ * A trie built from `wordCount` words that share no prefix at all, each
+ * `wordLen` characters long: `wordCount` separate `wordLen`-node chains
+ * hanging off the root. Topologically equivalent to a real trie built from
+ * words that share no letters -- the worst case for this layout, since no
+ * shared prefix means no node is reused to keep the graph smaller.
  */
-test.todo(
-  "trie's worst case (6 words x 8 chars, no shared prefix, 49 nodes) " +
-  'projects to overlapping spheres -- known, parked, see progress.md',
-);
+function noSharedPrefixTrie(wordCount: number, wordLen: number): { nodeCount: number; edges: Edge[] } {
+  const edges: Edge[] = [];
+  let next = 1;
+  for (let branch = 0; branch < wordCount; branch++) {
+    let parent = 0;
+    for (let step = 0; step < wordLen; step++) {
+      edges.push({ from: parent, to: next });
+      parent = next;
+      next++;
+    }
+  }
+  return { nodeCount: next, edges };
+}
+
+test("trie's worst case at its registry cap (6 words x 4 chars, no shared prefix) stays visibly separated on screen", () => {
+  // apps/web/src/viz/registry.ts's `words` element cap used to be 8; a
+  // screen-projection check (this file, added when this test was still a
+  // `test.todo`) found that at 8 chars, this exact shape (6 words, no
+  // shared prefix -> 49 nodes) projected an adjacent parent/child pair to
+  // -1.44px through the shipped camera -- real overlap, and PRE-EXISTING
+  // (it measured negative under the original [0,9,36] camera too, so this
+  // was never a regression from that camera's own rotation). Word length
+  // is the lever that matters (same as linked-list's chain length was for
+  // its own cap) -- word COUNT is untouched at 6, deliberately, since it's
+  // the more pedagogically interesting axis for this lesson. At 4 chars
+  // (25 nodes) the tightest parent/child pair clears the same 3px bar
+  // linked-list's own cap uses, with a comparable margin.
+  const { nodeCount, edges } = noSharedPrefixTrie(6, 4);
+  const edgeGap = minEdgeGapPx(nodeCount, edges);
+  expect(edgeGap).toBeGreaterThan(MIN_GAP_PX);
+  expect(edgeGap).toBeCloseTo(3.93, 1);
+
+  // The closest pair overall is a DIFFERENT, milder claim: two UNRELATED
+  // nodes (not parent/child) crowding together is visual clutter, not a
+  // misread of graph structure (nothing here could look like a false
+  // edge or a merged node), so this only needs to clear zero -- no actual
+  // overlap -- not the full MIN_GAP_PX bar. It's thin (well under a full
+  // sphere-width of clearance) precisely because word count was held at
+  // its full existing range instead of also being tightened; reducing
+  // word count to 3 would comfortably clear this too, at the cost of
+  // leaving no room to add a single word beyond the default's 3 -- judged
+  // the worse trade for a lesson about adding words to see branches form.
+  const anyGap = minAnyPairGapPx(nodeCount, edges);
+  expect(anyGap).toBeGreaterThan(0);
+  expect(anyGap).toBeCloseTo(0.56, 1);
+});

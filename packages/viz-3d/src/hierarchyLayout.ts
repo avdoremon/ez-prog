@@ -27,10 +27,18 @@ export type { Position3D };
  *
  * 15 gives a 16-node chain exactly 1.0 units of spacing (a 25% margin
  * over 0.8) -- that length is this constant's calibration anchor, not any
- * lesson's cap: linked-list's registry cap is 7, rendering at most 8
- * nodes once its generator splices in the inserted one, and it is bound
- * by screen projection long before this 3D floor. Trie's existing,
- * unchanged worst case (6 words x 8 chars, 49 nodes) settles at 1.5.
+ * lesson's cap: neither `linked-list` (registry cap 7, rendering at most 8
+ * nodes once its generator splices in the inserted one) nor `trie`
+ * (registry cap 6 words x 4 chars, 25 nodes) is bound by this 3D floor --
+ * both are bound by screen projection, checked in
+ * hierarchyProjection.test.ts, which is stricter and catches shapes this
+ * 3D check cannot (see that file, or HierarchyView3D.tsx's camera
+ * constants, for why 3D distance alone doesn't predict what a learner
+ * sees). hierarchyLayout.test.ts still exercises this 3D floor against
+ * trie's ORIGINAL, larger worst case (6 words x 8 chars, 49 nodes,
+ * settling at 1.5) as a calibration/regression check, even though that
+ * shape is no longer reachable through the registry -- it remains a
+ * strictly-harder input than anything the schema permits today.
  */
 export const HIERARCHY_LAYOUT_RADIUS = 15;
 

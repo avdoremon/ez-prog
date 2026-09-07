@@ -408,9 +408,27 @@ const registry = {
     // single most trie-specific insight worth leading with. Try "car" for a
     // successful search, or "cow" for a missing character.
     defaultInput: { words: ['cat', 'car', 'cart'], search: 'ca' },
+    // `words`' per-word length was 8 until a screen-projection check found
+    // the real reachable worst case (6 words, no shared prefix) rendered
+    // with actual on-screen overlap: a parent/child pair projected to
+    // -1.44px through the shipped camera, even though every pair clears
+    // the OLD 0.8-unit 3D-distance floor with room to spare (that 3D check
+    // in hierarchyLayout.test.ts never claimed to guarantee what a learner
+    // sees — see hierarchyProjection.test.ts). Word length is the lever
+    // that matters here, the same way linked-list's chain LENGTH (not its
+    // node styling) was the lever for its own legibility cap: at 6 words x
+    // 4 chars (25 nodes), the tightest parent/child pair measures +3.93px,
+    // comfortably above the 3px bar (itself anchored to a real rejected
+    // screenshot, see hierarchyProjection.test.ts's MIN_GAP_PX). Word
+    // COUNT (`words.max(6)`) is deliberately left unchanged — it is the
+    // more pedagogically interesting axis for this lesson (seeing new
+    // branches form), and the default input's word count (3) already sits
+    // well under it. `search`'s own `.max(8)` is untouched: it only walks
+    // existing edges to look up a path, never creates a node, so it has no
+    // effect on what gets rendered.
     inputSchema: z.object({
       words: z
-        .array(z.string().regex(/^[a-z]+$/, 'lowercase letters only').min(1).max(8))
+        .array(z.string().regex(/^[a-z]+$/, 'lowercase letters only').min(1).max(4))
         .min(1)
         .max(6),
       search: z.string().regex(/^[a-z]+$/, 'lowercase letters only').min(1).max(8),

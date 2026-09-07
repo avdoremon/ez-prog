@@ -640,10 +640,10 @@ Field by field:
     node" button strip below the canvas plus a live-region summary naming each focused
     node's neighbours — because the WebGL canvas itself is `aria-hidden`. Used by
     `linked-list` and `trie` (`data-structures/linked-list.mdx`,
-    `data-structures/trie.mdx`) — `linked-list` needed its registry schema tightened
-    (32 → 7 values, i.e. an 8-node chain once its generator splices in the inserted
-    node) to fit legibly; `trie`'s existing schema was left unchanged by an explicit
-    spec decision.
+    `data-structures/trie.mdx`) — both needed their registry schemas tightened to fit
+    legibly: `linked-list`'s `arr` (32 → 7 values, i.e. an 8-node chain once its
+    generator splices in the inserted node) and `trie`'s per-word length (8 → 4
+    characters, i.e. a 25-node worst case at its unchanged word-count cap of 6).
 
     Two *different* legibility constraints apply here, and it is worth keeping them
     apart. The first is 3D spacing — nodes crushing closer than the sphere diameter —
@@ -657,14 +657,15 @@ Field by field:
     component's exported `HIERARCHY_CAMERA_POSITION`/`HIERARCHY_CAMERA_FOV` and
     asserting a pixel gap between adjacent spheres. **If you change either camera
     constant, the layout radius, or one of these two lessons' input schemas, re-run that
-    test** — it is the only thing checking the property a learner actually sees. It also
-    records one known, parked limitation as a `test.todo`: trie's schema-permitted worst
-    case (6 words × 8 characters with no shared prefix, 49 nodes) does overlap on
-    screen, under this camera and under the original one alike. See
-    `docs/superpowers/specs/2026-08-31-hierarchyview-3d-design.md` for the full
-    derivation before touching `hierarchyLayout.ts`'s constants, and
-    `.superpowers/sdd/2026-08-31-hierarchyview-3d/progress.md`'s final-review section
-    for that parked case.
+    test** — it is the only thing checking the property a learner actually sees. It
+    checks each lesson's actual current registry worst case (both parent/child pairs
+    and, for `trie`'s branching shape, any two nodes at all — unrelated nodes crowding
+    together is milder than connected ones overlapping, but still worth a lower bar,
+    see the test file itself) — this is what caught `trie`'s schema needing the same
+    kind of tightening `linked-list`'s already had. See
+    `docs/superpowers/specs/2026-08-31-hierarchyview-3d-design.md`'s §5.1/§5.2
+    "Superseded" notes for the full derivation and history before touching
+    `hierarchyLayout.ts`'s constants or either lesson's schema again.
 - `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
   `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
   screen-reader user or a JS-disabled reader can act on.
