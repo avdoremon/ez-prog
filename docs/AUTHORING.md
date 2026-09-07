@@ -511,8 +511,8 @@ Verbatim shape, from the real `binary-search` entry:
 
 Field by field:
 
-- `renderer` — `'ArrayView'`, `'TreeView'`, `'GraphView'`, `'TreeView3D'` or
-  `'GraphView3D'`; the union in
+- `renderer` — `'ArrayView'`, `'TreeView'`, `'GraphView'`, `'TreeView3D'`,
+  `'GraphView3D'`, or `'HierarchyView3D'`; the union in
   `apps/web/src/viz/types.ts` is what the type allows. Choosing between them is ordinary
   content work. **Writing a new one is still an engine change** (§0), and there are now
   two different shapes that change can take, depending on whether the renderer's
@@ -526,8 +526,8 @@ Field by field:
     dependencies are small — the whole `RENDERERS` map is bundled into every lesson page
     that uses `<Viz>`, so a heavy dependency here is a heavy dependency on all 27+ other
     lessons too, whether or not they use that renderer.
-  - **Heavy-dependency renderer (new, added for `TreeView3D`; `GraphView3D` now
-    follows the same pattern).** `TreeView3D` and `GraphView3D` both live in the same
+  - **Heavy-dependency renderer (new, added for `TreeView3D`; `GraphView3D` and
+    `HierarchyView3D` now follow the same pattern).** All three live in the same
     workspace package, `packages/viz-3d`, wrapping
     `@react-three/fiber`/`@react-three/drei`/`three` — roughly 250KB+ gzipped, far more
     than every other renderer's dependencies combined. Statically importing that into
@@ -535,7 +535,8 @@ Field by field:
     every lesson in the site, not just `data-structures/tree.mdx` and `algorithms/bfs.mdx`.
     Instead, `VizIsland.tsx` has a `loadRenderer(rendererName)` function that returns the
     lightweight `RENDERERS` map entry for every ordinary renderer name, but has a
-    separate branch each for `'TreeView3D'` and `'GraphView3D'` that both return a
+    separate branch each for `'TreeView3D'`, `'GraphView3D'`, and `'HierarchyView3D'`
+    that all return a
     *dynamic* `import('@cs/viz-3d')` (picking the matching named export off the module)
     — so the Three.js stack is only fetched when a viz entry actually names one of them.
     If your new renderer pulls in a comparably heavy
@@ -582,12 +583,13 @@ Field by field:
     adjacency list, one row per node listing its neighbours, rather than a node-and-edge
     diagram. Nodes are still marked by `{ t: 'index' }`; edges use `{ t: 'edge', from,
     to }`, and on an undirected graph a single edge mark lights up both listings of that
-    edge. Weights render when present. Used by `linked-list` and `trie` in the registry
-    today — both acyclic (a chain and a tree, not a binary one), which is why they're
-    candidates for extending `TreeView3D`'s deterministic layout rather than
-    `GraphView3D`'s force-directed one (see the `GraphView3D` pilot spec's scope
-    section), not migration targets for this renderer. `bfs`, `dfs`, `dijkstra`, and
-    `graph-intro` have all moved off `GraphView` onto `GraphView3D` (below).
+    edge. Weights render when present. **No shipped lesson currently uses it** — `bfs`,
+    `dfs`, `dijkstra`, and `graph-intro` moved to `GraphView3D`; `linked-list` and
+    `trie` (both acyclic — a chain and a tree, not a binary one) moved to
+    `HierarchyView3D` (below). It remains a real, working option for a future
+    `GraphState`-shaped lesson that specifically wants an adjacency-list rendering
+    (e.g. one where a 3D spatial layout wouldn't add anything) — it just has no current
+    user.
   - **`GraphView3D`** draws that same `GraphState` — same `{ values, edges, directed? }`
     shape, same node/edge marks — as a camera-controllable 3D scene instead of
     `GraphView`'s adjacency list. Unlike `TreeView3D`'s radial layout (which can derive
@@ -613,6 +615,25 @@ Field by field:
     ships `directed: false`) and, incidentally, of the layout bug above. See
     `docs/superpowers/plans/2026-08-28-graphview-3d-pilot.md` for the design
     reasoning behind all of this.
+  - **`HierarchyView3D`** draws the same `GraphState` shape as `GraphView`/`GraphView3D`
+    — same `{ values, edges, directed? }`, same node/edge marks — as a
+    camera-controllable 3D scene, but with a deterministic (not force-directed) radial
+    layout: a BFS depth from a detected root plus a per-parent angular wedge, the same
+    philosophy `TreeView3D`'s formula uses, generalized from "index implies structure"
+    to "edges imply structure" so it also covers non-binary branching (a trie) and a
+    plain chain (a linked list) — shapes `TreeView3D`'s `2i+1`/`2i+2` formula can't
+    express. Deliberately **not** shared with `GraphView3D`'s bounding radius: at
+    `GraphView3D`'s `LAYOUT_RADIUS` (5), a chain longer than ~7 nodes crushes below the
+    sphere-diameter floor regardless of layout shape (the root-to-first-child gap is the
+    bottleneck, and it's angle-invariant — a golden-angle spiral was tried and
+    numerically disproven as a fix). `HierarchyView3D` gets its own, larger
+    `HIERARCHY_LAYOUT_RADIUS` (15, in `hierarchyLayout.ts`) and a proportionally
+    pulled-back camera instead. Used by `linked-list` and `trie`
+    (`data-structures/linked-list.mdx`, `data-structures/trie.mdx`) — `linked-list`
+    needed its registry schema tightened (32 → 16 nodes) to fit legibly at that radius;
+    `trie`'s existing schema already fit with no change. See
+    `docs/superpowers/specs/2026-08-31-hierarchyview-3d-design.md` for the full
+    derivation before touching `hierarchyLayout.ts`'s constants.
 - `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
   `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
   screen-reader user or a JS-disabled reader can act on.
