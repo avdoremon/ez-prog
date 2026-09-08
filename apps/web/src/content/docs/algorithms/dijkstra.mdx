@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 A map where every road takes the same time is not a map. Once edges carry a
 cost, the fewest hops and the cheapest route stop being the same thing — and
@@ -19,32 +20,26 @@ breadth-first search only knew how to count hops.
 
 ## How it works
 
-Keep one number per node: the cheapest cost you currently know of reaching it.
-All start at ∞ except the start, at 0. Then repeat until nothing is left:
+Keep one number per node: cheapest cost known so far. All start at ∞ except
+the start, at 0. Repeat until nothing is left:
 
-1. **Settle** the cheapest unsettled node. Its number is now final.
-2. **Relax** its edges — if going through it reaches a neighbour for less than
-   that neighbour's current number, write down the smaller figure.
+1. **Settle** the cheapest unsettled node — final.
+2. **Relax** its edges: if it reaches a neighbour for less, record the
+   smaller number.
 
-Step 1 is the whole idea, and a claim worth pausing on. Why is that number
-*final*? Because any cheaper route must leave through another unsettled node,
-which already costs at least as much — and a non-negative edge cannot bring
-the total back down.
+That number is final: any cheaper route must pass through another unsettled
+node already costing as much, and a non-negative edge can't reduce it.
 
-That leans entirely on **non-negative weights**. Allow a negative edge and a
-settled node can turn out cheaper later — but the algorithm has moved on and
-never looks back, so it answers wrongly rather than slowly. The input editor
-rejects negative weights for exactly that reason.
+This relies on **non-negative weights**: a negative edge could cheapen a
+settled node later, but the algorithm never looks back — wrong, not slow,
+why the editor rejects them.
 
-Watch node 4. It sits one edge from the start, so BFS would call it the
-nearest node in the graph, and step 5 records it at cost 9. Ten steps later a
-three-edge detour through 1 and 3 reaches it for 6. Hops and cost disagree;
-cost wins.
+Watch node 4: one edge away (BFS's answer), but step 5 settles it at cost 9;
+a detour later lowers it to 6.
 
 ## Try it
 
-```js
-function dijkstra(adj, start, n) {
+<RunnableCode lang="js" client:visible source={`function dijkstra(adj, start, n) {
   const dist = Array(n).fill(Infinity), settled = new Set();
   dist[start] = 0;
   for (;;) {
@@ -63,21 +58,27 @@ function dijkstra(adj, start, n) {
   }
   return dist;
 }
-```
+
+const adj = [
+  [{ to: 1, weight: 4 }, { to: 2, weight: 1 }],
+  [{ to: 3, weight: 1 }],
+  [{ to: 1, weight: 2 }, { to: 3, weight: 5 }],
+  [],
+];
+dijkstra(adj, 0, 4);
+`} />
 
 ## Trade-offs
 
-Set every weight to 1 and this degenerates into BFS with extra bookkeeping.
-BFS is not the weaker algorithm — it is the specialisation for equal weights,
-because a queue beats repeatedly searching for a minimum.
+Set every weight to 1 and this becomes BFS with extra bookkeeping — a queue
+beats scanning for a minimum.
 
-That search is this version's cost: a pass over every node, once per settle —
-quadratic in the number of nodes. Real implementations keep the tentative
-distances in a binary heap and pay a logarithm per operation. Same algorithm;
-the scan is shown here because it is the step you need to see.
+That scan is the cost: quadratic in nodes. Real implementations use a binary
+heap instead, paying a logarithm per operation; shown here as the step to
+see.
 
-For negative weights use Bellman-Ford, at a higher price. A\* is Dijkstra plus
-a guess about where the goal lies.
+For negative weights use Bellman-Ford. A\* is Dijkstra plus a guess about the
+goal.
 
 ## Check your understanding
 
