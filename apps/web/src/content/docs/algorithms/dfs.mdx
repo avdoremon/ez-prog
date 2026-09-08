@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 The previous lesson ended on a claim: swap the queue for a stack and you have
 written a different algorithm. This is that algorithm, on the same graph, so
@@ -21,29 +22,26 @@ you can watch the difference the container makes.
 
 Keep a **stack** of nodes waiting to be explored. Take the node on top, and
 push each unseen neighbour. That is breadth-first search with `pop()` where
-`shift()` used to be — compare the two code panels and the only difference is
-that one word.
+`shift()` used to be — the two code panels differ by that one word.
 
 The behaviour could hardly be more different. A stack returns the *most
 recently* added node, so the search commits to whatever it just discovered and
-follows it as far as it goes. It only comes back for alternatives when a
-branch dead-ends. BFS spreads in rings; DFS dives and backtracks.
+follows it as far as it goes, only backing up when a branch dead-ends. BFS
+spreads in rings; DFS dives and backtracks.
 
-The shortest-path guarantee is gone with it. BFS reached each node by a
-shortest route because closer nodes were always dequeued first; a stack makes
-no such promise, so the first time DFS arrives somewhere may be by a long
-detour.
+The shortest-path guarantee goes with it: BFS reached each node by a
+shortest route because closer nodes were always dequeued first, and a stack
+makes no such promise, so DFS may first arrive somewhere by a long detour.
 
 **You have almost certainly written DFS without a visible stack.** Recursing
 into each neighbour does the same thing, because the call stack *is* the
-stack — each call pushes a frame and returning pops it. That is the Stacks
-lesson's point arriving in a new place, and it is why a deep enough graph can
-overflow the call stack where an explicit stack on the heap would cope.
+stack. That is the Stacks lesson's point in a new place, and why a deep
+enough graph can overflow the call stack where an explicit heap stack would
+cope.
 
 ## Try it
 
-```js
-function dfs(adj, start) {
+<RunnableCode lang="js" client:visible source={`function dfs(adj, start) {
   const seen = new Set([start]);
   const stack = [start], order = [];
   while (stack.length > 0) {
@@ -57,20 +55,21 @@ function dfs(adj, start) {
   }
   return order;
 }
-```
+
+const adj = [[1, 2], [0, 3], [0, 3], [1, 2, 4], [3]];
+dfs(adj, 0);
+`} />
 
 ## Trade-offs
 
-Both searches cost the same: one visit per node, one look per edge. Memory is
-where they part. BFS's queue can hold an entire ring at once, which on a wide
-graph is enormous; DFS holds roughly one path plus the branches hanging off
-it, which on a wide shallow graph is far less. On a deep narrow graph the
-comparison reverses.
+Both cost one visit per node, one edge check. Memory differs: BFS's
+queue can hold an entire ring at once, huge on a wide graph; DFS holds
+roughly one path plus its branches, less on a wide shallow graph, though a
+deep narrow graph reverses that.
 
-Reach for DFS when you need to explore exhaustively rather than by distance:
-detecting cycles, topological sorting, finding connected components, solving
-mazes, backtracking puzzles. Reach for BFS when the question is "how far" or
-"fewest steps," because DFS will answer it wrongly.
+Reach for DFS to explore exhaustively: cycle detection, topological sort,
+connected components, mazes, backtracking. Reach for BFS for "how far" or
+"fewest steps": DFS answers that wrongly.
 
 ## Check your understanding
 
