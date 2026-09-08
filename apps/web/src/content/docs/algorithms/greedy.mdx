@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 A greedy algorithm takes the best option available right now and never looks
 back. Sometimes that is provably optimal; sometimes it is confidently wrong.
@@ -24,27 +25,24 @@ that still fits, repeat. Two 25s, one 10, three 1s — six coins, optimal.
 
 What makes it *greedy* is what it never does: compare whole solutions,
 backtrack, or ask whether a worse choice now would pay off later. Each
-decision is made once, from what is visible then, and is permanent.
+decision is made once and is permanent.
 
-That is why greedy is fast: no search tree, just one pass over the options,
-where trying every combination would be exponential.
+That is why greedy is fast: one pass over the options, where trying every
+combination would be exponential.
 
 ## Where it fails
 
 Change the coins to `[4, 3, 1]` and ask for 6. Run it in the editor above.
 
 Greedy takes the 4, then needs 2 more that only 1s can cover: **three coins**.
-But 3 + 3 is **two**. Taking the 4 — locally the best move — destroyed the
-possibility of using two 3s.
+But 3 + 3 is **two**. Taking the 4 destroyed the possibility of using two 3s.
 
-Nothing in the algorithm detects this — it has no notion of a solution it did
-not build. The failure is silent, which is what makes greedy dangerous: it
-always returns *an* answer, and never says whether it is the best one.
+Nothing in the algorithm detects this. The failure is silent: greedy always
+returns *an* answer, never says whether it is the best one.
 
 ## Try it
 
-```js
-function greedyCoins(coins, amount) {
+<RunnableCode lang="js" client:visible source={`function greedyCoins(coins, amount) {
   const sorted = [...coins].sort((a, b) => b - a);
   let remaining = amount, used = 0;
   for (const coin of sorted) {
@@ -55,22 +53,22 @@ function greedyCoins(coins, amount) {
   }
   return remaining === 0 ? used : null;
 }
-```
+
+greedyCoins([25, 10, 5, 1], 41);
+`} />
 
 ## Trade-offs
 
-Greedy is worth trying first because it is simple and fast. The cost is that
-using it *correctly* means proving it applies — you get no warning otherwise.
+Greedy is worth trying first: simple and fast. Using it *correctly* means
+proving it applies — no warning otherwise.
 
-It is provably optimal for Dijkstra's shortest paths, Huffman coding, minimum
-spanning trees, and interval scheduling by earliest finish time. The US coin
-system is another: its denominations are arranged so the locally-largest
-choice never blocks a better global one.
+It is provably optimal for Dijkstra, Huffman coding, minimum spanning trees,
+and interval scheduling. US coin denominations are another case: arranged so
+the locally-largest choice never blocks a better global one.
 
-When it fails, the usual replacement is dynamic programming, which considers
-the alternatives greedy discarded — at more time and memory. The workflow is:
-try greedy, hunt for a counterexample, and drop it if you find one. One
-counterexample is a disproof; a hundred passing examples prove nothing.
+When it fails, the usual replacement is dynamic programming, at more time
+and memory. Workflow: try greedy, hunt a counterexample, drop it if found —
+one counterexample disproves it; a hundred passing examples prove nothing.
 
 ## Check your understanding
 
