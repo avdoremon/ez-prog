@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 An array reaches slot 5 instantly, but finding the *value* 37 means looking
 through it. A hash table closes that gap with one idea: if the value decides
@@ -19,67 +20,69 @@ which slot it goes in, you can compute where to look instead of searching.
 
 ## How it works
 
-Pick a slot from the key by arithmetic — here `key % capacity`, seven slots,
-so 12 goes to slot 5. To find 12 again, run the same sum and look in slot 5.
-No scan, at any table size.
+Pick a slot from the key by arithmetic — `key % capacity`, seven slots, so
+12 goes to slot 5; finding it again means the same sum. No scan, at any
+table size.
 
-The catch arrives with 19, which also hashes to slot 5. Two keys, one slot: a
-**collision** — not bad luck but unavoidable, since there are more possible
-keys than slots.
+19 also hashes to slot 5 — a **collision**, unavoidable since keys outnumber
+slots. **Linear probing** resolves it: try the next slot, wrapping at the
+end. Watch 19 walk 5 → 6 → 0 to the first free slot — so **19 is no longer
+at its own hash**, and a lookup must repeat that walk: three looks, not
+seven.
 
-This table resolves it by **linear probing**: if the slot is taken, try the
-next one, wrapping round the end. Watch 19 walk 5 → 6 → 0 and settle in the
-first free slot it meets.
-
-That has a consequence worth pausing on. **19 is no longer at its own hash.**
-A lookup cannot check slot 5 and give up — it must repeat the insert's walk
-exactly, as the last four steps show. Finding 19 costs three looks, not seven.
-
-The walk stops at the first *empty* slot, which is the only reason a failed
-lookup is cheap: an empty slot proves the key was never inserted, because the
-insert would have stopped there too.
+The walk stops at the first *empty* slot, why a failed lookup is cheap: an
+empty slot proves the key was never inserted.
 
 ## Try it
 
-```js
-insert(key) {
-  let i = key % this.capacity;
-  for (let n = 0; n < this.capacity; n++) {
-    if (this.slots[i] === null) {
-      this.slots[i] = key;
-      return true;
-    }
-    if (this.slots[i] === key) return true;
-    i = (i + 1) % this.capacity;
+<RunnableCode lang="js" client:visible source={`class HashTable {
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.slots = new Array(capacity).fill(null);
   }
-  return false;
+
+  insert(key) {
+    let i = key % this.capacity;
+    for (let n = 0; n < this.capacity; n++) {
+      if (this.slots[i] === null) {
+        this.slots[i] = key;
+        return true;
+      }
+      if (this.slots[i] === key) return true;
+      i = (i + 1) % this.capacity;
+    }
+    return false;
+  }
+
+  has(key) {
+    let i = key % this.capacity;
+    for (let n = 0; n < this.capacity; n++) {
+      if (this.slots[i] === key) return true;
+      if (this.slots[i] === null) return false;
+      i = (i + 1) % this.capacity;
+    }
+    return false;
+  }
 }
 
-has(key) {
-  let i = key % this.capacity;
-  for (let n = 0; n < this.capacity; n++) {
-    if (this.slots[i] === key) return true;
-    if (this.slots[i] === null) return false;
-    i = (i + 1) % this.capacity;
-  }
-  return false;
-}
-```
+const table = new HashTable(7);
+for (const key of [12, 19, 26]) table.insert(key);
+console.log('slots', table.slots);
+console.log('has 19', table.has(19));
+console.log('has 20', table.has(20));
+`} />
 
 ## Trade-offs
 
-The `load` variable is the number that matters: keys divided by slots. While
-the table is mostly empty, probes are short and lookups are effectively
-constant-time. As it fills, runs of occupied slots grow and probes lengthen,
-until at a full table a miss costs a whole lap. Real tables resize once load
-passes roughly 0.7 — and resizing rehashes everything, which is the
-[amortized cost](/complexity/amortized-analysis/) argument again.
+The `load` factor — keys over slots — decides speed: short probes near
+empty, long near full. Real tables resize past load 0.7, rehashing
+everything — the [amortized cost](/complexity/amortized-analysis/) argument
+again.
 
-Two things a hash table gives up. Order is one: slots come out in hash order,
-nothing like sorted, so a [BST](/data-structures/bst/) still wins for range
-queries. Deletion is the sharper trap — blanking a slot breaks every probe
-chain running through it, stranding keys further along. Real implementations
-leave a *tombstone* marking the slot "used, but not this key".
+A hash table gives up order — slots come out hash-ordered, so a
+[BST](/data-structures/bst/) still wins for ranges — and easy deletion,
+since blanking a slot breaks every probe chain through it; real
+implementations use a *tombstone* instead.
 
 ## Check your understanding
 
