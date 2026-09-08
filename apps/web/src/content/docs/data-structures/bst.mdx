@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 The previous lesson ended with a tree whose in-order walk came out sorted.
 That was not luck. It is one rule, and that rule turns a tree into something
@@ -37,21 +38,17 @@ that.
 
 ## When the shape goes wrong
 
-"Balanced" is load-bearing, and nothing in the rule forces it. Insert 1, 2, 3,
-4, 5 in that order and each value goes right of the last: height 5, no
-branching — a linked list wearing a tree's clothes, where search is O(*n*).
+"Balanced" is load-bearing, and nothing forces it. Insert 1, 2, 3, 4, 5 and
+each value goes right of the last: height 5, no branching — a linked list
+wearing a tree's clothes, search O(*n*).
 
 This is quick sort's problem again: sorted input defeats the naive strategy.
-Self-balancing trees (AVL, red-black) rotate as they insert so the height
-stays logarithmic whatever order values arrive in. Your language's ordered map
-is almost certainly one.
-
-The visualization only draws complete trees, so it cannot show that case.
+Self-balancing trees (AVL, red-black) rotate on insert to keep height
+logarithmic — your language's ordered map is almost certainly one.
 
 ## Try it
 
-```js
-function bstSearch(tree, target) {
+<RunnableCode lang="js" client:visible source={`function bstSearch(tree, target) {
   let i = 0;
   while (i < tree.length) {
     if (target === tree[i]) return i;
@@ -59,18 +56,18 @@ function bstSearch(tree, target) {
   }
   return -1;
 }
-```
+
+bstSearch([8, 3, 10, 1, 6, 9, 14], 6);
+`} />
 
 ## Trade-offs
 
-Against a sorted array, a BST trades cache locality for cheap insertion: both
-search in log *n*, but the array pays *n* per insert and the tree log *n*.
-Against a hash table it is slower for plain lookup — hashing is constant time —
-but it keeps values *ordered*, so it can answer "smallest value above 40?" or
-walk everything in order, which a hash table cannot.
+A BST trades an array's cache locality for cheap inserts: both search in
+log *n*, but the array shifts *n* elements per insert. Against a hash table
+it loses on plain lookup — hashing is constant time — but keeps values
+ordered, so it answers "smallest above 40?" or walks everything sorted.
 
-Reach for a BST when you need ordering as well as lookup: ranges, successors,
-sorted iteration. Use a hash table when you only ask "is this present?"
+Reach for a BST when you need ordering, not just presence.
 
 ## Check your understanding
 
