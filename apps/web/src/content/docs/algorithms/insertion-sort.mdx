@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Picking up a dealt hand of cards, you do not sort it by swapping neighbours
 over and over. You take each new card and slide it left until it sits in the
@@ -24,25 +25,20 @@ prefix is sorted again and one element longer.
 
 ## How it works
 
-Start with the prefix `[arr[0]]`, which is trivially sorted. Take `arr[1]`
-as the key and compare it with the value to its left. While that value is
-bigger, copy it one slot right — this is a shift, not a swap, and it opens a
-gap that travels leftward with the search. When you meet a value that is not
-bigger than the key, or you run off the front of the array, the gap is where
-the key belongs, so drop it in.
+Start with the prefix `[arr[0]]`, trivially sorted. Take `arr[1]` as the key
+and compare it with the value to its left; while that value is bigger, copy
+it one slot right — a shift, not a swap. Once you meet a value not bigger,
+or run off the front, the gap is where the key belongs.
 
-Repeat with `arr[2]`, `arr[3]`, and so on. Every key ends up inside a sorted
-prefix, so after the last one the whole array is sorted.
+Repeat with `arr[2]`, `arr[3]`, and so on until sorted.
 
-Two properties fall out of this. The shift only happens on *strictly*
-bigger, so equal values never jump over each other — the sort is stable. And
-a value already in place triggers no shifts, which is why nearly-sorted
-input is fast.
+Two properties fall out: the shift only happens on *strictly* bigger, so
+equal values never jump each other — the sort is stable. A value already in
+place triggers no shifts, why nearly-sorted input is fast.
 
 ## Try it
 
-```js
-function insertionSort(arr) {
+<RunnableCode lang="js" client:visible source={`function insertionSort(arr) {
   arr = [...arr];
   for (let i = 1; i < arr.length; i++) {
     const key = arr[i];
@@ -55,18 +51,18 @@ function insertionSort(arr) {
   }
   return arr;
 }
-```
+
+insertionSort([5, 2, 9, 1, 7, 3]);
+`} />
 
 ## Trade-offs
 
-Reach for it on small arrays and on data already almost in order: sorted
-input costs one comparison per element and no shifts, which is linear. That
-is why real library sorts drop down to insertion sort once a chunk gets
-small enough.
+Reach for it on small arrays and data already almost sorted: one comparison
+per element, no shifts — linear. That's why library sorts drop to it once a
+chunk gets small enough.
 
 Avoid it on large unsorted arrays. Reversed input forces every key to travel
-the whole prefix, giving roughly *n*²/2 shifts — bubble sort's growth rate,
-with less work per step.
+the whole prefix — roughly *n*²/2 shifts, bubble sort's growth rate.
 
 ## Check your understanding
 
