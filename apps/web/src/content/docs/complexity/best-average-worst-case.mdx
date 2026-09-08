@@ -10,6 +10,7 @@ languages: [js]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 "How long does linear search take on ten values?" has no single answer — it
 depends on where the value sits.
@@ -17,45 +18,42 @@ depends on where the value sits.
 <Viz id="linear-search" />
 
 This run looks for 23 and finds it at index 5: six checks. Open **Try your
-own input** and change only `target`. Set `2` and the run ends after one
-check; set `100`, which is absent, and it costs all ten.
+own input** and change only `target`. Setting `2` ends the run after one
+check; setting `100` — absent — costs all ten.
 
 ## Three questions, not one
 
-- **Best case** — the cheapest input of that size: the target is first. One
-  check, O(1).
-- **Worst case** — the most expensive: absent, or last. *n* checks, O(*n*),
-  and a guarantee — nothing can be slower.
-- **Average case** — the mean over the inputs you expect. At a uniformly
-  random position, about *n*/2 checks: still O(*n*).
+- **Best case** — the cheapest input: the target is first, one check, O(1).
+- **Worst case** — the most expensive: absent, or last, *n* checks, O(*n*) —
+  nothing can be slower.
+- **Average case** — the mean over expected inputs: at a uniformly random
+  position, about *n*/2 checks, still O(*n*).
 
-Only the average assumes something — a distribution real data may not match.
-Best and worst are the ends of the range, so they assume nothing.
+Only the average assumes a distribution data may not match; best and worst
+assume nothing.
 
 ## When the cases sit in different classes
 
 <Viz id="quick-sort" />
 
-Quick sort partitions around the last value of each range. The eight
-shuffled values above cost 16 comparisons. Paste
-`{ "arr": [1, 2, 3, 4, 5, 6, 7, 8] }` into the editor — already sorted — and
-the count climbs to 28.
+Quick sort partitions around each range's last value: the eight shuffled
+values above cost 16 comparisons. Paste
+`{ "arr": [1, 2, 3, 4, 5, 6, 7, 8] }` — already sorted — and the count climbs
+to 28.
 
-Every pivot is now the largest value left, so each partition peels off one
-element instead of halving the range: *n* − 1 comparisons, then *n* − 2,
-down to 1 — *n*(*n* − 1)/2 in all. Shuffled input averages O(*n* log *n*);
-sorted input is O(*n*²).
+Every pivot is now the largest remaining, so each partition peels off one
+element instead of halving it: *n* − 1, then *n* − 2, down to 1 —
+*n*(*n* − 1)/2 total. Shuffled input averages O(*n* log *n*); sorted input is
+O(*n*²).
 
-Linear search's cases differ by a constant factor, so any of them tells much
-the same story. Quick sort's differ by a whole growth class, so "quick sort
-is O(*n* log *n*)" is an average-case claim that omits the case real data
-hits most easily: input already in order. O(·) bounds growth without saying
-*which* case, and a claim naming none is unfinished.
+Linear search's cases differ only by a constant factor; quick sort's differ
+by a whole growth class — calling it O(*n* log *n*) omits the case real data
+hits most easily, input already in order. O(·) bounds growth without saying
+*which* case; a claim naming none is unfinished.
 
 ## Try it
 
-```js
-function checksToFind(arr, target) {
+<RunnableCode lang="js" client:visible source={`function checksToFind(arr, target) {
   for (let i = 0; i < arr.length; i++) {
     if (arr[i] === target) return i + 1;
   }
@@ -66,22 +64,21 @@ const arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
 const each = arr.map((v) => checksToFind(arr, v));
 const total = each.reduce((a, b) => a + b, 0);
 
-console.log('best   ', Math.min(...each));      // 1
-console.log('worst  ', checksToFind(arr, 100)); // 10
-console.log('average', total / each.length);    // 5.5
-```
+console.log('best', Math.min(...each));
+console.log('worst', checksToFind(arr, 100));
+console.log('average', total / each.length);
+`} />
 
 ## Trade-offs
 
-Design against the worst case when slow means broken: a request deadline, a
-control loop, a queue that backs up until it falls over. Design against the
-average when work happens in bulk and only the total matters. Never design
-around the best case — the cheapest input is the one you can least rely on
-being handed.
+Design against the worst case when slow means broken — a deadline, a control
+loop, a backed-up queue. Design against the average when only the total
+across runs matters, never the best case: the input you can least rely on
+getting.
 
 When a bad worst case is easy to hit, change the algorithm, not the wording:
-a random or median-of-three pivot leaves quick sort's O(*n*²) intact but
-stops sorted input from triggering it.
+a random or median-of-three pivot keeps quick sort's O(*n*²) but stops
+sorted input from triggering it.
 
 ## Check your understanding
 
