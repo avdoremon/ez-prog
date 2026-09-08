@@ -9,6 +9,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Bubble sort is rarely the sort you should reach for, but it is the shortest
 correct one — a single nested loop, no extra memory — which makes it the
@@ -39,8 +40,7 @@ you.
 
 ## Try it
 
-```js
-function bubbleSort(arr) {
+<RunnableCode lang="js" client:visible source={`function bubbleSort(arr) {
   arr = [...arr];
   for (let i = 0; i < arr.length - 1; i++) {
     let swapped = false;
@@ -54,7 +54,9 @@ function bubbleSort(arr) {
   }
   return arr;
 }
-```
+
+bubbleSort([5, 2, 9, 1, 7, 3]);
+`} />
 
 ## Trade-offs
 
