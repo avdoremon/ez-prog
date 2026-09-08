@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Searching a graph raises a question an array never does: from here, several
 places are reachable at once. Breadth-first search answers it by refusing to
@@ -40,8 +41,7 @@ also stops it being queued twice.
 
 ## Try it
 
-```js
-function bfs(adj, start) {
+<RunnableCode lang="js" client:visible source={`function bfs(adj, start) {
   const seen = new Set([start]);
   const queue = [start], order = [];
   while (queue.length > 0) {
@@ -55,24 +55,23 @@ function bfs(adj, start) {
   }
   return order;
 }
-```
+
+const adj = [[1, 2], [0, 3], [0, 3], [1, 2, 4], [3]];
+bfs(adj, 0);
+`} />
 
 ## Trade-offs
 
-Swap the queue for a stack and you get depth-first search — same code, a
-different container, and a completely different traversal. That single
-substitution is the whole difference between the two, and it is worth
-remembering when you meet DFS.
+Swap the queue for a stack and you get depth-first search: same code,
+different container, different traversal. Remember that when you meet DFS.
 
-BFS costs one visit per node and one look per edge, so it runs in time
-proportional to nodes plus edges. Its memory is the catch: the queue can hold
-an entire ring at once, which on a wide graph is far more than the single path
-a depth-first search keeps.
+BFS visits each node and edge once, so it runs in time proportional to nodes
+plus edges. Memory is the catch: the queue can hold an entire ring at once,
+more than DFS's single path.
 
-Use BFS when distance matters — fewest moves in a puzzle, degrees of
-separation, shortest route on an unweighted map. When edges carry *weights*,
-fewest edges stops meaning shortest, and BFS gives the wrong answer; that is
-Dijkstra's problem.
+Use BFS when distance matters — fewest moves, degrees of separation, shortest
+route on an unweighted map. Once edges carry *weights*, that's Dijkstra's
+problem.
 
 ## Check your understanding
 
