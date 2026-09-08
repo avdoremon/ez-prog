@@ -9,6 +9,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Handed an unsorted pile of receipts and asked to find one, you do nothing
 clever: you go through them one at a time until the right one turns up.
@@ -22,48 +23,45 @@ the instant a match appears.
 ## How it works
 
 Walk the array left to right, asking one question at each position: is this
-the value I want? If yes, stop and report where. If you reach the end without
-a match, report it absent — conventionally as `-1`, since no real index is
-negative.
+the value I want? If yes, stop and report where. If you reach the end
+without a match, report it absent — conventionally `-1`, since no real
+index is negative.
 
 That is the whole algorithm: no setup, no requirement on the data. The array
 above is sorted only because this visualization is reused to race binary
 search in [How Fast Is Fast?](/complexity/big-o/); linear search neither
-knows nor cares. Paste an unsorted array into **Try your own input** and
-watch it run identically.
+knows nor cares.
 
 The cost has three cases: first try is one check; last, or absent, is *n*
-checks; averaged over random positions, about *n*/2. Plan around the absent
-case: **you cannot conclude something is missing until you have looked
-everywhere.**
+checks; averaged over random positions, about *n*/2. **You cannot conclude
+something is missing until you have looked everywhere.**
 
 ## Try it
 
-```js
-function linearSearch(arr, target) {
+<RunnableCode lang="js" client:visible source={`function linearSearch(arr, target) {
   for (let i = 0; i < arr.length; i++) {
     if (arr[i] === target) return i;
   }
   return -1;
 }
-```
+
+linearSearch([4, 8, 15, 16, 23, 42], 23);
+`} />
 
 ## Trade-offs
 
-Linear search's advantage is not speed — it is that it demands nothing.
-Nothing sorted, nothing indexed, no extra memory. It works on a linked list,
-on a file read a line at a time, on values arriving from a socket. Every
-faster search buys its speed with a precondition, and something must pay for
-it.
+Linear search's advantage is not speed — it demands nothing. Nothing sorted,
+indexed, or extra memory. It works on a linked list, a file read a line at a
+time, values arriving from a socket. Every faster search buys speed with a
+precondition, and something must pay for it.
 
-That makes the comparison against binary search less obvious than it looks.
-Binary search is dramatically faster, but only on sorted data, and sorting
-costs more than a single scan. **For one search on unsorted data, scanning
-wins.** Sorting first pays off only when you will search the same data many
-times.
+That makes the comparison against binary search less obvious. Binary search
+is dramatically faster, but only on sorted data, and sorting costs more than
+a single scan. **For one search on unsorted data, scanning wins** — sorting
+first pays off only when you search the same data many times.
 
-The moment "find me this value" happens in a loop, scanning is the wrong
-tool: sort once and binary search, or build a hash map.
+When that search happens in a loop, scanning is the wrong tool: sort once
+and binary search, or build a hash map.
 
 ## Check your understanding
 
