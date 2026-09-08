@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 A trie stores a set of words by spelling them out one character at a time,
 one edge per letter. Two words that start the same way walk the same path
@@ -26,17 +27,19 @@ passed through here too — it's reused; only a letter with no matching edge
 creates a new node. The last letter of a word marks its node as a
 **complete word**, not just a path that happens to exist.
 
-That last distinction is the trap. Searching for a string walks the same
-way: follow an edge per character, and fail immediately if one is
-missing. But reaching the end of the string only proves the string is a
-**path** in the trie — it does not prove the string was ever inserted as
-its own word. Step the visualization with the default input: `"ca"` walks
-fine, because `"cat"`, `"car"`, and `"cart"` all pass through it, but
-`"ca"` itself was never inserted, so it is a prefix, not a match.
+That last distinction is the trap. Searching walks the same way: follow an
+edge per character, failing immediately if one is missing. But reaching the
+end only proves the string is a **path** in the trie — not that it was ever
+inserted as its own word. `"ca"` walks fine, since `"cat"`, `"car"`, and
+`"cart"` all pass through it, but `"ca"` itself was never inserted — a
+prefix, not a match.
 
 ## Try it
 
-```js
+<RunnableCode lang="js" client:visible source={`function newNode() {
+  return { children: new Map(), isWord: false };
+}
+
 function insert(root, word) {
   let node = root;
   for (const ch of word) {
@@ -47,22 +50,36 @@ function insert(root, word) {
   }
   node.isWord = true;
 }
-```
+
+function search(root, word) {
+  let node = root;
+  for (const ch of word) {
+    if (!node.children.has(ch)) return false;
+    node = node.children.get(ch);
+  }
+  return node.isWord;
+}
+
+const root = newNode();
+for (const word of ['cat', 'car', 'cart']) insert(root, word);
+console.log('cat', search(root, 'cat'));
+console.log('ca', search(root, 'ca'));
+console.log('cart', search(root, 'cart'));
+`} />
 
 ## Trade-offs
 
-Reach for a trie when the operation you actually need is "does any stored
-word start with this" — autocomplete, spell-check candidates, IP routing
-tables — because that question falls out of the structure directly: walk
-to the prefix's node and everything below it is a match. A hash set of
-whole words cannot answer that without scanning every entry.
+Reach for a trie when you need "does any stored word start with this" —
+autocomplete, spell-check candidates, IP routing tables — since that falls
+out of the structure directly: walk to the prefix's node and everything
+below it is a match. A hash set of whole words can't answer that without
+scanning every entry.
 
 Avoid it for plain membership testing ("is this word stored at all"),
 where a hash set answers in one computed slot and a trie costs one hop per
-character instead. A trie also spends more memory per word than storing
-the string once — each node can hold up to 26 potential children even
-when only one is used — though shared prefixes claw a lot of that back
-whenever the stored words overlap the way real language does.
+character. A trie also spends more memory per word than storing the string
+once, though shared prefixes claw a lot of that back when stored words
+overlap the way real language does.
 
 ## Check your understanding
 
