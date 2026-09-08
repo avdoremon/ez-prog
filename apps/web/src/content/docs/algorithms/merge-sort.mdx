@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Merging two sorted piles is easy: look at the top card of each, take the
 smaller, repeat. Merge sort is built entirely on noticing that a pile of one
@@ -19,28 +20,22 @@ card is already sorted.
 
 ## How it works
 
-Split the array in half, sort each half, merge them. The sorting of each half
-is the same procedure again — and the recursion bottoms out at runs of one
-value, which are sorted by definition. Nothing clever happens at the bottom;
-all the work is in the merging on the way back up.
+Split the array in half, sort each half, merge them — recursion bottoms out
+at runs of one value, sorted by definition. All the work is in merging back
+up.
 
-Merging is the part worth watching. Two sorted runs sit side by side, and you
-repeatedly compare their front values and take the smaller. Because both runs
-are sorted, whichever value you take is the smallest one left anywhere — so
-one pass over both runs produces a sorted combination. Merging *n* values
-costs about *n* comparisons, not *n*².
+Merging: two sorted runs sit side by side; repeatedly compare their front
+values and take the smaller. Because both are sorted, that value is the
+smallest left anywhere — one pass produces a sorted combination, about *n*
+comparisons, not *n*².
 
-Now count. Every level of the recursion merges every value exactly once, so
-each level costs *n*, and halving repeatedly gives about log₂(*n*) levels.
-Total: **n log n** — and unlike the quadratic sorts, that holds for every
-input, because the splitting ignores the values entirely.
-
-Watch a merged range settle: once declared merged, it stays sorted.
+Now count: each level merges every value once, costing *n*, and halving
+gives about log₂(*n*) levels. Total: **n log n** — and unlike the quadratic
+sorts, that holds for every input, since splitting ignores the values.
 
 ## Try it
 
-```js
-function mergeSort(arr, lo = 0, hi = arr.length - 1) {
+<RunnableCode lang="js" client:visible source={`function mergeSort(arr, lo = 0, hi = arr.length - 1) {
   if (lo >= hi) return arr;
   const mid = (lo + hi) >> 1;
   mergeSort(arr, lo, mid);
@@ -55,25 +50,24 @@ function mergeSort(arr, lo = 0, hi = arr.length - 1) {
   while (j < right.length) arr[k++] = right[j++];
   return arr;
 }
-```
+
+mergeSort([5, 2, 9, 1, 7, 3]);
+`} />
 
 ## Trade-offs
 
-Merge sort's selling point is that its *n* log *n* is a guarantee, not an
-average. Quick sort is usually faster in practice but can degrade badly on
-unlucky input; merge sort has no bad case, which is why it backs sorts that
-must not have surprises.
+Merge sort's selling point: *n* log *n* is guaranteed, not an average. Quick
+sort is usually faster but can degrade badly on unlucky input; merge sort has
+none.
 
-It is also **stable**: the comparison takes from the left run on a tie, so
-equal values keep their original order. That matters when you sort by one
-field and want a previous sort to survive underneath.
+It is also **stable**: comparisons favor the left run on a tie, keeping
+equal values' original order — useful when sorting by one field should
+preserve an earlier sort underneath.
 
-The cost is memory. Merging needs somewhere to put the combination, so the
-usual implementation allocates about *n* extra slots — where the quadratic
-sorts you have seen work in place. That trade flips for data that cannot be
-randomly accessed: merge sort is the natural sort for linked lists, and for
-data too large to fit in memory, since merging only ever reads each run
-front to back.
+The cost is memory: merging needs roughly *n* extra slots, where quadratic
+sorts work in place. That flips for data that can't be randomly accessed —
+merge sort suits linked lists and data too large for memory, reading each
+run front to back.
 
 ## Check your understanding
 
