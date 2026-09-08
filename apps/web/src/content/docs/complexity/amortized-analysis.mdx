@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Appending to a list feels free. But an array is a fixed block, so eventually
 an append finds no room and must move everything somewhere bigger. Amortized
@@ -19,33 +20,26 @@ analysis is how we say "that is still cheap" without lying.
 
 ## How it works
 
-A dynamic array keeps two numbers: how many values it holds and how many it
-*could* hold. Appending writes into a spare slot — one step. When the spares
-run out, it allocates a bigger block, copies everything across, then appends.
+A dynamic array tracks how many values it holds and how many it *could* hold.
+Appending writes into a spare slot — one step. When the spares run out, it
+allocates a bigger block, copies everything across, then appends.
 
-The copy is genuinely expensive: copying *n* values costs *n*. The worst case
-for a single append really is O(*n*), and averaging does not change that.
+Copying *n* values costs *n*, so a single append's worst case is O(*n*), and
+averaging doesn't change that.
 
-What saves it is **how rarely** it happens. The array does not grow by one
-slot, it **doubles** — so each resize buys twice the room of the last, and
-resizes get rarer exactly as fast as they get costlier.
+What saves it is how rarely that happens: the array doesn't grow by one slot,
+it **doubles**, so each resize buys twice the room of the last, and resizes
+get rarer exactly as fast as they get costlier.
 
 Count it above: from capacity 1, sixteen appends trigger four resizes copying
-1, 2, 4, and 8 values — fifteen copies for sixteen appends.
-
-That series is the argument. Copies total 1 + 2 + 4 + …, summing to just under
-**twice** the final size, so the copying averages under two per append however
-long the run. That is what "amortized O(1)" claims: not that every append is
-cheap, but that *n* appends cost O(*n*) together.
-
-Be careful with the arithmetic: "fewer copies than appends" is tempting, and
-true for sixteen values — but five values from capacity 1 makes seven copies.
-The bound is two per append, not one.
+1, 2, 4, and 8 values — fifteen copies total, summing to just under **twice**
+the final size, so copying averages under two per append however long the
+run (not one, however tempting that sounds). This is what "amortized O(1)"
+means: not every append is cheap, but *n* appends together cost O(*n*).
 
 ## Try it
 
-```js
-function push(arr, value) {
+<RunnableCode lang="js" client:visible source={`function push(arr, value) {
   if (arr.size === arr.capacity) {
     const bigger = new Array(arr.capacity * 2);
     for (let i = 0; i < arr.size; i++) bigger[i] = arr.data[i];
@@ -55,24 +49,26 @@ function push(arr, value) {
   arr.data[arr.size++] = value;
   return arr;
 }
-```
+
+const arr = { data: new Array(2), size: 0, capacity: 2 };
+for (const value of [1, 2, 3, 4, 5]) push(arr, value);
+arr.data.slice(0, arr.size);
+`} />
 
 ## Trade-offs
 
-Doubling is what makes the argument work; growing by a *fixed* amount destroys
-it. Add ten slots at a time and resizes stay equally expensive while never
-getting rarer — *n* appends then cost about *n*²/20. Growth has to be
-multiplicative.
+Doubling makes the argument work; a *fixed* amount destroys it — adding ten
+slots at a time keeps resizes equally expensive without ever getting rarer,
+costing about *n*²/20 over *n* appends.
 
-The cost is wasted space: just after a resize the array may be half empty, so
-you trade up to 2× memory for constant-time appends. Some implementations grow
-by 1.5× to waste less.
+The cost is wasted space: right after a resize the array may be half empty,
+trading up to 2× memory for constant-time appends (some implementations grow
+by 1.5× instead, to waste less).
 
-Amortized is also not average-case: it makes no probabilistic claim, but
-guarantees any *n* appends cost O(*n*). The distinction bites when one slow
-operation is unacceptable — an amortized bound is no comfort if a single
-append missing a deadline is a failure, which is why real-time systems often
-refuse doubling arrays.
+Amortized is also not average-case: it makes no probabilistic claim, only a
+guarantee that *n* appends cost O(*n*). That matters when a single slow
+operation is unacceptable, which is why real-time systems often avoid
+doubling arrays.
 
 ## Check your understanding
 
