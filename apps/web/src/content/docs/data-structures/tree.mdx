@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 An array gives every value two neighbours. A tree gives it a parent and up to
 two children instead — and that one change turns "walk from left to right"
@@ -23,28 +24,27 @@ Every value is a **node**. The top node is the **root**, childless nodes are
 **leaves**, and the steps from root to deepest leaf is the **height**. In a
 *binary* tree each node has at most two children, a left and a right.
 
-The tree above is a flat array, index *i*'s children at 2*i*+1 and 2*i*+2 —
-the trick the Heaps lesson uses, valid whenever the tree is complete. Trees
-with gaps use node objects holding pointers instead.
+The tree above is a flat array, children at 2*i*+1 and 2*i*+2 — the Heaps
+lesson's trick, valid when the tree is complete. Trees with gaps use node
+objects with pointers instead.
 
-Walking it is where trees stop resembling arrays. Two directions lead from any
-node and only one can be first, so you must decide when to record the node
-relative to its subtrees:
+Walking it is where trees stop resembling arrays. Two directions lead from
+any node, so you must decide when to record the node relative to its
+subtrees:
 
 - **Pre-order** — record the node, then the left subtree, then the right.
 - **In-order** — left subtree, then the node, then the right.
 - **Post-order** — both subtrees, then the node.
 
-That is the *only* difference between them: one line moves. Change `order` in
-the input editor and watch the same tree produce a different sequence.
+That's the *only* difference: one line moves. Change `order` and watch the
+same tree produce a different sequence.
 
-Notice what in-order gives on this tree: 1, 3, 6, 8, 9, 10, 14 — sorted. That
-is not a coincidence; it is the property the next lesson is built on.
+Notice what in-order gives here: 1, 3, 6, 8, 9, 10, 14 — sorted. Not a
+coincidence; it's the property the next lesson builds on.
 
 ## Try it
 
-```js
-function traverse(tree, order, i = 0, out = []) {
+<RunnableCode lang="js" client:visible source={`function traverse(tree, order, i = 0, out = []) {
   if (i >= tree.length) return out;
   if (order === 'pre') out.push(tree[i]);
   traverse(tree, order, 2 * i + 1, out);
@@ -53,19 +53,19 @@ function traverse(tree, order, i = 0, out = []) {
   if (order === 'post') out.push(tree[i]);
   return out;
 }
-```
+
+traverse([8, 3, 10, 1, 6, 9, 14], 'in');
+`} />
 
 ## Trade-offs
 
-Each order is right for some job. Pre-order sees a node before its children —
-use it to copy or serialise a tree. Post-order sees children first, which is
-what freeing a tree or sizing a directory needs: you cannot total a folder
-before its subfolders. In-order is the one search trees care about.
+Each order fits a job. Pre-order sees a node before its children, for
+copying or serialising. Post-order sees children first — what freeing a
+tree or sizing a directory needs. In-order is what search trees care about.
 
-The cost over an array is indirection: values are no longer adjacent, so
-iteration loses the cache locality arrays enjoy. What you buy is structure — a
-balanced tree puts every node within about log *n* steps of the root, which is
-what makes the next lessons' operations cheap.
+The cost over an array is indirection: values aren't adjacent, losing
+arrays' cache locality. What you buy is structure — a balanced tree puts
+every node within about log *n* steps of the root.
 
 ## Check your understanding
 
