@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 A stack is an array that has given something up. You may only touch one end,
 and in exchange every operation becomes cheap and the ordering becomes a
@@ -38,8 +39,7 @@ you can rely on without checking.
 
 ## Try it
 
-```js
-function runStack(ops) {
+<RunnableCode lang="js" client:visible source={`function runStack(ops) {
   const stack = [];
   for (const op of ops) {
     if (op !== null) stack.push(op);
@@ -47,7 +47,9 @@ function runStack(ops) {
   }
   return stack;
 }
-```
+
+runStack([4, 8, 15, null, 16]);
+`} />
 
 ## Trade-offs
 
