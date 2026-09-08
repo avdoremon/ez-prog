@@ -10,6 +10,7 @@ languages: [js]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 "Fast" is not a stopwatch measurement — it is a question of how the work
 grows as the input grows. The clearest way to see that is to run two
@@ -49,8 +50,7 @@ growing, which is the property that actually matters once real data does.
 
 ## Try it
 
-```js
-function countedLinearSearch(arr, target) {
+<RunnableCode lang="js" client:visible source={`function countedLinearSearch(arr, target) {
   let checked = 0;
   for (const value of arr) {
     checked++;
@@ -70,7 +70,11 @@ function countedBinarySearch(arr, target) {
   }
   return checked;
 }
-```
+
+const arr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
+console.log('linear', countedLinearSearch(arr, 91));
+console.log('binary', countedBinarySearch(arr, 91));
+`} />
 
 ## Check your understanding
 
