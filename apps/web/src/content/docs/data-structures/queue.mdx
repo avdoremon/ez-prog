@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 A queue is the other half of the stack's bargain. It also restricts you to the
 ends — but to *opposite* ends, and that one change flips the ordering and the
@@ -25,23 +26,20 @@ A stack would have handed back the newest instead.
 
 Enqueueing is cheap, exactly as pushing was — the back is the end of the
 array, and nothing else moves. Dequeueing is where the trouble is. Removing
-index 0 leaves a hole at the front, and the array has no way to represent a
-hole, so everything behind it shifts left. Step the visualization: each
-dequeue is followed by one shift per remaining value.
+index 0 leaves a hole at the front the array can't represent, so everything
+behind it shifts left: each dequeue costs one shift per remaining value.
 
-That is the Arrays lesson's shifting cost, arriving where you least want it —
-on the operation a queue performs constantly. A queue of *n* values costs
-about *n* per dequeue this way.
+That is the Arrays lesson's shifting cost, landing on the operation a queue
+performs constantly — about *n* per dequeue.
 
-Real implementations refuse to pay it. Instead of moving the values, they move
-a **head index**: dequeueing just advances a marker and leaves the value
-behind. Let the head and back wrap around the array — a *circular buffer* —
-and both operations become constant time with no shifting at all.
+Real implementations refuse to pay it. Instead of moving values, they move a
+**head index**: dequeueing just advances a marker, leaving the value behind.
+Let head and back wrap around the array — a *circular buffer* — and both
+operations become constant time, no shifting.
 
 ## Try it
 
-```js
-function runQueue(ops) {
+<RunnableCode lang="js" client:visible source={`function runQueue(ops) {
   const queue = [];
   let head = 0;
   for (const op of ops) {
@@ -50,23 +48,25 @@ function runQueue(ops) {
   }
   return queue.slice(head);
 }
-```
+
+runQueue([1, 2, 3, null, 4]);
+`} />
 
 ## Trade-offs
 
-Use a queue when fairness in arrival order is the point: work waiting for a
+Use a queue when arrival-order fairness is the point: work waiting for a
 worker, requests waiting for a server, print jobs, keystrokes. Breadth-first
-search is a queue too — it visits everything one step away before anything two
-steps away, which is exactly "oldest first."
+search is a queue too — "oldest first" visits everything one step away
+before anything two steps away.
 
-The catch is the one above: the obvious array implementation makes the common
-operation the expensive one. Use your language's real queue — Python's
+The catch: the obvious array implementation makes the common operation the
+expensive one. Use your language's real queue — Python's
 `collections.deque`, Java's `ArrayDeque` — or keep a head index yourself.
-`Array.prototype.shift()` in JavaScript is the trap, since it looks like `pop()`
-but is not the same cost.
+`Array.prototype.shift()` in JavaScript is the trap: it looks like `pop()`
+but isn't the same cost.
 
-Avoid a queue when you want the newest item first — that is a stack — or when
-priority should beat arrival order, which is a heap.
+Avoid a queue for newest-first (a stack) or when priority should beat
+arrival order (a heap).
 
 ## Check your understanding
 
