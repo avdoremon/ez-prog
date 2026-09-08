@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 To find the best run of three consecutive values, you could add up every group
 of three. But consecutive groups overlap almost entirely — and re-adding what
@@ -21,30 +22,26 @@ you already know is the waste worth removing.
 
 Add up the first *k* values. That total is the first window.
 
-Now move the window one step right. Only two things changed: one value left
-at the back, one value joined at the front. So the new total is the old total,
-minus the departing value, plus the arriving one:
+Now move the window one step right: one value left the back, one joined the
+front. The new total is the old total, minus the departing value, plus the
+arriving one:
 
 ```text
 sum = sum - arr[i - k] + arr[i]
 ```
 
-Everything in the overlap stays untouched. Track the best total as you go, and
-one pass answers the question.
+Everything in the overlap stays untouched. Track the best total as you go,
+and one pass answers the question.
 
 That single line is the whole technique. Recomputing each window costs *k*
-additions and there are about *n* windows, so the obvious approach is *n*×*k*.
-Repairing the total costs two operations per step regardless of *k*, which
-makes the whole scan linear — and, importantly, **independent of the window
-width.** A window of 3 and a window of 300 cost the same per step.
-
-Watch the departing cell dim at each slide. That is the value being subtracted
-out; the rest of the window is never re-read.
+additions over *n* windows: *n*×*k*. Repairing the total costs two
+operations per step regardless of *k*, making the scan linear and
+**independent of window width** — a window of 3 and one of 300 cost the
+same.
 
 ## Try it
 
-```js
-function maxWindowSum(arr, k) {
+<RunnableCode lang="js" client:visible source={`function maxWindowSum(arr, k) {
   let sum = 0;
   for (let i = 0; i < k; i++) sum += arr[i];
   let best = sum, bestStart = 0;
@@ -57,22 +54,22 @@ function maxWindowSum(arr, k) {
   }
   return { best, bestStart };
 }
-```
+
+maxWindowSum([2, 1, 5, 1, 3, 2], 3);
+`} />
 
 ## Trade-offs
 
-This works because addition is reversible: knowing what left the window is
-enough to undo its contribution. That is the precondition, and it is easy to
-violate. Swap the sum for a **maximum** and the trick collapses — when the
-departing value *was* the maximum, the old maximum tells you nothing about the
-new one, and you are back to rescanning. Sliding-window maximum is solvable in
-linear time, but it needs a deque, not a running total.
+This works because addition is reversible: knowing what left the window
+undoes its contribution — easy to violate. Swap the sum for a **maximum**
+and the trick collapses: when the departing value *was* the maximum, the old
+one tells you nothing about the new, and you are back to rescanning.
+Sliding-window maximum is solvable in linear time, but needs a deque.
 
-Use it when the window has a fixed width and the quantity you track can be
-updated incrementally: sums, counts, averages, character frequencies. Reach
-for something else when the window's width depends on the data — those are
-variable-size windows, where both edges move independently — or when the
-tracked quantity cannot be undone.
+Use it when the window has a fixed width and the tracked quantity updates
+incrementally: sums, counts, averages, character frequencies. Reach for
+something else when the width depends on the data, or the quantity can't be
+undone.
 
 ## Check your understanding
 
