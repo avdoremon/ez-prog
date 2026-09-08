@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Handed a shelf of books to order by height, most people do not swap
 neighbours over and over. They scan for the shortest, stand it at the left
@@ -19,29 +20,26 @@ end, then scan again. Selection sort is that habit, written down.
 
 ## How it works
 
-The array splits into a sorted prefix on the left and an unsorted rest. Each
-pass scans the whole rest, remembers where the smallest value sits, and swaps
-it into the first unsorted slot. That slot is settled, the boundary moves
-right one, and the next pass repeats.
+The array splits into a sorted prefix and an unsorted rest. Each pass scans
+the rest, remembers where the smallest value sits, and swaps it into the
+first unsorted slot. That slot is settled, the boundary moves right, and
+the next pass repeats.
 
-Notice what the scan does *not* do: it moves nothing, only records an
-index. All movement happens once per pass, in a single swap at the end — and
-if the smallest value already sits in the right slot, even that is skipped.
-Watch the `swaps` counter above: it reaches **2** on six values that took 15
-comparisons to sort.
+Notice what the scan does *not* do: it moves nothing, only records an index.
+Movement happens once per pass, in a single swap — skipped entirely if the
+smallest value already sits in the right slot.
 
-That gap is the point. Selection sort makes at most *n*−1 swaps on any input,
-because each pass settles a slot for good; bubble sort on this array makes 8. When comparing is cheap but moving data is expensive — flash memory
-that wears out, or records far larger than the key they are sorted by — that
-is the trade you want.
+That gap is the point: at most *n*−1 swaps on any input, since each pass
+settles a slot for good. When comparing is cheap but moving data is
+expensive — flash memory that wears out, records far larger than the key —
+that's the trade you want.
 
-The other half of the trade: the scan never gets cheaper. With no early exit, a
-sorted array costs exactly as many comparisons as a reversed one.
+The other half: the scan never gets cheaper — no early exit, so a sorted
+array costs as many comparisons as a reversed one.
 
 ## Try it
 
-```js
-function selectionSort(arr) {
+<RunnableCode lang="js" client:visible source={`function selectionSort(arr) {
   arr = [...arr];
   for (let i = 0; i < arr.length - 1; i++) {
     let min = i;
@@ -52,20 +50,20 @@ function selectionSort(arr) {
   }
   return arr;
 }
-```
+
+selectionSort([5, 2, 9, 1, 7, 3]);
+`} />
 
 ## Trade-offs
 
-Use it when writes cost far more than reads and the array is small. Otherwise
-its *n*²/2 comparisons make it a poor general sort: the next lesson's
-insertion sort finishes nearly-ordered data in roughly linear time, while
-selection sort grinds through every comparison regardless.
+Use it when writes cost far more than reads and the array is small.
+Otherwise its *n*²/2 comparisons make it a poor general sort: insertion sort
+finishes nearly-ordered data in linear time, where selection sort grinds
+through every comparison regardless.
 
-One more difference matters when sorting records rather than bare numbers.
-The long-range swap can throw a value behind an equal one: on `[2, 2, 1]` the
-first `2` ends up after the second. Selection sort is **not stable**;
-insertion sort is. If equal records must keep their original order, that
-rules it out.
+One more difference for records: a long-range swap can throw a value behind
+an equal one — on `[2, 2, 1]` the first `2` ends up after the second.
+Selection sort is **not stable**; insertion sort is.
 
 ## Check your understanding
 
