@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Merge sort splits blindly and works while combining. Quick sort inverts that:
 it works up front, splitting so well that combining becomes unnecessary.
@@ -19,37 +20,31 @@ it works up front, splitting so well that combining becomes unnecessary.
 ## How it works
 
 Pick one value as the **pivot**. Rearrange the range so everything smaller
-sits left of it and everything larger sits right, then drop the pivot between
-them.
+sits left of it and everything larger sits right, then drop the pivot
+between them.
 
-The pivot is now in its **final position**, permanently: nothing on its left
-can need to move past it, and nothing on its right can move back. Watch that
-in the visualization — a placed pivot never moves again, where merge sort's
-writes can still shift in a later merge.
+The pivot is now in its **final position**, permanently — unlike merge
+sort's writes, which can still shift in a later merge.
 
 That leaves two independent ranges; recurse into both and the array ends up
-sorted with no merging step. Partitioning costs one pass, so if pivots land
-near the middle the ranges halve — about log *n* levels of *n* work:
-**n log n**.
+sorted with no merging step. If pivots land near the middle the ranges
+halve: **n log n**.
 
 ## When it goes wrong
 
 That "if" is doing real work. This version pivots on the last value, so on
-**already-sorted input** every pivot is the largest in its range. The split is
-then one value against everything else — *n* levels instead of log *n*, and
-the cost becomes *n*².
+**already-sorted input** every pivot is the largest: the split becomes one
+value against everything else — *n* levels instead of log *n*, cost *n*².
 
-Try it: run `[1, 2, 3, 4, 5, 6, 7, 8]` in the input editor and count the
-comparisons against the shuffled default. Sorted input — insertion sort's
-easiest case — is the worst case here.
+Try it: run `[1, 2, 3, 4, 5, 6, 7, 8]` and count comparisons against the
+shuffled default — insertion sort's easiest case is the worst case here.
 
-Real implementations pick the pivot better — median-of-three, or at random —
-making the bad case rare rather than impossible.
+Real implementations pick the pivot better — median-of-three, or random —
+making the bad case rare, not impossible.
 
 ## Try it
 
-```js
-function quickSort(arr, lo = 0, hi = arr.length - 1) {
+<RunnableCode lang="js" client:visible source={`function quickSort(arr, lo = 0, hi = arr.length - 1) {
   if (lo >= hi) return arr;
   const pivot = arr[hi];
   let small = lo;
@@ -64,20 +59,22 @@ function quickSort(arr, lo = 0, hi = arr.length - 1) {
   quickSort(arr, small + 1, hi);
   return arr;
 }
-```
+
+quickSort([5, 2, 9, 1, 7, 3]);
+`} />
 
 ## Trade-offs
 
 Quick sort is usually the fastest general-purpose sort in practice, despite
 merge sort's better guarantee. It sorts **in place** — no *n* extra slots —
-and its inner loop is a simple scan with excellent cache behaviour.
+with a tight, cache-friendly scan.
 
-You give up the guarantee and stability: the worst case is real, and swapping
-distant elements can reorder equal values.
+You give up the guarantee and stability: swapping distant elements can
+reorder equal values.
 
 Pick merge sort for a predictable bound or stable output, quick sort for
-average speed in place. Many libraries hedge: run quick sort, watch the
-recursion depth, switch to heap sort if it degrades — introsort.
+average speed in place. Many libraries hedge, switching to heap sort if
+recursion depth degrades.
 
 ## Check your understanding
 
