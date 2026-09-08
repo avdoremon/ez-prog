@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 To find two values in a sorted list that add to a target, you could try every
 pair. But sorted data tells you which way to move — and one pointer at each
@@ -41,8 +42,7 @@ is ruled out for good, never revisited.
 
 ## Try it
 
-```js
-function twoSumSorted(arr, target) {
+<RunnableCode lang="js" client:visible source={`function twoSumSorted(arr, target) {
   let lo = 0, hi = arr.length - 1;
   while (lo < hi) {
     const sum = arr[lo] + arr[hi];
@@ -52,20 +52,21 @@ function twoSumSorted(arr, target) {
   }
   return null;
 }
-```
+
+twoSumSorted([2, 4, 7, 11, 15], 15);
+`} />
 
 ## Trade-offs
 
 Against the obvious nested loop over every pair, this turns *n*²/2 additions
-into at most *n*. It uses no extra memory, which is what separates it from
-the hash-map approach: a hash map solves the same problem in linear time on
-*unsorted* data, but stores up to *n* entries.
+into at most *n*. It uses no extra memory, separating it from the hash-map
+approach: a hash map solves the same problem in linear time on *unsorted*
+data, but stores up to *n* entries.
 
 So the choice is about what you already have. Sorted input: two pointers,
-nothing allocated. Unsorted input you only search once: a hash map, since
-sorting first costs more than the scan. Two pointers is not a trick for
-pair-sums specifically — the same converge-from-both-ends shape solves
-palindrome checks, container-with-most-water, and merging sorted lists.
+nothing allocated. Unsorted input searched once: a hash map, since sorting
+first costs more than the scan. The same converge-from-both-ends shape also
+solves palindrome checks and container-with-most-water.
 
 ## Check your understanding
 
