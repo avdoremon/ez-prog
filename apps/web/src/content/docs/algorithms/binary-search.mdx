@@ -9,6 +9,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Looking for a name in a sorted list, you do not start at the top. You open
 somewhere near the middle and decide which half to keep. Binary search is
@@ -34,8 +35,7 @@ never needs more than about twenty comparisons.
 
 ## Try it
 
-```js
-function binarySearch(arr, target) {
+<RunnableCode lang="js" client:visible source={`function binarySearch(arr, target) {
   let lo = 0, hi = arr.length - 1;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
@@ -45,7 +45,9 @@ function binarySearch(arr, target) {
   }
   return -1;
 }
-```
+
+binarySearch([3, 7, 7, 7, 12, 19, 25], 19);
+`} />
 
 ## Trade-offs
 
