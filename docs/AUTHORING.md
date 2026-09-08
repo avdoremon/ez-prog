@@ -834,6 +834,10 @@ backslash-n — must be written `\\n` in the sample. A single `\n` is consumed
 by the *outer* template literal as an actual newline character before the
 learner ever sees it, silently shipping different code than intended.
 
+All 28 lessons use `<RunnableCode>` as of the
+`2026-09-08-runnable-code-rollout` plan — there is no longer a lesson on a
+static fenced `## Try it` block to use as a counter-example.
+
 ## 5. Running the gates
 
 | Command | What it does | Needs a prior build? |

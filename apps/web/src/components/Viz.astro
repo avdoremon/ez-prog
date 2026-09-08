@@ -6,9 +6,22 @@ interface Props { id: keyof typeof VIZ }
 const { id } = Astro.props;
 const entry = VIZ[id];
 if (!entry) throw new Error(`Viz: unknown id "${id}". Add it to src/viz/registry.ts.`);
+// Known statically from the registry at build time, unlike the `.viz-3d`
+// class TreeView3D/GraphView3D/HierarchyView3D add to their own root div --
+// that class only exists once VizIsland's `client:visible` island has
+// hydrated *and* finished its dynamic `import('@cs/viz-3d')` (see
+// VizIsland.tsx's loadRenderer comment: 250KB+ gzipped, loaded lazily).
+// viz.css used to size the reservation via `.viz:has(.viz-3d)`, which only
+// matches after that import resolves -- fine when nothing forces `.viz`
+// into view before then, but a reader scrolling straight to a lesson's
+// `<RunnableCode>` block (past `.viz`) can land the still-growing `.viz`
+// in view mid-import, turning its base-to-3D-reservation jump into a real,
+// visible layout shift. Emitting the modifier class here instead reserves
+// the right amount of space from the very first paint, no race possible.
+const is3D = entry.renderer.endsWith('3D');
 ---
 
-<figure class="viz">
+<figure class:list={['viz', { 'viz--3d': is3D }]}>
   <VizIsland id={id} client:visible />
   <noscript>
     <p>

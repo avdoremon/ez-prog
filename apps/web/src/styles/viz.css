@@ -373,25 +373,25 @@
  * avoids the same hydration layout shift documented above for `.viz` — see
  * that comment for the mechanism (the `.js` class, the CLS budget).
  *
- * 12rem was originally an unverified estimate. It has since been checked
- * against a real measurement: the "does not shift layout while RunnableCode
- * hydrates" tests in apps/web/e2e/lesson.spec.ts scroll each pilot lesson's
- * `.runnable-code` island into view (the same trigger that fires
- * `client:visible` hydration) and sum PerformanceObserver `layout-shift`
- * entries the same way the `.viz` CLS test does. Both pilot lessons pass
- * comfortably under the 0.1 budget (measured ~0.019 on
- * /algorithms/recursion/ and ~0.023 on /data-structures/array/), even though
- * the editor's actual post-hydration height (~25-27rem for these two
- * samples, measured via `.runnable-code__editor`'s getBoundingClientRect())
- * is well above this 12rem reservation — the Layout Instability score is
- * weighted by how much of the viewport is affected and how far it moves, not
- * by raw pixel growth, so the shortfall here does not translate into a
- * budget-busting shift for either lesson. Raise this value, and re-run those
- * tests, if a future lesson's sample is long/tall enough to push the score
- * over budget.
+ * 12rem was the original pilot-only estimate (`array.mdx`/`recursion.mdx`,
+ * ~25-27rem actual post-hydration height) and stayed comfortably under the
+ * 0.1 CLS budget precisely because the Layout Instability score weighs how
+ * much of the viewport a shift affects and how far, not raw pixel growth —
+ * so a shortfall of a dozen-odd rem was cheap. The 2026-09-08
+ * runnable-code-rollout plan's Task 27 extended the "does not shift layout
+ * while RunnableCode hydrates" coverage from those two pilots to all 28
+ * lessons and measured real post-hydration `.runnable-code__editor` heights
+ * up to ~84rem (`/data-structures/linked-list/` and
+ * `/data-structures/hash-table/`, both long samples) — a shortfall five to
+ * six times bigger than the pilots', which did blow the 0.1 budget (CLS up
+ * to ~0.33). 90rem is chosen with headroom above that measured ~84rem
+ * maximum, the same "single shared constant with headroom over the worst
+ * measured case" choice already made for `.js .viz:has(.viz-3d)` below.
+ * Raise it again, and re-run `pnpm test:e2e`, if a future lesson's sample
+ * pushes past this margin.
  */
 .js .runnable-code__editor {
-  min-height: 12rem;
+  min-height: 90rem;
 }
 
 .tree-view-3d {
@@ -461,23 +461,46 @@
 }
 
 /*
- * 60rem covers a 3D view's canvas + node strip + summary pushing the
- * figure past the plain .viz reservation above. Shared by all three 3D
- * renderers via the common `viz-3d` marker class (see TreeView3D.tsx,
- * GraphView3D.tsx and HierarchyView3D.tsx) rather than duplicating this
- * rule per renderer. Verified against a real measurement for each, by a
- * "does not shift layout while the 3D view hydrates" e2e test per
- * renderer (all in apps/web/e2e/lesson.spec.ts):
- *   - TreeView3D       -> /data-structures/tree/
- *   - GraphView3D      -> /algorithms/bfs/ (a force-directed layout, which
- *                         spreads nodes differently than the tree's
- *                         compact radial one)
- *   - HierarchyView3D  -> /data-structures/linked-list/ (a single chain,
- *                         the longest node strip of the three)
- * 60rem needed no correction for any of them.
+ * Covers a 3D view's canvas + node strip + summary pushing the figure past
+ * the plain .viz reservation above. Selected by the `viz--3d` modifier
+ * Viz.astro adds server-side (known statically from the registry's
+ * `renderer` field — see that file's comment) to every lesson whose viz uses
+ * TreeView3D, GraphView3D or HierarchyView3D, rather than duplicating this
+ * rule per renderer.
+ *
+ * This used to be keyed off `.viz:has(.viz-3d)` instead — `viz-3d` being the
+ * class TreeView3D/GraphView3D/HierarchyView3D put on their own root div,
+ * which only exists once VizIsland's `client:visible` island has hydrated
+ * *and* finished dynamically importing `@cs/viz-3d` (250KB+ gzipped, per
+ * VizIsland.tsx's loadRenderer comment). Checked only against the pilots'
+ * own "does not shift layout while the 3D view hydrates" e2e tests
+ * (tree/bfs/linked-list), which never scroll — they wait for hydration at
+ * the untouched scrollTop=0 position before measuring, so the reflow happens
+ * off-screen (below a ~45rem default viewport) and the `:has()` rule's
+ * arrival lagging the import by however long that took was invisible.
+ * Task 27 of the 2026-09-08 runnable-code-rollout plan added a second, more
+ * honest CLS test per lesson ("does not shift layout while RunnableCode
+ * hydrates") that scrolls `.runnable-code` — below `.viz` on every one of
+ * these lessons — into view before hydration settles, the way a learner
+ * actually reaching for the code editor would; landing that scroll while the
+ * `@cs/viz-3d` import was still in flight caught `.viz` mid-jump from the
+ * plain 46rem reservation above to the `:has()` rule's, a real, visible
+ * shift no size of a `:has(.viz-3d)`-keyed reservation can prevent, since
+ * the *jump itself* (not its final size) is what the score measures. The
+ * `viz--3d` class sidesteps the race entirely: Astro renders it into the
+ * very first server-sent HTML, so this reservation is already correct
+ * before any JavaScript — the renderer's — runs at all.
+ *
+ * 96rem is chosen with headroom over the tallest measured post-hydration
+ * figure, ~89.5rem on `/algorithms/dijkstra/` (its weighted-edge summary
+ * text pushing it tallest of the eight 3D-view lessons) — the same "single
+ * shared constant with headroom over the worst measured case" choice as
+ * `.js .runnable-code__editor` above. Raise it again, and re-run
+ * `pnpm test:e2e`, if a future lesson's graph or tree pushes past this
+ * margin.
  */
-.js .viz:has(.viz-3d) {
-  min-height: 60rem;
+.js .viz.viz--3d {
+  min-height: 96rem;
 }
 
 .graph-view-3d {
