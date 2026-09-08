@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 An array says what comes next. A tree says what comes below. A graph drops
 both assumptions and says only what connects to what — which is enough to
@@ -25,25 +26,24 @@ pairs of them. Two nodes joined by an edge are **neighbours**, and a node's
 node's degree counted.
 
 Notice the closing frame: the degrees add up to exactly twice the number of
-edges. That is not a property of this example — every edge has two ends, so
-every edge contributes 1 to each of two nodes. It is the first thing you can
-prove about a graph without knowing anything else about it.
+edges. That's not a property of this example — every edge has two ends, so
+contributes 1 to each of two nodes. It's the first thing provable about a
+graph without knowing anything else about it.
 
 A tree is just a graph with restrictions: connected, and free of cycles. Drop
-those and a tree's guarantees go with them. There is no root, so no natural
-starting point. There may be **cycles**, so a walk can return where it began —
-which is why every graph traversal keeps a `seen` set. Some nodes may be
-unreachable entirely.
+those and its guarantees go too. There's no root, so no natural starting
+point. There may be **cycles**, so a walk can return where it began — why
+every graph traversal keeps a `seen` set. Some nodes may be unreachable
+entirely.
 
 Edges can be **directed** — a one-way street, a "follows" on social media —
-or undirected. Set `directed` to `true` in the input editor and watch the
-neighbour lists change: with direction, being reachable from A no longer means
-A is reachable from you.
+or undirected. Set `directed` to `true` and watch the neighbour lists change:
+with direction, being reachable from A no longer means A is reachable from
+you.
 
 ## Try it
 
-```js
-function describe(values, edges, directed) {
+<RunnableCode lang="js" client:visible source={`function describe(values, edges, directed) {
   const adj = values.map(() => []);
   for (const { from, to } of edges) {
     adj[from].push(to);
@@ -51,25 +51,24 @@ function describe(values, edges, directed) {
   }
   return { adj, degrees: adj.map((a) => a.length) };
 }
-```
+
+const edges = [{ from: 0, to: 1 }, { from: 1, to: 2 }, { from: 2, to: 3 }, { from: 3, to: 0 }];
+describe(['a', 'b', 'c', 'd'], edges, false);
+`} />
 
 ## Trade-offs
 
-The representation above is an **adjacency list**: each node stores its
-neighbours. It costs space proportional to nodes plus edges, and listing a
-node's neighbours is immediate — which is exactly what traversals do, so it is
-the usual choice.
+An **adjacency list** — each node stores its neighbours — costs space
+proportional to nodes plus edges, with immediate neighbour lookup, which is
+what traversals need. It's the usual choice.
 
-The alternative is an **adjacency matrix**: an *n*×*n* grid where cell (*i*,
-*j*) says whether an edge exists. Checking "is there an edge from A to B?" is
-then one lookup rather than a scan, but it costs *n*² space whether or not the
-edges exist. That pays off only for **dense** graphs, where most possible
-edges are present. Most real graphs are sparse — a road network has far fewer
-roads than the square of its junctions — so lists usually win.
+The alternative, an **adjacency matrix** (an *n*×*n* grid marking edges),
+answers "is there an edge from A to B?" in one lookup but costs *n*² space
+regardless of edge count — worthwhile only for **dense** graphs. Most real
+graphs are sparse, so lists win.
 
-The questions worth asking are then about *reaching*: what connects to what,
-how far apart two nodes are, whether a cycle exists. That is the next two
-lessons.
+Next, the questions become about *reaching*: what connects to what, how far
+apart nodes are, whether a cycle exists.
 
 ## Check your understanding
 
