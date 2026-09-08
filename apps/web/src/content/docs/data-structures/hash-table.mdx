@@ -30,8 +30,8 @@ end. Watch 19 walk 5 → 6 → 0 to the first free slot — so **19 is no longer
 at its own hash**, and a lookup must repeat that walk: three looks, not
 seven.
 
-The walk stops at the first *empty* slot, why a failed lookup is cheap: an
-empty slot proves the key was never inserted.
+The walk stops at the first *empty* slot, which is why a failed lookup is
+cheap: an empty slot proves the key was never inserted.
 
 ## Try it
 
@@ -76,13 +76,12 @@ console.log('has 20', table.has(20));
 
 The `load` factor — keys over slots — decides speed: short probes near
 empty, long near full. Real tables resize past load 0.7, rehashing
-everything — the [amortized cost](/complexity/amortized-analysis/) argument
-again.
+everything — the [amortized cost](/complexity/amortized-analysis/) argument.
 
 A hash table gives up order — slots come out hash-ordered, so a
 [BST](/data-structures/bst/) still wins for ranges — and easy deletion,
 since blanking a slot breaks every probe chain through it; real
-implementations use a *tombstone* instead.
+implementations use a *tombstone*.
 
 ## Check your understanding
 
