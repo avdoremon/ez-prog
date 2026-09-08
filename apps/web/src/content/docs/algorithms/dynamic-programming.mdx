@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 Recursive `fib(n)` calls `fib(n - 1)` and `fib(n - 2)` — but `fib(n - 1)`
 *also* calls `fib(n - 2)`, and both branches call `fib(n - 3)`, and so on.
@@ -39,8 +40,7 @@ which is the entire trick.
 
 ## Try it
 
-```js
-function fib(n) {
+<RunnableCode lang="js" client:visible source={`function fib(n) {
   const dp = new Array(n + 1);
   dp[0] = 0;
   if (n >= 1) dp[1] = 1;
@@ -49,23 +49,23 @@ function fib(n) {
   }
   return dp[n];
 }
-```
+
+fib(10);
+`} />
 
 ## Trade-offs
 
 Reach for a table when a problem has both properties above: a recurrence
-relating each answer to smaller ones, and recursion that would revisit the
-same smaller ones more than once. The payoff is real — naive recursive
-`fib` is exponential, while the table is linear in `n` — and the code
-usually stays about as short as the recursive version.
+relating each answer to smaller ones, and recursion that would revisit them
+more than once. The payoff is real — naive recursive `fib` is exponential,
+the table linear in `n` — and the code stays about as short.
 
-Skip it when the recursive calls never overlap in the first place —
-factorial from the previous lesson never asks the same subproblem twice,
-so a table would just add bookkeeping for no savings. It's also not free:
-the table costs memory proportional to how many answers you keep, which a
-version that only remembers the last two values (as this `fib` could)
-would avoid entirely — that refinement is worth knowing exists, even
-though this lesson keeps the full table for clarity.
+Skip it when calls never overlap — factorial never asks the same subproblem
+twice, so a table adds bookkeeping for no savings. It's not free either: the
+table costs memory proportional to how many answers you keep, which a
+version remembering only the last two values (as this `fib` could) would
+avoid — worth knowing, even though this lesson keeps the full table for
+clarity.
 
 ## Check your understanding
 
