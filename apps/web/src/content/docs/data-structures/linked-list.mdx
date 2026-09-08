@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 An array packs its values side by side in memory, which is exactly what
 makes indexing instant and inserting expensive. A linked list gives up the
@@ -20,29 +21,22 @@ allocated, holding only its value and a pointer to whoever comes next.
 
 ## How it works
 
-A node is two fields: a **value**, and a **pointer to the next node** (or
-nothing, if it's last). The list is just a pointer to the first node — the
-**head**. There is no second pointer to skip ahead with, so reaching node 3
-means standing on node 0, then 1, then 2 first. Step the visualization and
-count the hops: reading by position costs one pointer chase per step, not
-an array's one-shot arithmetic.
+A node holds a **value** and a **pointer to the next node** (or nothing, if
+last). The list is a pointer to the first node — the **head**. There's no
+second pointer to skip ahead with, so reaching node 3 means walking 0, 1, 2
+first: one pointer chase per step, not an array's one-shot arithmetic.
 
-Inserting is the mirror image. Once you're standing at the right node —
-even after paying for the walk to get there — splicing in a new one is two
-pointer writes: the new node's `next` takes over what used to follow it,
-and the node before it now points at the new one. Nothing else moves, no
-matter how many nodes come after. That's the trade the array lesson set
-up: an array pays at insertion time, shifting everyone right; a linked
-list pays at *access* time, walking node by node — insertion itself is
-free once you've arrived.
+Inserting is the mirror: once you're standing at the right node, splicing in
+a new one is two pointer writes, and nothing else moves. An array pays at
+insertion, shifting everyone right; a linked list pays at *access*, walking
+node by node.
 
-Deleting is the same rewire in reverse: point the previous node's `next`
-at whatever the removed node pointed to. No shifting, no gap to close.
+Deleting reverses the rewire: point the previous node's `next` at whatever
+the removed node pointed to. No shifting, no gap.
 
 ## Try it
 
-```js
-function readThenInsert(head, readIndex, insertAt, value) {
+<RunnableCode lang="js" client:visible source={`function readThenInsert(head, readIndex, insertAt, value) {
   let node = head;
   for (let i = 0; i < readIndex; i++) node = node.next;
   const found = node.value;
@@ -59,23 +53,36 @@ function readThenInsert(head, readIndex, insertAt, value) {
 
   return { found, head };
 }
-```
+
+function makeList(values) {
+  let head = null;
+  for (let i = values.length - 1; i >= 0; i--) head = { value: values[i], next: head };
+  return head;
+}
+
+function toArray(head) {
+  const out = [];
+  for (let node = head; node; node = node.next) out.push(node.value);
+  return out;
+}
+
+const list = makeList([4, 8, 15, 16, 23]);
+const result = readThenInsert(list, 2, 1, 99);
+console.log('found', result.found);
+console.log('list now', toArray(result.head));
+`} />
 
 ## Trade-offs
 
-Reach for a linked list when you insert or delete often at a position you
-already hold a reference to — the front of a queue, a splice you're
-already iterating toward. None of that shifts anything else.
+Reach for a linked list when you insert or delete at a position you already
+hold — the front of a queue, a splice you're already iterating toward.
+Avoid it for index access: `list[500]` costs 500 hops where an array
+computes the address directly. Iteration suffers too — array values sit in
+contiguous cache lines, while linked nodes scatter, so each hop can miss
+cache.
 
-Avoid it when you need to reach a position by index: `list[500]` doesn't
-exist, and getting there costs 500 hops where an array computes the
-address directly. Iteration suffers too — an array's values sit in
-contiguous cache lines, while a linked list's nodes scatter across memory
-and each hop can miss cache, even though both are technically linear.
-
-The summary is the one the array lesson set up: an array is cheap to read
-and expensive to splice; a linked list is the opposite. The access pattern
-your problem needs decides which one pays less.
+An array is cheap to read, expensive to splice; a linked list is the
+opposite — your access pattern decides which pays less.
 
 ## Check your understanding
 
