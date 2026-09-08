@@ -10,6 +10,7 @@ languages: [js, py, c]
 ---
 
 import Viz from '../../../components/Viz.astro';
+import RunnableCode from '../../../components/RunnableCode.tsx';
 
 A queue serves whoever arrived first. Often you want whoever matters most —
 and you want that without paying to keep everything sorted. A heap is the
@@ -27,25 +28,24 @@ children of i  =  2i + 1  and  2i + 2
 parent of i    =  (i - 1) / 2, rounded down
 ```
 
-Index 0 is the root. That is the whole representation — which is why a heap
-costs no memory beyond the values themselves.
+Index 0 is the root — the whole representation, which is why a heap costs no
+memory beyond the values themselves.
 
 The one rule, for a max-heap: **every parent is at least as large as its
-children.** Notice how weak that is. It says nothing about left versus right,
-and nothing about cousins — the array above is emphatically *not* sorted. It
-guarantees exactly one thing: nothing is bigger than the root.
+children.** Notice how weak that is: nothing about left versus right, nothing
+about cousins — the array above is *not* sorted. It guarantees exactly one
+thing: nothing is bigger than the root.
 
-**Insert** appends the value at the end, then swaps it upward while it is
-bigger than its parent. **Extract** takes the root, moves the last value into
-the hole, then swaps it downward while a child is bigger.
+**Insert** appends at the end, then swaps upward while bigger than its
+parent. **Extract** takes the root, moves the last value into the hole,
+then swaps downward while a child is bigger.
 
-Both walk one path between root and leaf. A binary tree of *n* values is about
-log₂(*n*) deep, so both cost log *n* — 20 steps for a million values.
+Both walk one path between root and leaf. A binary tree of *n* values is
+about log₂(*n*) deep, so both cost log *n*.
 
 ## Try it
 
-```js
-function heapInsert(heap, value) {
+<RunnableCode lang="js" client:visible source={`function heapInsert(heap, value) {
   heap.push(value);
   let i = heap.length - 1;
   while (i > 0) {
@@ -56,22 +56,23 @@ function heapInsert(heap, value) {
   }
   return heap;
 }
-```
+
+heapInsert([9, 5, 6, 2, 3], 8);
+`} />
 
 ## Trade-offs
 
-A heap is the standard priority queue: schedulers, Dijkstra's algorithm,
-event simulations, and "keep the top *k*" problems all want the extreme
-element repeatedly and never want the full ordering.
+A heap is the standard priority queue: schedulers, Dijkstra's algorithm, and
+"keep the top *k*" all want the extreme element repeatedly, never the full
+ordering.
 
-Its cost profile is the point. Sorting costs *n* log *n* up front to make
-*every* position known; a heap pays nothing up front and log *n* per
-operation to keep only the extreme known. That wins whenever you pull a few
-items, or when values keep arriving and a sorted array would need re-sorting.
+Its cost profile is the point. Sorting costs *n* log *n* up front to know
+*every* position; a heap pays log *n* per operation to know only the
+extreme — a win when you pull a few items, or values keep arriving.
 
-The limitation follows from the same weakness: a heap finds an arbitrary
-value no faster than scanning, because it never promised where anything but
-the root is. Draining it one extraction at a time is heapsort.
+A heap finds an arbitrary value no faster than scanning, since it never
+promised where anything but the root is. Draining it one extraction at a
+time is heapsort.
 
 ## Check your understanding
 
