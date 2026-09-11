@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { EditorView, basicSetup } from 'codemirror';
 import { javascript } from '@codemirror/lang-javascript';
 import { runJs } from '../lib/runner/index.js';
@@ -14,6 +14,13 @@ export interface RunnableCodeProps {
 }
 
 export default function RunnableCode({ source, run = runJs }: RunnableCodeProps) {
+  // Drives the per-instance `--rc-lines` custom property consumed by
+  // `.js .runnable-code__editor` in viz.css (see that rule's comment for the
+  // measured px-per-line/chrome constants). Computed from `source` --
+  // present in the server-rendered HTML, same as the value it replaces, so
+  // hydration still causes zero shift -- but sized to *this* sample instead
+  // of a single worst-case constant shared by all 28 lessons.
+  const lineCount = source.split('\n').length;
   const editorHostRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<EditorView | null>(null);
   const [result, setResult] = useState<RunResult | null>(null);
@@ -59,7 +66,11 @@ export default function RunnableCode({ source, run = runJs }: RunnableCodeProps)
 
   return (
     <div className="runnable-code">
-      <div className="runnable-code__editor" ref={editorHostRef} />
+      <div
+        className="runnable-code__editor"
+        ref={editorHostRef}
+        style={{ '--rc-lines': lineCount } as CSSProperties}
+      />
       <noscript>
         <pre className="runnable-code__fallback">{source}</pre>
       </noscript>

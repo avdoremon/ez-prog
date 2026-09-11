@@ -36,8 +36,9 @@ That "if" is doing real work. This version pivots on the last value, so on
 **already-sorted input** every pivot is the largest: the split becomes one
 value against everything else — *n* levels instead of log *n*, cost *n*².
 
-Try it: run `[1, 2, 3, 4, 5, 6, 7, 8]` and count comparisons against the
-shuffled default — insertion sort's easiest case is the worst case here.
+Try it: run `[1, 2, 3, 4, 5, 6, 7, 8]` in the input editor and count
+comparisons against the shuffled default — insertion sort's easiest case is
+the worst case here.
 
 Real implementations pick the pivot better — median-of-three, or random —
 making the bad case rare, not impossible.
@@ -65,16 +66,16 @@ quickSort([5, 2, 9, 1, 7, 3]);
 
 ## Trade-offs
 
-Quick sort is usually the fastest general-purpose sort in practice, despite
-merge sort's better guarantee. It sorts **in place** — no *n* extra slots —
-with a tight, cache-friendly scan.
+Quick sort is usually the fastest general-purpose sort, despite merge sort's
+better guarantee. It sorts **in place** — no *n* extra slots — with a tight,
+cache-friendly scan.
 
 You give up the guarantee and stability: swapping distant elements can
 reorder equal values.
 
 Pick merge sort for a predictable bound or stable output, quick sort for
-average speed in place. Many libraries hedge, switching to heap sort if
-recursion depth degrades.
+average speed in place. Many libraries switch to heap sort if recursion
+depth degrades.
 
 ## Check your understanding
 

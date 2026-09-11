@@ -373,25 +373,44 @@
  * avoids the same hydration layout shift documented above for `.viz` — see
  * that comment for the mechanism (the `.js` class, the CLS budget).
  *
- * 12rem was the original pilot-only estimate (`array.mdx`/`recursion.mdx`,
- * ~25-27rem actual post-hydration height) and stayed comfortably under the
- * 0.1 CLS budget precisely because the Layout Instability score weighs how
- * much of the viewport a shift affects and how far, not raw pixel growth —
- * so a shortfall of a dozen-odd rem was cheap. The 2026-09-08
- * runnable-code-rollout plan's Task 27 extended the "does not shift layout
- * while RunnableCode hydrates" coverage from those two pilots to all 28
- * lessons and measured real post-hydration `.runnable-code__editor` heights
- * up to ~84rem (`/data-structures/linked-list/` and
- * `/data-structures/hash-table/`, both long samples) — a shortfall five to
- * six times bigger than the pilots', which did blow the 0.1 budget (CLS up
- * to ~0.33). 90rem is chosen with headroom above that measured ~84rem
- * maximum, the same "single shared constant with headroom over the worst
- * measured case" choice already made for `.js .viz:has(.viz-3d)` below.
- * Raise it again, and re-run `pnpm test:e2e`, if a future lesson's sample
- * pushes past this margin.
+ * This used to be a single unconditional `90rem` constant, sized for the
+ * tallest of the 28 lessons' samples. That fixed every lesson's CLS budget,
+ * but it is a *permanent* reservation (nothing releases it once CodeMirror
+ * mounts — `.runnable-code__editor .cm-editor` does not stretch to fill its
+ * host), so every lesson shorter than the tallest one rendered the
+ * difference as permanent dead space below its code — up to ~1000px of it
+ * on the two original pilots (`array.mdx`/`recursion.mdx`, ~25-27rem actual
+ * vs. 90rem reserved), which had zero dead space before that constant
+ * existed. See `.superpowers/sdd/2026-09-08-runnable-code-rollout/
+ * final-review-report.md` Critical #1.
+ *
+ * Fixed by reserving per instance instead: `RunnableCode.tsx` sets a
+ * `--rc-lines` custom property from `source.split('\n').length` on the host
+ * div itself, present in the server-rendered HTML (same zero-race property
+ * the constant had). The multiplier and offset below are not a guess or a
+ * type-scale line-height (this editor has no declared code line-height —
+ * `.runnable-code__editor .cm-editor` sets only font-family/font-size) —
+ * they are a direct linear fit of real post-hydration
+ * `.runnable-code__editor .cm-editor` heights against source line counts,
+ * measured with Playwright against the production build across all 28
+ * lessons (see fix-wave-1-report.md for the full table): every lesson's
+ * height fit `2.4rem * lines + 0.49rem` to within 0.01rem, with the sole
+ * exception of lessons whose sample happens to wrap a line onto an extra
+ * visual row (observed: +1.4rem for one wrapped line in `graph.mdx`,
+ * +2.8rem for `linked-list.mdx`). `+ 5rem` (vs. the ~0.5rem fitted
+ * intercept) covers that wrapping headroom plus a margin for future edits
+ * and cross-run font-rendering variance, the same "headroom over the worst
+ * measured case" principle the old shared constant used, just applied per
+ * instance instead of once globally. `var(--rc-lines, 1)` falls back to a
+ * one-line minimum (7.4rem) if the custom property is ever absent, so this
+ * can never collapse to a zero-height reservation.
+ *
+ * Re-run the Playwright fit (or at minimum `pnpm test:e2e`) if a future
+ * lesson's sample wraps more than one line, or if CodeMirror's rendered
+ * metrics change (font, theme, `EditorView.lineWrapping` config).
  */
 .js .runnable-code__editor {
-  min-height: 90rem;
+  min-height: calc(var(--rc-lines, 1) * 2.4rem + 5rem);
 }
 
 .tree-view-3d {
@@ -462,11 +481,10 @@
 
 /*
  * Covers a 3D view's canvas + node strip + summary pushing the figure past
- * the plain .viz reservation above. Selected by the `viz--3d` modifier
- * Viz.astro adds server-side (known statically from the registry's
- * `renderer` field — see that file's comment) to every lesson whose viz uses
- * TreeView3D, GraphView3D or HierarchyView3D, rather than duplicating this
- * rule per renderer.
+ * the plain .viz reservation above. `viz--3d` is the modifier Viz.astro adds
+ * server-side (known statically from the registry's `renderer` field — see
+ * that file's comment) to every lesson whose viz uses TreeView3D,
+ * GraphView3D or HierarchyView3D.
  *
  * This used to be keyed off `.viz:has(.viz-3d)` instead — `viz-3d` being the
  * class TreeView3D/GraphView3D/HierarchyView3D put on their own root div,
@@ -491,15 +509,48 @@
  * very first server-sent HTML, so this reservation is already correct
  * before any JavaScript — the renderer's — runs at all.
  *
- * 96rem is chosen with headroom over the tallest measured post-hydration
- * figure, ~89.5rem on `/algorithms/dijkstra/` (its weighted-edge summary
- * text pushing it tallest of the eight 3D-view lessons) — the same "single
- * shared constant with headroom over the worst measured case" choice as
- * `.js .runnable-code__editor` above. Raise it again, and re-run
- * `pnpm test:e2e`, if a future lesson's graph or tree pushes past this
- * margin.
+ * This used to be a single `96rem` constant covering all eight 3D-view
+ * lessons, sized for the tallest (`/algorithms/dijkstra/`, ~89.5rem —
+ * GraphView3D). TreeView3D and HierarchyView3D never get anywhere near that:
+ * their own worst measured cases (`bst.mdx` and `trie.mdx` respectively)
+ * over-reserved by up to ~19rem under the shared constant. See
+ * `.superpowers/sdd/2026-09-08-runnable-code-rollout/
+ * final-review-report.md` Important #2.
+ *
+ * Fixed the same way as `.js .runnable-code__editor` above: one reservation
+ * per renderer instead of one shared worst-case constant. `Viz.astro` adds a
+ * second, renderer-specific modifier class (`viz--treeview3d` /
+ * `viz--graphview3d` / `viz--hierarchyview3d`, from `entry.renderer`,
+ * lower-cased) alongside `viz--3d`, server-side and statically known the
+ * same way `viz--3d` itself is — no new race. Each value below is headroom
+ * (+6rem, matching the old constant's ~6.5rem headroom over its own worst
+ * case) over that renderer's own worst measured post-hydration figure
+ * height, measured with Playwright against the production build with the
+ * `min-height` floor temporarily neutralized (see fix-wave-1-report.md):
+ *   TreeView3D:      max ~76.5rem (`bst.mdx`, discarded-subtree summary)  -> 83rem
+ *   HierarchyView3D: max ~82.7rem (`trie.mdx`, deepest word)             -> 89rem
+ *   GraphView3D:     max ~89.5rem (`dijkstra.mdx`, weighted-edge summary) -> 96rem (unchanged)
+ * `.js .viz.viz--3d` is kept as a low-bound fallback — the smallest of the
+ * three — in case a future renderer's name ends in "3D" (so `is3D` and
+ * `viz--3d` both still apply) without matching one of the three specific
+ * classes above; the specific rules below it win the cascade wherever they
+ * apply (equal specificity, later source order).
+ * Raise the relevant renderer's value, and re-run `pnpm test:e2e`, if a
+ * future lesson's graph, tree or hierarchy view pushes past its margin.
  */
 .js .viz.viz--3d {
+  min-height: 83rem;
+}
+
+.js .viz.viz--treeview3d {
+  min-height: 83rem;
+}
+
+.js .viz.viz--hierarchyview3d {
+  min-height: 89rem;
+}
+
+.js .viz.viz--graphview3d {
   min-height: 96rem;
 }
 

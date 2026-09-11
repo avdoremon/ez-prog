@@ -19,9 +19,15 @@ if (!entry) throw new Error(`Viz: unknown id "${id}". Add it to src/viz/registry
 // visible layout shift. Emitting the modifier class here instead reserves
 // the right amount of space from the very first paint, no race possible.
 const is3D = entry.renderer.endsWith('3D');
+// A second, renderer-specific modifier (`viz--treeview3d` / `viz--graphview3d`
+// / `viz--hierarchyview3d`) alongside `viz--3d`, so viz.css can reserve a
+// height sized to *this* renderer's own worst case instead of one constant
+// shared by all three (see that rule's comment in viz.css). Known statically
+// here for the same reason `is3D` is.
+const rendererClass = `viz--${entry.renderer.toLowerCase()}`;
 ---
 
-<figure class:list={['viz', { 'viz--3d': is3D }]}>
+<figure class:list={['viz', { 'viz--3d': is3D, [rendererClass]: is3D }]}>
   <VizIsland id={id} client:visible />
   <noscript>
     <p>
