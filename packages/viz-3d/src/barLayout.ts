@@ -12,6 +12,14 @@ export const BAR_MAX_HEIGHT = 4;
 /** A bar never renders shorter than this, so a zero (or near-zero) value stays visible. */
 export const MIN_BAR_HEIGHT = 0.15;
 
+/**
+ * A null slot's fixed height -- never derived from any value, so it can
+ * never be mistaken for "a very small real value." Rendered with a
+ * visually distinct wireframe material (BarView3D.tsx), the 3D
+ * equivalent of ArrayView's dashed empty-cell border.
+ */
+export const EMPTY_BAR_HEIGHT = 0.1;
+
 /** Extra half-width, in world units, left on either side of the outermost bars when framing the camera. */
 export const CAMERA_MARGIN = 1.5;
 
@@ -21,23 +29,31 @@ export const MIN_CAMERA_DISTANCE = 6;
 export interface Bar3D extends Position3D {
   height: number;
   sign: 1 | -1;
+  isEmpty: boolean;
 }
 
-export function layoutBar3D(values: number[]): Map<number, Bar3D> {
+export function layoutBar3D(values: (number | null)[]): Map<number, Bar3D> {
   const bars = new Map<number, Bar3D>();
   const n = values.length;
   if (n === 0) return bars;
 
-  const maxAbs = Math.max(1, ...values.map((v) => Math.abs(v)));
+  const numeric = values.filter((v): v is number => v !== null);
+  const maxAbs = Math.max(1, ...numeric.map((v) => Math.abs(v)));
   const scale = BAR_MAX_HEIGHT / maxAbs;
 
   for (let i = 0; i < n; i++) {
-    const value = values[i]!;
+    const value = values[i];
+    const x = (i - (n - 1) / 2) * BAR_PITCH;
+
+    if (value === null) {
+      bars.set(i, { x, y: EMPTY_BAR_HEIGHT / 2, z: 0, height: EMPTY_BAR_HEIGHT, sign: 1, isEmpty: true });
+      continue;
+    }
+
     const sign: 1 | -1 = value < 0 ? -1 : 1;
     const height = Math.max(MIN_BAR_HEIGHT, Math.abs(value) * scale);
-    const x = (i - (n - 1) / 2) * BAR_PITCH;
     const y = (sign * height) / 2;
-    bars.set(i, { x, y, z: 0, height, sign });
+    bars.set(i, { x, y, z: 0, height, sign, isEmpty: false });
   }
 
   return bars;

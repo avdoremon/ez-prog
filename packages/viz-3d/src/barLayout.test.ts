@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import {
-  BAR_MAX_HEIGHT, BAR_PITCH, MIN_BAR_HEIGHT, MIN_CAMERA_DISTANCE,
+  BAR_MAX_HEIGHT, BAR_PITCH, EMPTY_BAR_HEIGHT, MIN_BAR_HEIGHT, MIN_CAMERA_DISTANCE,
   cameraDistanceFor, layoutBar3D,
 } from './barLayout.js';
 
@@ -73,4 +73,39 @@ test('cameraDistanceFor grows monotonically as n grows, for a fixed fov/aspect',
 
 test('cameraDistanceFor never drops below MIN_CAMERA_DISTANCE for a tiny array', () => {
   expect(cameraDistanceFor(1, 50, 16 / 9)).toBeGreaterThanOrEqual(MIN_CAMERA_DISTANCE);
+});
+
+test('a null value renders as a fixed-height, marked-empty bar', () => {
+  const bars = layoutBar3D([5, null, 3]);
+  const empty = bars.get(1)!;
+  expect(empty.isEmpty).toBe(true);
+  expect(empty.height).toBe(EMPTY_BAR_HEIGHT);
+  expect(empty.sign).toBe(1);
+});
+
+test('a real value is never marked empty', () => {
+  const bars = layoutBar3D([0, 5]);
+  expect(bars.get(0)!.isEmpty).toBe(false);
+  expect(bars.get(1)!.isEmpty).toBe(false);
+});
+
+test('height scaling ignores null values when finding the max', () => {
+  const bars = layoutBar3D([null, 10, null, 20]);
+  expect(bars.get(3)!.height).toBeCloseTo(BAR_MAX_HEIGHT); // 20 is the real max
+  expect(bars.get(1)!.height).toBeCloseTo(BAR_MAX_HEIGHT / 2); // 10 is half of 20
+});
+
+test('an all-null array does not divide by zero', () => {
+  const bars = layoutBar3D([null, null, null]);
+  for (const b of bars.values()) {
+    expect(b.isEmpty).toBe(true);
+    expect(b.height).toBe(EMPTY_BAR_HEIGHT);
+    expect(Number.isFinite(b.height)).toBe(true);
+  }
+});
+
+test("a null slot's x position is unaffected -- it still occupies its own row slot", () => {
+  const bars = layoutBar3D([5, null, 3]);
+  const xs = [...bars.values()].map((b) => b.x).sort((a, b) => a - b);
+  expect(xs).toEqual([-BAR_PITCH, 0, BAR_PITCH]);
 });
