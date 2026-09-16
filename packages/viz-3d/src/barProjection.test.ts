@@ -86,6 +86,17 @@ test('bubble/insertion/selection-sort worst case (16 bars) stays visibly separat
   expect(allBarsOnScreen(values)).toBe(true);
 });
 
+test('binary-search/linear-search/sliding-window/two-pointer worst case (32 bars) stays visibly separated on screen', () => {
+  // Measured: 6.62px -- this cap was tightened from 64 specifically
+  // because 64 only cleared MIN_GAP_PX by 19%; re-verify this margin
+  // stays comfortable if BAR_PITCH/CAMERA_MARGIN ever change.
+  const values = Array.from({ length: 32 }, (_, i) => i + 1);
+  const gap = run(values, '32 bars');
+  expect(gap).toBeGreaterThan(MIN_GAP_PX);
+  expect(gap).toBeCloseTo(6.62, 1);
+  expect(allBarsOnScreen(values)).toBe(true);
+});
+
 test('merge/quick-sort worst case (24 bars) stays visibly separated on screen', () => {
   // Measured: 8.32px -- the tightest of the four cases here (more bars in
   // the same frustum width means a smaller angular slice per bar), but

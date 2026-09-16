@@ -110,11 +110,20 @@ a real projection calculation (same method as
 | n | adjacent-bar gap |
 |---|---|
 | 24 | 8.65px |
-| 32 | 6.77px |
+| 32 | 6.62px |
 | 40 | 5.54px |
 | 48 | 4.69px |
 | 56 | 4.06px |
 | 64 | 3.58px |
+
+> Corrected during implementation: a quick standalone script (used only to
+> decide scope before writing this spec) first estimated the n=32 case at
+> 6.77px; `barProjection.test.ts`, importing the real shipped
+> `cameraDistanceFor`/`BAR_CAMERA_HEIGHT` rather than re-deriving them, is
+> the authoritative measurement and reads 6.62px. The other rows above
+> were never re-measured against the real test and may carry the same
+> small discrepancy — treat only 24/32 (both now backed by a real pinned
+> test) as load-bearing.
 
 64 clears the project's `MIN_GAP_PX = 3` floor, but only by 0.58px — a
 ~19% margin, far thinner than every other lesson this project has shipped
@@ -126,7 +135,7 @@ not from "positive gap" alone — see
 is not something to accept on arithmetic alone.
 
 **Decision: cap these 4 lessons' `arr.max()` at 64 → 32 for `BarView3D`**
-(6.77px, comfortably closer to this project's typical margins), to be
+(6.62px, comfortably closer to this project's typical margins), to be
 confirmed with a real screenshot during implementation before treating it
 as settled — exactly the same order of operations (measure, screenshot,
 then decide) `linked-list`/`trie` went through. If the screenshot judges
@@ -137,7 +146,7 @@ No other lesson in Group A or B needs a schema change: their existing
 maxima (`heap` 31, `hash-table` 16, `amortized-growth` 32,
 `array-basics` 32, `queue` 24, `stack` 40, `greedy-coins` 12,
 `dp-fibonacci`'s table length ≤16, `recursion`'s stack depth ≤11) are all
-at or below 32, where the gap is already ≥6.77px.
+at or below 32, where the gap is already ≥6.62px.
 
 ---
 

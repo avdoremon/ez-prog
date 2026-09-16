@@ -6,8 +6,13 @@ const registry = {
     renderer: 'BarView3D',
     label: 'Sorted array being searched',
     defaultInput: { arr: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target: 23 },
+    // 32, not the previous 64: BarView3D's camera-fit margin at 64 bars
+    // measures only 3.58px above the 3px legibility floor (a ~19% margin,
+    // thin compared to every other BarView3D lesson) -- see
+    // docs/superpowers/specs/2026-09-16-barview3d-full-migration-design.md
+    // §2. At 32 the margin is 6.77px, pinned in barProjection.test.ts.
     inputSchema: z.object({
-      arr: z.array(z.number()).min(1).max(64),
+      arr: z.array(z.number()).min(1).max(32),
       target: z.number(),
     }),
     load: () =>
@@ -533,9 +538,13 @@ const registry = {
     renderer: 'BarView3D',
     label: 'Array with a fixed-width window sliding across it',
     defaultInput: { arr: [3, -1, 4, 8, 2, -5, 7, 1], k: 3 },
+    // arr's cap is 32, not the previous 64, for BarView3D's camera-fit
+    // legibility margin -- see the note on binary-search's identical
+    // change above. k is untouched (a window can never exceed arr's own
+    // length via the refine below, so tightening arr already bounds it).
     inputSchema: z
       .object({
-        arr: z.array(z.number()).min(1).max(64),
+        arr: z.array(z.number()).min(1).max(32),
         k: z.number().int().min(1).max(64),
       })
       // Cross-field: a window wider than the array has no valid position.
@@ -552,8 +561,9 @@ const registry = {
     renderer: 'BarView3D',
     label: 'Sorted array with a pointer converging from each end',
     defaultInput: { arr: [1, 3, 4, 6, 8, 11, 15], target: 14 },
+    // 32, not the previous 64 -- see binary-search's identical note above.
     inputSchema: z.object({
-      arr: z.array(z.number()).min(2).max(64),
+      arr: z.array(z.number()).min(2).max(32),
       target: z.number(),
     }),
     load: () =>
@@ -566,8 +576,9 @@ const registry = {
     renderer: 'BarView3D',
     label: 'Array scanned one value at a time',
     defaultInput: { arr: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target: 23 },
+    // 32, not the previous 64 -- see binary-search's identical note above.
     inputSchema: z.object({
-      arr: z.array(z.number()).min(1).max(64),
+      arr: z.array(z.number()).min(1).max(32),
       target: z.number(),
     }),
     load: () =>
