@@ -5,7 +5,7 @@ import type { Lang } from '../lib/langs.js';
 export interface VizEntry<I = unknown, S = unknown> {
   renderer:
     | 'ArrayView' | 'TreeView' | 'GraphView'
-    | 'TreeView3D' | 'GraphView3D' | 'HierarchyView3D';
+    | 'TreeView3D' | 'GraphView3D' | 'HierarchyView3D' | 'BarView3D';
   label: string;
   defaultInput: I;
   inputSchema: z.ZodType<I>;
