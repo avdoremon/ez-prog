@@ -44,24 +44,28 @@ test('editing the input and running produces a different frame sequence than the
 
 test('invalid input shows an inline message and leaves the previous frames rendered', async () => {
   const user = userEvent.setup();
-  render(<VizIsland id="bubble-sort" />);
-  await screen.findByText(/sorting 6 values/i);
+  // linear-search, not bubble-sort: this test only exercises VizIsland's own
+  // input-validation behaviour, not anything renderer-specific, so it should
+  // stay on a plain ArrayView lesson rather than pull in BarView3D's
+  // three.js/WebGL dependency chain into a jsdom test.
+  render(<VizIsland id="linear-search" />);
+  await screen.findByText(/checking every value in order/i);
 
   await openEditor(user);
-  const tooLong = Array.from({ length: 25 }, (_, i) => i); // schema max is 24
-  await replaceInput(user, JSON.stringify({ arr: tooLong }));
+  const tooLong = Array.from({ length: 65 }, (_, i) => i); // schema max is 64
+  await replaceInput(user, JSON.stringify({ arr: tooLong, target: 0 }));
   await user.click(screen.getByRole('button', { name: /^run$/i }));
 
   const alert = await screen.findByRole('alert');
   expect(alert).toHaveTextContent(/\S/);
   // Previous frames are untouched -- default input's first frame is still shown.
-  expect(screen.getByText(/sorting 6 values/i)).toBeInTheDocument();
+  expect(screen.getByText(/checking every value in order/i)).toBeInTheDocument();
 });
 
 test('malformed JSON shows an inline message and does not crash', async () => {
   const user = userEvent.setup();
-  render(<VizIsland id="bubble-sort" />);
-  await screen.findByText(/sorting 6 values/i);
+  render(<VizIsland id="linear-search" />);
+  await screen.findByText(/checking every value in order/i);
 
   await openEditor(user);
   await replaceInput(user, '{ this is not json');
@@ -69,7 +73,7 @@ test('malformed JSON shows an inline message and does not crash', async () => {
 
   const alert = await screen.findByRole('alert');
   expect(alert).toHaveTextContent(/\S/);
-  expect(screen.getByText(/sorting 6 values/i)).toBeInTheDocument();
+  expect(screen.getByText(/checking every value in order/i)).toBeInTheDocument();
 });
 
 test('Reset restores the default input text and default frames', async () => {
@@ -97,8 +101,8 @@ test('Reset restores the default input text and default frames', async () => {
 
 test('the validation message is associated with the textarea via aria-describedby', async () => {
   const user = userEvent.setup();
-  render(<VizIsland id="bubble-sort" />);
-  await screen.findByText(/sorting 6 values/i);
+  render(<VizIsland id="linear-search" />);
+  await screen.findByText(/checking every value in order/i);
 
   await openEditor(user);
   const textarea = await replaceInput(user, 'not json at all');
