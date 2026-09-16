@@ -43,3 +43,8 @@ test('buildBarSummary appends a description per range mark', () => {
   const summary = buildBarSummary([5, 2, 9], [{ kind: 'done', at: { t: 'range', from: 0, to: 2 } }]);
   expect(summary).toBe('Array, 3 values. 3 slots done.');
 });
+
+test('buildBarSummary describes a null slot as empty, not as a value', () => {
+  const summary = buildBarSummary([5, null, 3], [{ kind: 'cursor', at: { t: 'index', i: 1 } }]);
+  expect(summary).toBe('Array, 3 values. Slot 1 (empty) is cursor.');
+});

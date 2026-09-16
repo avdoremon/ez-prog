@@ -38,7 +38,7 @@ export function resolveBarMarks(marks: Mark[], length: number): Map<number, Mark
  * TreeView3D's buildSceneSummary, but "Array, N values" wording and
  * slot-based mark descriptions instead of tree-node ones).
  */
-export function buildBarSummary(state: number[], marks: Mark[] = []): string {
+export function buildBarSummary(state: (number | null)[], marks: Mark[] = []): string {
   if (state.length === 0) return 'Empty array.';
 
   const base = `Array, ${state.length} value${state.length === 1 ? '' : 's'}.`;
@@ -46,7 +46,9 @@ export function buildBarSummary(state: number[], marks: Mark[] = []): string {
   const parts: string[] = [];
   for (const mark of marks) {
     if (mark.at.t === 'index') {
-      parts.push(`Slot ${mark.at.i} (value ${state[mark.at.i]}) is ${mark.kind}.`);
+      const value = state[mark.at.i];
+      const described = value === null ? 'empty' : `value ${value}`;
+      parts.push(`Slot ${mark.at.i} (${described}) is ${mark.kind}.`);
     } else if (mark.at.t === 'range') {
       const count = Math.abs(mark.at.to - mark.at.from) + 1;
       parts.push(`${count} slot${count === 1 ? '' : 's'} ${mark.kind}.`);
