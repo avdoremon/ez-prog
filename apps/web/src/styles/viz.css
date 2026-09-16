@@ -645,3 +645,49 @@
   margin-top: .5rem;
   font-weight: 600;
 }
+
+.bar-view-3d {
+  margin-top: .5rem;
+}
+
+.bar-view-3d--empty {
+  padding: 1rem;
+  text-align: center;
+}
+
+.bar-view-3d__canvas-wrap {
+  height: 24rem;
+  border: 2px solid var(--muted);
+}
+
+.bar-view-3d__canvas-wrap canvas {
+  display: block;
+}
+
+.bar-view-3d__bars {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .35rem;
+  margin-top: .5rem;
+}
+
+.bar-view-3d__bar-button {
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  border: 2px solid var(--muted);
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.bar-view-3d__bar-button:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.bar-view-3d__summary {
+  margin-top: .5rem;
+  font-weight: 600;
+}
