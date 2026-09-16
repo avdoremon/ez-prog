@@ -555,15 +555,24 @@
 }
 
 /*
- * +6rem headroom over the tallest of the 5 BarView3D lessons' real
- * measured post-hydration figure height (selection-sort.mdx, 75rem),
- * matching the same headroom convention the other three renderers' own
- * dedicated rules above use. Measured with the `min-height` floor
- * temporarily neutralized via a throwaway Playwright script, same method
- * as those three.
+ * +6rem headroom over the tallest of all 18 BarView3D lessons' real
+ * measured post-hydration figure height, matching the same headroom
+ * convention the other three renderers' own dedicated rules above use.
+ * Measured across each lesson's ENTIRE run (not just its first frame)
+ * with the `min-height` floor temporarily neutralized via a throwaway
+ * Playwright script, same method as those three.
+ *
+ * Originally 81rem, sized only against the 5 original sort lessons
+ * (tallest: selection-sort.mdx, 75rem). The 13-lesson follow-up migration
+ * (docs/superpowers/plans/2026-09-16-barview3d-full-migration.md) found a
+ * much taller real worst case: hash-table.mdx peaks at 110.59rem partway
+ * through its run (step 12, mid-probe -- not its first frame), because
+ * its code sample (a full class with two methods) and vars table are
+ * simply longer content than any sort lesson's, not because anything in
+ * BarView3D itself is broken. heap.mdx is the next tallest, at 98.13rem.
  */
 .js .viz.viz--barview3d {
-  min-height: 81rem;
+  min-height: 117rem;
 }
 
 .graph-view-3d {

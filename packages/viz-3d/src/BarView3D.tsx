@@ -78,9 +78,17 @@ export function BarView3D({ state, marks = NO_MARKS, label }: BarView3DProps) {
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const reducedMotion = usePrefersReducedMotion();
 
-  if (state.length === 0) {
-    return <p className="bar-view-3d bar-view-3d--empty">{label}: empty</p>;
-  }
+  // Unlike TreeView3D/HierarchyView3D (whose graphs are fixed for a whole
+  // lesson run and never legitimately empty, since every schema requires
+  // at least one value), a plain array CAN legitimately be empty on some
+  // frames of a single run -- heap's generator starts from an empty heap
+  // and grows it one insert at a time. An early "nothing to ever show"
+  // return here (as those two renderers have) would replace the entire
+  // canvas/button-strip with a static placeholder on heap's very first
+  // frame, breaking the whole page rather than just showing zero bars.
+  // No special-casing is needed below: every computation already handles
+  // state.length === 0 correctly (an empty bars map, a zero-item render
+  // loop, buildBarSummary's own "Empty array." text).
 
   const hasFocusedBar = focusedIndex !== null && state[focusedIndex] !== undefined;
   const focusedBar = hasFocusedBar ? (bars.get(focusedIndex!) ?? null) : null;
