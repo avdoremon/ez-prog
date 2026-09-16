@@ -97,7 +97,7 @@ counting method, code fences excluded), for calibrating trims:**
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/bfs.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
 old_string:
 ```
@@ -109,7 +109,7 @@ import Viz from '../../../components/Viz.astro';
 import RunnableCode from '../../../components/RunnableCode.tsx';
 ```
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -157,19 +157,19 @@ bfs(adj, 0);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint and trim if needed**
+- [x] **Step 3: Verify content lint and trim if needed**
 
 Run: `pnpm lint:content`
 Expected: eventually exits 0 with `Content lint passed.` If it first reports
 `prose-word-limit` for `bfs.mdx`, apply the Global Constraints trim procedure
 to `bfs.mdx`'s `## Trade-offs` section and re-run until clean.
 
-- [ ] **Step 4: Typecheck**
+- [x] **Step 4: Typecheck**
 
 Run: `pnpm typecheck`
 Expected: exits 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/bfs.mdx
@@ -182,9 +182,9 @@ git commit -m "feat: migrate the bfs lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/binary-search.mdx`
 
-- [ ] **Step 1: Add the import** (same pattern as Task 1, Step 1, this file)
+- [x] **Step 1: Add the import** (same pattern as Task 1, Step 1, this file)
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -223,13 +223,13 @@ binarySearch([3, 7, 7, 7, 12, 19, 25], 19);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content` (this lesson has
+- [x] **Step 3: Verify content lint** — `pnpm lint:content` (this lesson has
   172 words of headroom before Step 2; unlikely to need a trim, but follow
   the Global Constraints procedure if it does).
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/binary-search.mdx
@@ -242,9 +242,9 @@ git commit -m "feat: migrate the binary-search lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/bubble-sort.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -291,12 +291,12 @@ bubbleSort([5, 2, 9, 1, 7, 3]);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/bubble-sort.mdx
@@ -309,9 +309,9 @@ git commit -m "feat: migrate the bubble-sort lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/dfs.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -359,12 +359,12 @@ dfs(adj, 0);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/dfs.mdx
@@ -377,9 +377,9 @@ git commit -m "feat: migrate the dfs lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/dijkstra.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -442,13 +442,13 @@ dijkstra(adj, 0, 4);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed (this lesson starts closest to budget of the graph
   lessons — 6 words of headroom — a trim is likely required).
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/dijkstra.mdx
@@ -461,9 +461,9 @@ git commit -m "feat: migrate the dijkstra lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/dynamic-programming.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -500,12 +500,12 @@ fib(10);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/dynamic-programming.mdx
@@ -518,9 +518,9 @@ git commit -m "feat: migrate the dynamic-programming lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/greedy.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -561,13 +561,13 @@ greedyCoins([25, 10, 5, 1], 41);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
   already at the 700-word cap, so a trim to `## Trade-offs` (per Global
   Constraints) is required here.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/greedy.mdx
@@ -580,9 +580,9 @@ git commit -m "feat: migrate the greedy lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/insertion-sort.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -627,12 +627,12 @@ insertionSort([5, 2, 9, 1, 7, 3]);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim (Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim (Global
   Constraints) — this lesson has 2 words of headroom, a trim is required.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/insertion-sort.mdx
@@ -645,9 +645,9 @@ git commit -m "feat: migrate the insertion-sort lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/linear-search.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -678,12 +678,12 @@ linearSearch([4, 8, 15, 16, 23, 42], 23);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/linear-search.mdx
@@ -696,9 +696,9 @@ git commit -m "feat: migrate the linear-search lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/merge-sort.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -747,12 +747,12 @@ mergeSort([5, 2, 9, 1, 7, 3]);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim (Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim (Global
   Constraints) — this lesson has 2 words of headroom, a trim is required.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/merge-sort.mdx
@@ -765,9 +765,9 @@ git commit -m "feat: migrate the merge-sort lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/quick-sort.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -816,12 +816,12 @@ quickSort([5, 2, 9, 1, 7, 3]);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim (Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim (Global
   Constraints) — this lesson has 3 words of headroom, a trim is required.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/quick-sort.mdx
@@ -834,9 +834,9 @@ git commit -m "feat: migrate the quick-sort lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/selection-sort.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -877,12 +877,12 @@ selectionSort([5, 2, 9, 1, 7, 3]);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim (Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim (Global
   Constraints) — this lesson has 1 word of headroom, a trim is required.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/selection-sort.mdx
@@ -895,9 +895,9 @@ git commit -m "feat: migrate the selection-sort lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/sliding-window.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -942,12 +942,12 @@ maxWindowSum([2, 1, 5, 1, 3, 2], 3);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/sliding-window.mdx
@@ -960,9 +960,9 @@ git commit -m "feat: migrate the sliding-window lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/algorithms/two-pointer.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1001,12 +1001,12 @@ twoSumSorted([2, 4, 7, 11, 15], 15);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/algorithms/two-pointer.mdx
@@ -1019,9 +1019,9 @@ git commit -m "feat: migrate the two-pointer lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/data-structures/bst.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1056,13 +1056,13 @@ bstSearch([8, 3, 10, 1, 6, 9, 14], 6);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
   already at the 700-word cap, so a trim to `## Trade-offs` (per Global
   Constraints) is required here.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/bst.mdx
@@ -1075,9 +1075,9 @@ git commit -m "feat: migrate the bst lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/data-structures/graph.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1113,12 +1113,12 @@ describe(['a', 'b', 'c', 'd'], edges, false);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/graph.mdx
@@ -1138,9 +1138,9 @@ Wrap them in the `class HashTable` they clearly belong to (implied by `##
 How it works`'s description of the same structure), so the runnable version
 is self-contained.
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1214,13 +1214,13 @@ console.log('has 20', table.has(20));
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
   already at the 700-word cap and the `class` wrapper adds real words, so a
   trim to `## Trade-offs` (per Global Constraints) is required here.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/hash-table.mdx
@@ -1233,9 +1233,9 @@ git commit -m "feat: migrate the hash-table lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/data-structures/heap.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1276,12 +1276,12 @@ heapInsert([9, 5, 6, 2, 3], 8);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/heap.mdx
@@ -1300,9 +1300,9 @@ would `JSON.stringify` a deeply nested object and read poorly. Add two small
 helpers (`makeList`, `toArray`) and finish with `console.log` calls instead,
 matching `recursion.mdx`'s console-output style.
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1370,12 +1370,12 @@ console.log('list now', toArray(result.head));
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed (the helpers add real words; a trim is likely).
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/linked-list.mdx
@@ -1388,9 +1388,9 @@ git commit -m "feat: migrate the linked-list lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/data-structures/queue.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1427,13 +1427,13 @@ runQueue([1, 2, 3, null, 4]);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
   already at the 700-word cap, so a trim to `## Trade-offs` (per Global
   Constraints) is required here.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/queue.mdx
@@ -1446,9 +1446,9 @@ git commit -m "feat: migrate the queue lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/data-structures/stack.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1483,12 +1483,12 @@ runStack([4, 8, 15, null, 16]);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/stack.mdx
@@ -1501,9 +1501,9 @@ git commit -m "feat: migrate the stack lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/data-structures/tree.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1540,12 +1540,12 @@ traverse([8, 3, 10, 1, 6, 9, 14], 'in');
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/tree.mdx
@@ -1562,9 +1562,9 @@ git commit -m "feat: migrate the tree lesson to RunnableCode"
 so the runnable version can demonstrate the lesson's own headline claim
 ("searching `ca` does not return found" for a trie holding cat/car/cart).
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1620,13 +1620,13 @@ console.log('cart', search(root, 'cart'));
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed (`search`/`newNode` add real words; a trim is
   likely).
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/data-structures/trie.mdx
@@ -1639,9 +1639,9 @@ git commit -m "feat: migrate the trie lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/complexity/amortized-analysis.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1682,13 +1682,13 @@ arr.data.slice(0, arr.size);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`. This lesson is
   already at the 700-word cap, so a trim to `## Trade-offs` (per Global
   Constraints) is required here.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/complexity/amortized-analysis.mdx
@@ -1705,9 +1705,9 @@ git commit -m "feat: migrate the amortized-analysis lesson to RunnableCode"
 invocations and `console.log` calls (unlike every other lesson in this
 plan) — no new invocation line is needed, only the fence-to-component swap.
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1752,13 +1752,13 @@ console.log('average', total / each.length);
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed (this is the smallest change in the plan; unlikely
   to need one, but follow the procedure if it does).
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/complexity/best-average-worst-case.mdx
@@ -1771,9 +1771,9 @@ git commit -m "feat: migrate the best-average-worst-case lesson to RunnableCode"
 
 **Files:** Modify `apps/web/src/content/docs/complexity/big-o.mdx`
 
-- [ ] **Step 1: Add the import**
+- [x] **Step 1: Add the import**
 
-- [ ] **Step 2: Replace the Try it block**
+- [x] **Step 2: Replace the Try it block**
 
 old_string:
 ````
@@ -1834,12 +1834,12 @@ console.log('binary', countedBinarySearch(arr, 91));
 `} />
 ````
 
-- [ ] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
+- [x] **Step 3: Verify content lint** — `pnpm lint:content`, trim per Global
   Constraints if needed.
 
-- [ ] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
+- [x] **Step 4: Typecheck** — `pnpm typecheck`, expect exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/content/docs/complexity/big-o.mdx
@@ -1861,7 +1861,7 @@ git commit -m "feat: migrate the big-o lesson to RunnableCode"
   already iterate (Run/Reset output, axe-once-hydrated, CLS-once-hydrated).
   No new test loop is written; extending the array is sufficient.
 
-- [ ] **Step 1: Extend `RUNNABLE_LESSONS` with all 26 migrated lessons**
+- [x] **Step 1: Extend `RUNNABLE_LESSONS` with all 26 migrated lessons**
 
 old_string:
 ```ts
@@ -1905,7 +1905,7 @@ const RUNNABLE_LESSONS: { path: string; expectedText: string }[] = [
 ];
 ```
 
-- [ ] **Step 2: Run the e2e suite**
+- [x] **Step 2: Run the e2e suite**
 
 Run: `pnpm build && pnpm test:e2e`
 Expected: all tests pass, including the now 28-entry `RUNNABLE_LESSONS`
@@ -1916,7 +1916,7 @@ slip in the plan's exact numbers is more likely than a runner bug — cross
 check against the pilot lessons' pattern before suspecting `RunnableCode`
 itself) and fix the array entry, not the lesson's algorithm.
 
-- [ ] **Step 3: Note the completed rollout in AUTHORING.md**
+- [x] **Step 3: Note the completed rollout in AUTHORING.md**
 
 `docs/AUTHORING.md` §4.9 already documents the `<RunnableCode>` convention
 generically (written when only the two pilots existed) — no convention text
@@ -1944,13 +1944,13 @@ All 28 lessons use `<RunnableCode>` as of the
 static fenced `## Try it` block to use as a counter-example.
 ```
 
-- [ ] **Step 4: Full gate run**
+- [x] **Step 4: Full gate run**
 
 Run, in order:
 `pnpm lint:content && pnpm typecheck && pnpm test && pnpm build && pnpm check:offline && pnpm test:e2e`
 Expected: all exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/e2e/lesson.spec.ts docs/AUTHORING.md
@@ -1961,16 +1961,16 @@ git commit -m "test: extend RunnableCode e2e coverage to all 28 lessons"
 
 ## Definition of Done
 
-- [ ] All 26 remaining lessons (Tasks 1–26) import `RunnableCode` and render
+- [x] All 26 remaining lessons (Tasks 1–26) import `RunnableCode` and render
       `<RunnableCode lang="js" client:visible source={...} />` in place of
       their static `## Try it` fence.
-- [ ] Every migrated lesson passes `pnpm lint:content` (700-word budget
+- [x] Every migrated lesson passes `pnpm lint:content` (700-word budget
       included) after any needed `## Trade-offs`/`## How it works` trim.
-- [ ] `RUNNABLE_LESSONS` in `apps/web/e2e/lesson.spec.ts` lists all 28
+- [x] `RUNNABLE_LESSONS` in `apps/web/e2e/lesson.spec.ts` lists all 28
       lessons; `pnpm test:e2e` passes for all of them (Run/Reset output,
       axe, CLS).
-- [ ] `docs/AUTHORING.md` §4.9 notes the rollout is complete.
-- [ ] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
+- [x] `docs/AUTHORING.md` §4.9 notes the rollout is complete.
+- [x] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
       `pnpm check:offline`, `pnpm test:e2e` all exit 0 (Task 27, Step 4).
-- [ ] No file under `packages/` was edited; `RunnableCode.tsx` and
+- [x] No file under `packages/` was edited; `RunnableCode.tsx` and
       `apps/web/src/lib/runner/` were not edited.
