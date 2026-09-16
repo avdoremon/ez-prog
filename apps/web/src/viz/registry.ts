@@ -17,7 +17,7 @@ const registry = {
     code: () => import('./code/binary-search/index.js'),
   },
   'bubble-sort': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Array being sorted by repeated swaps',
     defaultInput: { arr: [5, 2, 9, 1, 7, 3] },
     // Quadratic — tighter than the global MAX_FRAMES budget.
@@ -38,7 +38,7 @@ const registry = {
     code: () => import('./code/bubble-sort/index.js'),
   },
   'selection-sort': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Array being sorted by selecting the smallest remaining value',
     // Deliberately the same six values as the 'bubble-sort' and
     // 'insertion-sort' entries, so the three quadratic sorts can be compared
@@ -65,7 +65,7 @@ const registry = {
     code: () => import('./code/selection-sort/index.js'),
   },
   'insertion-sort': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Array being sorted by inserting each value into the sorted prefix',
     defaultInput: { arr: [5, 2, 9, 1, 7, 3] },
     // Quadratic — tighter than the global MAX_FRAMES budget.
@@ -96,7 +96,7 @@ const registry = {
     code: () => import('./code/heap/index.js'),
   },
   'merge-sort': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Array being sorted by splitting into runs and merging them back',
     defaultInput: { arr: [5, 2, 9, 1, 7, 3, 8, 4] },
     // Every level of the recursion writes n values, so frames grow as n log n.
@@ -111,7 +111,7 @@ const registry = {
     code: () => import('./code/merge-sort/index.js'),
   },
   'quick-sort': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Array being partitioned around a pivot',
     defaultInput: { arr: [5, 2, 9, 1, 7, 3, 8, 4] },
     // Quadratic in the worst case (already-sorted input, with this pivot).
