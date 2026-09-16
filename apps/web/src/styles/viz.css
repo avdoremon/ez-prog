@@ -554,6 +554,18 @@
   min-height: 96rem;
 }
 
+/*
+ * +6rem headroom over the tallest of the 5 BarView3D lessons' real
+ * measured post-hydration figure height (selection-sort.mdx, 75rem),
+ * matching the same headroom convention the other three renderers' own
+ * dedicated rules above use. Measured with the `min-height` floor
+ * temporarily neutralized via a throwaway Playwright script, same method
+ * as those three.
+ */
+.js .viz.viz--barview3d {
+  min-height: 81rem;
+}
+
 .graph-view-3d {
   margin-top: .5rem;
 }

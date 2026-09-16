@@ -98,15 +98,18 @@ test('merge/quick-sort worst case (24 bars) stays visibly separated on screen', 
 });
 
 test("every sort lesson's defaultInput (6 or 8 values) stays visibly separated on screen", () => {
-  // Measured: 22.25px / 19.88px -- fewer bars dollies the camera in
-  // closer (per cameraDistanceFor's own formula), so these read even
-  // more comfortably than either worst case above.
+  // Measured: 18.88px / 18.28px. At this few bars the horizontal fit
+  // alone would dolly the camera in closer, but cameraDistanceFor takes
+  // the LARGER of the horizontal and vertical fits (see its own doc
+  // comment) -- the vertical fit (fitting the tallest bar's full height)
+  // dominates here, which is why these two numbers sit close together
+  // instead of scaling down with n the way the 16/24-bar cases above do.
   const gap6 = run([5, 2, 9, 1, 7, 3], '6-bar defaultInput');
   const gap8 = run([5, 2, 9, 1, 7, 3, 8, 4], '8-bar defaultInput');
   expect(gap6).toBeGreaterThan(MIN_GAP_PX);
-  expect(gap6).toBeCloseTo(22.25, 1);
+  expect(gap6).toBeCloseTo(18.88, 1);
   expect(gap8).toBeGreaterThan(MIN_GAP_PX);
-  expect(gap8).toBeCloseTo(19.88, 1);
+  expect(gap8).toBeCloseTo(18.28, 1);
 });
 
 test('a single bar does not throw and sits on screen', () => {
