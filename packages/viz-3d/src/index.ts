@@ -15,3 +15,11 @@ export {
   HierarchyView3D, HIERARCHY_CAMERA_FOV, HIERARCHY_CAMERA_POSITION,
   type HierarchyView3DProps,
 } from './HierarchyView3D.js';
+export {
+  BAR_WIDTH, BAR_PITCH, BAR_MAX_HEIGHT, MIN_BAR_HEIGHT,
+  CAMERA_MARGIN, MIN_CAMERA_DISTANCE, layoutBar3D, cameraDistanceFor, type Bar3D,
+} from './barLayout.js';
+export { resolveBarMarks, buildBarSummary } from './barSummary.js';
+export {
+  BarView3D, BAR_CAMERA_FOV, BAR_CAMERA_HEIGHT, type BarView3DProps,
+} from './BarView3D.js';
