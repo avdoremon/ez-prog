@@ -306,30 +306,30 @@ correct), and the `DONE` frame (every bar reads as sorted/`done`-colored).
 
 ## 7. Definition of Done
 
-- [ ] `packages/viz-3d` gains: `layoutBar3D`, `cameraDistanceFor`,
+- [x] `packages/viz-3d` gains: `layoutBar3D`, `cameraDistanceFor`,
       `BarView3D`, and the `bar-view-3d__*` CSS class family (`viz.css`).
-- [ ] All 5 sort lessons' registry entries (`bubble-sort`, `insertion-sort`,
+- [x] All 5 sort lessons' registry entries (`bubble-sort`, `insertion-sort`,
       `selection-sort`, `merge-sort`, `quick-sort`) migrated: `renderer`
       field only, `<Viz id="...">` unchanged, verified by hand that every
       lesson's prose still reads sensibly with no edits needed.
-- [ ] `barLayout.ts`/`cameraDistanceFor` unit-tested per §6, including
+- [x] `barLayout.ts`/`cameraDistanceFor` unit-tested per §6, including
       sign, zero-value floor, and determinism.
-- [ ] `barProjection.test.ts` measures real on-screen bar spacing at every
+- [x] `barProjection.test.ts` measures real on-screen bar spacing at every
       lesson's actual schema-max array length (16/16/16/24/24), not just
       `defaultInput` — and the §5 table's "none expected" schema-change
       claim is either confirmed by this test or corrected, matching what
       actually gets found (per `HierarchyView3D`'s own precedent of a
       spec's initial optimistic claim being wrong until measured).
-- [ ] Accessibility (§4) verified by e2e test for all 5 lessons: value-
+- [x] Accessibility (§4) verified by e2e test for all 5 lessons: value-
       and-mark-describing button labels, camera-pan-on-focus, live-region
       announcement, `prefers-reduced-motion`, axe zero-violations.
-- [ ] CLS budget for `BarView3D` is a real measured value for all 5
+- [x] CLS budget for `BarView3D` is a real measured value for all 5
       lessons (via the existing e2e CLS loop), not assumed from another
       3D renderer's already-shipped number.
-- [ ] All 5 lessons visually verified via screenshot of the built page
+- [x] All 5 lessons visually verified via screenshot of the built page
       (§6) before being considered done — not test-suite-green alone —
       specifically a mid-run swap frame and the final `DONE` frame.
-- [ ] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
+- [x] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
       `pnpm check:offline`, `pnpm test:e2e` all exit 0.
-- [ ] No file under `packages/viz-core` is edited. No `.mdx` lesson file's
+- [x] No file under `packages/viz-core` is edited. No `.mdx` lesson file's
       prose changes, only its registry entry.

@@ -516,7 +516,7 @@ Verbatim shape, from the real `binary-search` entry:
 Field by field:
 
 - `renderer` — `'ArrayView'`, `'TreeView'`, `'GraphView'`, `'TreeView3D'`,
-  `'GraphView3D'`, or `'HierarchyView3D'`; the union in
+  `'GraphView3D'`, `'HierarchyView3D'`, or `'BarView3D'`; the union in
   `apps/web/src/viz/types.ts` is what the type allows. Choosing between them is ordinary
   content work. **Writing a new one is still an engine change** (§0), and there are now
   two different shapes that change can take, depending on whether the renderer's
@@ -666,6 +666,24 @@ Field by field:
     `docs/superpowers/specs/2026-08-31-hierarchyview-3d-design.md`'s §5.1/§5.2
     "Superseded" notes for the full derivation and history before touching
     `hierarchyLayout.ts`'s constants or either lesson's schema again.
+  - **`BarView3D`** draws a plain `number[]` — the same shape `ArrayView` draws as a
+    flat row of cells — as bars in a row instead, height encoding each value's
+    magnitude (negative values extend below a `y=0` baseline plane rather than being
+    clamped or hidden). Unlike every other 3D renderer here, its camera distance is NOT
+    a fixed, worst-case-tuned constant: bar spacing never shrinks as the array grows
+    (unlike `HierarchyView3D`'s fixed bounding radius, which does), so a closed-form
+    formula dollies the camera back exactly as far as the current array's length and
+    tallest value require, recomputed once per run — `cameraDistanceFor` takes the
+    larger of a horizontal fit (row width) and a vertical fit (tallest bar's height),
+    after an early version that fit only the horizontal axis let the tallest bar clip
+    through the canvas top, a real rendering defect a screenshot check caught (the same
+    "DOM assertions can't see into WebGL" lesson `graph-intro`'s crowding bug and
+    `dijkstra`'s weight labels already taught this project). Same accessible-interaction
+    pattern as its three siblings — a focusable per-slot button strip below the canvas
+    plus a live-region summary — because the WebGL canvas itself is `aria-hidden`. Used
+    by `bubble-sort`, `insertion-sort`, `selection-sort`, `merge-sort`, and `quick-sort`;
+    see `docs/superpowers/plans/2026-09-16-barview-3d.md` for the migration that moved
+    all 5 off `ArrayView`.
 - `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
   `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
   screen-reader user or a JS-disabled reader can act on.
