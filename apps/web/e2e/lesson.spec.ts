@@ -300,6 +300,46 @@ test('the 3D tree view is keyboard-operable and announces the focused node', asy
   await expect(summary).toContainText(/^Node 2, value/);
 });
 
+test('the 3D bar view is keyboard-operable and announces the focused slot', async ({ page }) => {
+  await page.goto('/algorithms/bubble-sort/');
+  const barButtons = page.locator('.bar-view-3d__bar-button');
+  await expect(barButtons.first()).toBeVisible();
+
+  const summary = page.locator('.bar-view-3d__summary');
+  const beforeFocus = await summary.textContent();
+  // bubble-sort's defaultInput is [5, 2, 9, 1, 7, 3] -- 6 values (see
+  // apps/web/src/viz/registry.ts).
+  expect(beforeFocus).toContain('Array, 6 values.');
+
+  await barButtons.nth(1).focus();
+  await expect(summary).not.toHaveText(beforeFocus ?? '');
+  await expect(summary).toContainText(/^Slot 1, value/);
+
+  await page.keyboard.press('Tab');
+  await expect(summary).toContainText(/^Slot 2, value/);
+});
+
+test('/algorithms/bubble-sort/ does not shift layout while the 3D view hydrates', async ({ page }) => {
+  await page.goto('/algorithms/bubble-sort/');
+  await page.waitForSelector('.bar-view-3d__bar-button');
+  const cls = await page.evaluate(
+    () =>
+      new Promise<number>((resolve) => {
+        let total = 0;
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries() as (PerformanceEntry & {
+            value: number;
+            hadRecentInput: boolean;
+          })[]) {
+            if (!entry.hadRecentInput) total += entry.value;
+          }
+        }).observe({ type: 'layout-shift', buffered: true });
+        setTimeout(() => resolve(total), 1000);
+      }),
+  );
+  expect(cls).toBeLessThan(0.1);
+});
+
 test('/data-structures/tree/ does not shift layout while the 3D view hydrates', async ({ page }) => {
   await page.goto('/data-structures/tree/');
   // Anchors this test to a genuinely hydrated page: without this, a 3D
