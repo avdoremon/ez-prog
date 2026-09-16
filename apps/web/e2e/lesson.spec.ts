@@ -39,7 +39,14 @@ test('the player steps through frames', async ({ page }) => {
   const note = page.getByTestId('note').first();
   const before = await note.textContent();
   await page.getByRole('button', { name: /next step/i }).first().click();
-  expect(await note.textContent()).not.toBe(before);
+  // Locator-based assertions auto-retry until the timeout, unlike a bare
+  // .textContent() read compared with expect().toBe() -- necessary now
+  // that every array-shaped lesson (this test's LESSON included) renders
+  // through BarView3D, whose extra async renderer import + WebGL setup
+  // is measurably slower than the plain ArrayView this test was written
+  // against, which had made the update land synchronously enough that
+  // the race never surfaced.
+  await expect(note).not.toHaveText(before ?? '');
 });
 
 test('prose renders with JavaScript disabled', async ({ browser }) => {
@@ -317,6 +324,24 @@ test('the 3D bar view is keyboard-operable and announces the focused slot', asyn
 
   await page.keyboard.press('Tab');
   await expect(summary).toContainText(/^Slot 2, value/);
+});
+
+test('the 3D bar view announces an empty slot correctly', async ({ page }) => {
+  await page.goto('/data-structures/hash-table/');
+  const barButtons = page.locator('.bar-view-3d__bar-button');
+  await expect(barButtons.first()).toBeVisible();
+
+  const summary = page.locator('.bar-view-3d__summary');
+  // hash-table's defaultInput is { keys: [12, 25, 37, 6, 19], capacity: 7,
+  // lookup: 19 } -- a 7-slot table (see apps/web/src/viz/registry.ts).
+  await expect(summary).toContainText('Array, 7 values.');
+
+  // At least one slot starts empty (5 keys into 7 slots) -- find the first
+  // button whose visible text is the empty marker and focus it.
+  const emptyButton = barButtons.filter({ hasText: '·' }).first();
+  await expect(emptyButton).toBeVisible();
+  await emptyButton.focus();
+  await expect(summary).toContainText(/, empty/);
 });
 
 test('/algorithms/bubble-sort/ does not shift layout while the 3D view hydrates', async ({ page }) => {
