@@ -3,7 +3,7 @@ import type { VizEntry } from './types.js';
 
 const registry = {
   'binary-search': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Sorted array being searched',
     defaultInput: { arr: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target: 23 },
     inputSchema: z.object({
@@ -84,7 +84,7 @@ const registry = {
     code: () => import('./code/insertion-sort/index.js'),
   },
   heap: {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Binary max-heap stored as a flat array, root at index 0',
     defaultInput: { values: [15, 4, 23, 8, 42, 16], extract: true },
     inputSchema: z.object({
@@ -126,7 +126,7 @@ const registry = {
     code: () => import('./code/quick-sort/index.js'),
   },
   'amortized-growth': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Dynamic array growing by doubling as values are appended',
     defaultInput: { count: 16, initialCapacity: 1 },
     // Copies during resizes add frames beyond the append count.
@@ -142,7 +142,7 @@ const registry = {
     code: () => import('./code/amortized-growth/index.js'),
   },
   'greedy-coins': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Coin denominations, largest first, as greedy works through them',
     defaultInput: { coins: [25, 10, 5, 1], amount: 63 },
     inputSchema: z.object({
@@ -349,7 +349,7 @@ const registry = {
     code: () => import('./code/hash-table/index.js'),
   },
   queue: {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Queue contents, front at the left and back at the right',
     // A number enqueues it; null dequeues. Interleaved so FIFO order shows.
     defaultInput: { ops: [4, 8, 15, null, 16, null, 23] },
@@ -364,7 +364,7 @@ const registry = {
     code: () => import('./code/queue/index.js'),
   },
   stack: {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Stack contents, with the top at the right',
     // A number pushes it; null pops. Interleaved so the LIFO order is visible
     // rather than just "fill up, then drain".
@@ -377,7 +377,7 @@ const registry = {
     code: () => import('./code/stack/index.js'),
   },
   'array-basics': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Array being read by index and then inserted into',
     defaultInput: { arr: [4, 8, 15, 16, 23, 42], readIndex: 3, insertAt: 1, value: 9 },
     inputSchema: z
@@ -530,7 +530,7 @@ const registry = {
     code: () => import('./code/linked-list/index.js'),
   },
   'sliding-window': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Array with a fixed-width window sliding across it',
     defaultInput: { arr: [3, -1, 4, 8, 2, -5, 7, 1], k: 3 },
     inputSchema: z
@@ -549,7 +549,7 @@ const registry = {
     code: () => import('./code/sliding-window/index.js'),
   },
   'two-pointer': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Sorted array with a pointer converging from each end',
     defaultInput: { arr: [1, 3, 4, 6, 8, 11, 15], target: 14 },
     inputSchema: z.object({
@@ -563,7 +563,7 @@ const registry = {
     code: () => import('./code/two-pointer/index.js'),
   },
   'linear-search': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Array scanned one value at a time',
     defaultInput: { arr: [2, 5, 8, 12, 16, 23, 38, 56, 72, 91], target: 23 },
     inputSchema: z.object({
