@@ -1,8 +1,26 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { expect, test } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import VizIsland from './VizIsland.js';
 import { VIZ } from '../viz/registry.js';
+
+// jsdom cannot create a real WebGL context, so @react-three/fiber's
+// <Canvas> throws inside any 3D renderer -- and every lesson now uses one
+// (ArrayView has no users left as of the full BarView3D migration). These
+// tests are about VizIsland's OWN behavior (input validation, Run/Reset,
+// frame stepping), not any renderer's rendering -- matching this
+// project's established practice of never unit-testing a 3D renderer's
+// actual canvas output (see TreeView3D/GraphView3D/HierarchyView3D's own
+// "verified by Playwright e2e instead" convention) -- so the renderer
+// components themselves are replaced with trivial stand-ins. Player's
+// note/vars/controls render independently of whatever the renderer prop
+// does, so every existing assertion below is unaffected.
+vi.mock('@cs/viz-3d', () => ({
+  BarView3D: () => null,
+  TreeView3D: () => null,
+  GraphView3D: () => null,
+  HierarchyView3D: () => null,
+}));
 
 // The disclosure is a native <details>/<summary>. It has no implicit ARIA
 // role recognised by aria-query (the role table @testing-library/dom relies
