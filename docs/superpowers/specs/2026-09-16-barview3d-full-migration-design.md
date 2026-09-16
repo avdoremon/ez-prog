@@ -189,18 +189,18 @@ No `.mdx` lesson prose changes — same as every prior 3D migration.
 
 ## 5. Definition of Done
 
-- [ ] `BarView3D`, `barLayout.ts`, `barSummary.ts` support
+- [x] `BarView3D`, `barLayout.ts`, `barSummary.ts` support
       `(number | null)[]` state; empty slots render as a visually distinct
       wireframe marker, never scaled by any value.
-- [ ] All 13 lessons migrated to `BarView3D`; `binary-search`,
+- [x] All 13 lessons migrated to `BarView3D`; `binary-search`,
       `linear-search`, `sliding-window`, `two-pointer` have `arr.max()`
       tightened 64 → 32, confirmed by real screenshot.
-- [ ] `barLayout.test.ts`/`barSummary.test.ts` cover null-slot behavior.
-- [ ] `barProjection.test.ts` covers the new 32-bar worst case with a real
+- [x] `barLayout.test.ts`/`barSummary.test.ts` cover null-slot behavior.
+- [x] `barProjection.test.ts` covers the new 32-bar worst case with a real
       measured, pinned number.
-- [ ] All 13 lessons screenshot-verified, including `hash-table`'s
+- [x] All 13 lessons screenshot-verified, including `hash-table`'s
       empty-slot rendering and the 32-bar case.
-- [ ] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
+- [x] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
       `pnpm check:offline`, `pnpm test:e2e` all exit 0.
-- [ ] No file under `packages/viz-core` is edited. No `.mdx` lesson file's
+- [x] No file under `packages/viz-core` is edited. No `.mdx` lesson file's
       prose changed.

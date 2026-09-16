@@ -45,7 +45,7 @@ dependency.
   `layoutBar3D` signature changes from `(values: number[])` to
   `(values: (number | null)[])`.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Add to `packages/viz-3d/src/barLayout.test.ts`:
 
@@ -88,12 +88,12 @@ test("a null slot's x position is unaffected -- it still occupies its own row sl
 });
 ```
 
-- [ ] **Step 2: Run the tests to verify they fail**
+- [x] **Step 2: Run the tests to verify they fail**
 
 Run: `pnpm exec vitest run packages/viz-3d/src/barLayout.test.ts`
 Expected: FAIL — `layoutBar3D` doesn't accept `null` yet / `EMPTY_BAR_HEIGHT` doesn't exist.
 
-- [ ] **Step 3: Update `barLayout.ts`**
+- [x] **Step 3: Update `barLayout.ts`**
 
 old_string:
 ```ts
@@ -179,14 +179,14 @@ export function layoutBar3D(values: (number | null)[]): Map<number, Bar3D> {
 }
 ```
 
-- [ ] **Step 4: Run the tests to verify they pass**
+- [x] **Step 4: Run the tests to verify they pass**
 
 Run: `pnpm exec vitest run packages/viz-3d/src/barLayout.test.ts`
 Expected: PASS, all tests green (including the pre-existing ones from the
 original migration — `Math.max(1, ...numeric...)` behaves identically to
 the old `Math.max(1, ...values...)` when no value is null).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/viz-3d/src/barLayout.ts packages/viz-3d/src/barLayout.test.ts
@@ -206,7 +206,7 @@ git commit -m "feat: add null-slot support to layoutBar3D"
   `(number | null)[]`. `resolveBarMarks` is unchanged (it never inspects
   values).
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add to `packages/viz-3d/src/barSummary.test.ts`:
 
@@ -217,12 +217,12 @@ test('buildBarSummary describes a null slot as empty, not as a value', () => {
 });
 ```
 
-- [ ] **Step 2: Run the test to verify it fails**
+- [x] **Step 2: Run the test to verify it fails**
 
 Run: `pnpm exec vitest run packages/viz-3d/src/barSummary.test.ts`
 Expected: FAIL — current text reads `(value null)`, not `(empty)`.
 
-- [ ] **Step 3: Update `barSummary.ts`**
+- [x] **Step 3: Update `barSummary.ts`**
 
 old_string:
 ```ts
@@ -254,12 +254,12 @@ export function buildBarSummary(state: (number | null)[], marks: Mark[] = []): s
     } else if (mark.at.t === 'range') {
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+- [x] **Step 4: Run the test to verify it passes**
 
 Run: `pnpm exec vitest run packages/viz-3d/src/barSummary.test.ts`
 Expected: PASS, all tests green.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/viz-3d/src/barSummary.ts packages/viz-3d/src/barSummary.test.ts
@@ -277,7 +277,7 @@ git commit -m "feat: add null-slot support to buildBarSummary"
 - `BarView3DProps.state` type changes from `number[]` to
   `(number | null)[]`.
 
-- [ ] **Step 1: Update the props type and imports**
+- [x] **Step 1: Update the props type and imports**
 
 old_string:
 ```ts
@@ -309,7 +309,7 @@ export interface BarView3DProps {
 }
 ```
 
-- [ ] **Step 2: Render an empty slot as a wireframe marker, not a solid colored bar**
+- [x] **Step 2: Render an empty slot as a wireframe marker, not a solid colored bar**
 
 old_string:
 ```ts
@@ -367,7 +367,7 @@ new_string:
           })}
 ```
 
-- [ ] **Step 3: Update the button-strip and focus-announcement labels for empty slots**
+- [x] **Step 3: Update the button-strip and focus-announcement labels for empty slots**
 
 old_string:
 ```ts
@@ -431,7 +431,7 @@ new_string:
       </div>
 ```
 
-- [ ] **Step 4: Typecheck**
+- [x] **Step 4: Typecheck**
 
 Run: `pnpm --filter @cs/viz-3d exec tsc --noEmit`
 Expected: exits 0. `EMPTY_BAR_HEIGHT` is imported but not directly
@@ -440,7 +440,7 @@ from the import if the compiler flags it as unused; keep it only if a
 lint rule requires re-exporting types consumed transitively (check
 `pnpm typecheck`'s actual output rather than guessing).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/viz-3d/src/BarView3D.tsx
@@ -462,7 +462,7 @@ git commit -m "feat: render null slots as a wireframe marker in BarView3D"
 — keep this task to the renderer field only, so a failure in Task 6 does
 not block these four from at least rendering correctly first.)
 
-- [ ] **Step 1–10: One `renderer` field edit per lesson**
+- [x] **Step 1–10: One `renderer` field edit per lesson**
 
 For each of the 10 ids above, in `apps/web/src/viz/registry.ts`:
 
@@ -483,12 +483,12 @@ new_string:
 `'two-pointer':`, `'linear-search':` — each is `renderer: 'ArrayView',`
 → `renderer: 'BarView3D',` on that entry only.)
 
-- [ ] **Step 11: Typecheck and content-lint**
+- [x] **Step 11: Typecheck and content-lint**
 
 Run: `pnpm typecheck && pnpm lint:content`
 Expected: both exit 0.
 
-- [ ] **Step 12: Commit**
+- [x] **Step 12: Commit**
 
 ```bash
 git add apps/web/src/viz/registry.ts
@@ -502,7 +502,7 @@ git commit -m "feat: migrate 10 plain-array lessons to BarView3D"
 **Files:**
 - Modify: `apps/web/src/viz/registry.ts`
 
-- [ ] **Step 1: `hash-table`**
+- [x] **Step 1: `hash-table`**
 
 old_string:
 ```ts
@@ -516,7 +516,7 @@ new_string:
     renderer: 'BarView3D',
 ```
 
-- [ ] **Step 2: `dp-fibonacci`**
+- [x] **Step 2: `dp-fibonacci`**
 
 old_string:
 ```ts
@@ -530,7 +530,7 @@ new_string:
     renderer: 'BarView3D',
 ```
 
-- [ ] **Step 3: `recursion`**
+- [x] **Step 3: `recursion`**
 
 old_string:
 ```ts
@@ -544,12 +544,12 @@ new_string:
     renderer: 'BarView3D',
 ```
 
-- [ ] **Step 4: Typecheck and content-lint**
+- [x] **Step 4: Typecheck and content-lint**
 
 Run: `pnpm typecheck && pnpm lint:content`
 Expected: both exit 0.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/viz/registry.ts
@@ -570,14 +570,14 @@ to every other lesson this project has shipped. Tighten to 32 (measured
 6.77px, an 126% margin), matching this project's practice of anchoring a
 schema cap to a real measured legibility number.
 
-- [ ] **Step 1: Tighten all 4 schemas**
+- [x] **Step 1: Tighten all 4 schemas**
 
 For `binary-search`, `linear-search`, `sliding-window`, `two-pointer` in
 `apps/web/src/viz/registry.ts`, each has an `arr: z.array(z.number())...max(64)`
 — change `.max(64)` to `.max(32)` on each of these 4 entries only (every
 other entry's own `.max(...)` value is untouched).
 
-- [ ] **Step 2: Add the n=32 case to `barProjection.test.ts`**
+- [x] **Step 2: Add the n=32 case to `barProjection.test.ts`**
 
 old_string:
 ```ts
@@ -600,7 +600,7 @@ test('binary-search/linear-search/sliding-window/two-pointer worst case (32 bars
 test('merge/quick-sort worst case (24 bars) stays visibly separated on screen', () => {
 ```
 
-- [ ] **Step 3: Run the updated projection test**
+- [x] **Step 3: Run the updated projection test**
 
 Run: `pnpm exec vitest run packages/viz-3d/src/barProjection.test.ts`
 Expected: PASS. If the measured number differs from 6.77 by more than
@@ -608,7 +608,7 @@ the `toBeCloseTo` tolerance, update the pinned value to what actually
 printed (read the `console.log` output, same as the original migration's
 Task 7) rather than forcing the assertion to match a stale guess.
 
-- [ ] **Step 4: Typecheck and content-lint**
+- [x] **Step 4: Typecheck and content-lint**
 
 Run: `pnpm typecheck && pnpm lint:content`
 Expected: both exit 0. (`lint:content` matters here because a `defaultInput`
@@ -616,7 +616,7 @@ that now exceeds a tightened schema max would fail — confirm each of the
 4 lessons' `defaultInput.arr.length` is well under 32; all four currently
 default to 7–10 elements, so this should pass without further changes.)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/viz/registry.ts packages/viz-3d/src/barProjection.test.ts
@@ -637,7 +637,7 @@ Step 2). This task adds exactly one new test: a keyboard-operable check on
 slot announcement) the original `BarView3D` migration's `bubble-sort`
 keyboard test never exercised.
 
-- [ ] **Step 1: Add the hash-table keyboard/empty-slot test**
+- [x] **Step 1: Add the hash-table keyboard/empty-slot test**
 
 Find the existing `test('the 3D bar view is keyboard-operable and
 announces the focused slot'...)` block in `apps/web/e2e/lesson.spec.ts`
@@ -663,13 +663,13 @@ test('the 3D bar view announces an empty slot correctly', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Confirm `ALL_LESSONS` already covers all 13 migrated lessons**
+- [x] **Step 2: Confirm `ALL_LESSONS` already covers all 13 migrated lessons**
 
 Run: `grep -c "'/algorithms/binary-search/'\|'/algorithms/linear-search/'\|'/algorithms/two-pointer/'\|'/algorithms/sliding-window/'\|'/data-structures/array/'\|'/data-structures/heap/'\|'/complexity/amortized-analysis/'\|'/algorithms/greedy/'\|'/data-structures/queue/'\|'/data-structures/stack/'\|'/data-structures/hash-table/'\|'/algorithms/dynamic-programming/'\|'/algorithms/recursion/'" apps/web/e2e/lesson.spec.ts`
 Expected: all 13 paths already present in `ALL_LESSONS` (they were, before
 this plan — this step only confirms nothing needs adding there).
 
-- [ ] **Step 3: Build and run the new test**
+- [x] **Step 3: Build and run the new test**
 
 Run: `pnpm build && pnpm --filter web exec playwright test -g "empty slot"`
 Expected: PASS. If the "at least one empty slot" assumption doesn't hold
@@ -679,13 +679,13 @@ the actual rendered button text/aria-label via
 test's selector to match what's actually rendered — not the other way
 around.
 
-- [ ] **Step 4: Run the full e2e suite**
+- [x] **Step 4: Run the full e2e suite**
 
 Run: `pnpm test:e2e`
 Expected: all tests pass, including the `ALL_LESSONS` loops now covering
 all 18 `BarView3D` lessons (5 original + 13 new).
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add apps/web/e2e/lesson.spec.ts
@@ -700,11 +700,11 @@ Not a code-writing task — the same real-build screenshot methodology
 Task 9 of the original `BarView3D` plan used (and which caught a real
 camera bug there).
 
-- [ ] **Step 1: Build and preview**
+- [x] **Step 1: Build and preview**
 
 Run: `pnpm build && pnpm --filter web exec astro preview`
 
-- [ ] **Step 2: Screenshot every one of the 13 lessons**
+- [x] **Step 2: Screenshot every one of the 13 lessons**
 
 For each: `/algorithms/binary-search/`, `/data-structures/heap/`,
 `/complexity/amortized-analysis/`, `/algorithms/greedy/`,
@@ -721,7 +721,7 @@ palette, and — specifically for `hash-table`, `dp-fibonacci`, and
 clearly different from a solid real-value bar, not just "a very short
 bar."
 
-- [ ] **Step 3: Screenshot one of the 4 tightened lessons at its new max**
+- [x] **Step 3: Screenshot one of the 4 tightened lessons at its new max**
 
 Pick `binary-search`; via "Try your own input," submit a 32-element
 array (e.g. `{ arr: Array.from({length: 32}, (_, i) => i * 3), target: 45 }`)
@@ -729,7 +729,7 @@ and screenshot. Confirm by eye that bars are individually distinguishable
 — matching the measured 6.77px margin from Task 6, not just trusting the
 number.
 
-- [ ] **Step 4: Re-check the CSS reservation**
+- [x] **Step 4: Re-check the CSS reservation**
 
 Using the same throwaway-script method the original `BarView3D` plan's
 Task 9 used (temporarily neutralizing `.js .viz.viz--barview3d`'s
@@ -739,12 +739,12 @@ check whether any of these 13 lessons' figure height exceeds the existing
 `.js .viz.viz--barview3d` rule to (new tallest measured) + 6rem; if not,
 leave it unchanged and say so in the Task 9 commit message.
 
-- [ ] **Step 5: Re-run the CLS e2e tests if the CSS reservation changed**
+- [x] **Step 5: Re-run the CLS e2e tests if the CSS reservation changed**
 
 Run: `pnpm test:e2e -g "does not shift layout"`
 Expected: all pass.
 
-- [ ] **Step 6: Commit (only if Step 4 changed a file)**
+- [x] **Step 6: Commit (only if Step 4 changed a file)**
 
 ```bash
 git add apps/web/src/styles/viz.css
@@ -760,7 +760,7 @@ git commit -m "fix: adjust BarView3D's CSS reservation for the newly-migrated le
 - Modify: `docs/superpowers/specs/2026-09-16-barview3d-full-migration-design.md`
 - Modify: `docs/superpowers/plans/2026-09-16-barview3d-full-migration.md` (this file)
 
-- [ ] **Step 1: Update `BarView3D`'s AUTHORING.md paragraph to mention null-slot support**
+- [x] **Step 1: Update `BarView3D`'s AUTHORING.md paragraph to mention null-slot support**
 
 Find the `BarView3D` bullet added by the original migration (in §4.6,
 right after the `HierarchyView3D` bullet) and add one sentence after its
@@ -788,13 +788,13 @@ new_string:
     extension and the remaining 13).
 ```
 
-- [ ] **Step 2: Full gate run**
+- [x] **Step 2: Full gate run**
 
 Run, in order:
 `pnpm lint:content && pnpm typecheck && pnpm test && pnpm build && pnpm check:offline && pnpm test:e2e`
 Expected: all exit 0.
 
-- [ ] **Step 3: Check off this plan's and the spec's Definition of Done**
+- [x] **Step 3: Check off this plan's and the spec's Definition of Done**
 
 Update every `- [ ]` in this plan file and in
 `docs/superpowers/specs/2026-09-16-barview3d-full-migration-design.md`'s
@@ -802,7 +802,7 @@ Update every `- [ ]` in this plan file and in
 what was expected (e.g. if the 6.77px pin needed adjusting, or the CSS
 reservation needed raising).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add docs/AUTHORING.md docs/superpowers/specs/2026-09-16-barview3d-full-migration-design.md docs/superpowers/plans/2026-09-16-barview3d-full-migration.md
@@ -813,24 +813,71 @@ git commit -m "docs: document BarView3D's null-slot support and close out the fu
 
 ## Definition of Done
 
-- [ ] `BarView3D`/`barLayout.ts`/`barSummary.ts` support
+- [x] `BarView3D`/`barLayout.ts`/`barSummary.ts` support
       `(number | null)[]` state; empty slots render as a fixed-height
       wireframe marker.
-- [ ] All 13 remaining `ArrayView` lessons migrated to `BarView3D`
+- [x] All 13 remaining `ArrayView` lessons migrated to `BarView3D`
       (`renderer` field only, except the 4 schema-tightened ones).
-- [ ] `binary-search`, `linear-search`, `sliding-window`, `two-pointer`
+- [x] `binary-search`, `linear-search`, `sliding-window`, `two-pointer`
       have `arr.max()` tightened 64 → 32, with a real pinned projection
       measurement backing it.
-- [ ] `barLayout.test.ts`/`barSummary.test.ts` cover null-slot behavior;
+- [x] `barLayout.test.ts`/`barSummary.test.ts` cover null-slot behavior;
       `barProjection.test.ts` covers the new 32-bar case.
-- [ ] e2e: `hash-table`'s empty-slot announcement is tested; the
+- [x] e2e: `hash-table`'s empty-slot announcement is tested; the
       pre-existing `ALL_LESSONS` loop covers all 13 lessons' axe/CLS.
-- [ ] All 13 lessons visually verified via screenshot, including
+- [x] All 13 lessons visually verified via screenshot, including
       `hash-table`/`dp-fibonacci`/`recursion`'s empty-slot rendering and
       one 32-bar worst case — not test-suite-green alone.
-- [ ] CSS reservation re-checked against these 13 lessons' real measured
+- [x] CSS reservation re-checked against these 13 lessons' real measured
       heights.
-- [ ] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
+- [x] `pnpm lint:content`, `pnpm typecheck`, `pnpm test`, `pnpm build`,
       `pnpm check:offline`, `pnpm test:e2e` all exit 0.
-- [ ] No file under `packages/viz-core` is edited. No `.mdx` lesson file's
+- [x] No file under `packages/viz-core` is edited. No `.mdx` lesson file's
       prose changed.
+
+## Actual outcomes vs. what this plan expected
+
+- **The n=32 measurement was corrected: 6.62px, not 6.77px.** The
+  design spec's table used a quick standalone script to decide scope
+  before any code existed; `barProjection.test.ts`, importing the real
+  shipped `cameraDistanceFor`/`BAR_CAMERA_HEIGHT`, is authoritative.
+  Both the spec and the pinned test assertion were corrected to 6.62px.
+  Still comfortably clear of `MIN_GAP_PX = 3`.
+- **Two real defects found during Task 8's screenshot/height
+  verification, neither anticipated by the spec:**
+  1. `heap`'s generator legitimately starts from an empty array (it
+     builds the heap one insert at a time). `BarView3D`'s "nothing to
+     ever show" early return — copied from `TreeView3D`/`GraphView3D`/
+     `HierarchyView3D`, whose graphs are fixed for a whole run and
+     never legitimately empty — replaced the entire canvas with a
+     static placeholder on that frame, breaking the page. Fixed by
+     removing the guard entirely (every computation already handled
+     length 0 correctly on its own). `recursion` exercises the mirror
+     case (ends empty once the call stack fully unwinds) and needed no
+     separate fix, confirming the removal was the right general fix,
+     not a `heap`-specific patch.
+  2. `hash-table`'s real worst-case height across its run (110.59rem,
+     at a mid-probe frame — not its first frame) far exceeded the
+     81rem CSS reservation sized only against the original 5 sort
+     lessons. Not a `BarView3D` bug — its own canvas area measured a
+     normal ~30rem — just a much longer code sample (a full class) and
+     wider vars table than any sort lesson has. Reservation raised to
+     117rem (110.59rem + 6rem headroom).
+- **A third, unplanned fix: `apps/web/e2e/lesson.spec.ts`'s generic
+  "the player steps through frames" test had a latent timing race**
+  (`expect(await note.textContent())` instead of an auto-retrying
+  locator assertion) that `BarView3D`'s slower hydration (extra dynamic
+  import + WebGL setup vs. `ArrayView`'s near-instant one) exposed —
+  failed 3 of 5 reruns before the fix, 0 of 5 after switching to
+  `await expect(note).not.toHaveText(...)`.
+- **A fourth, unplanned fix: `VizIsland.test.tsx` needed two changes,
+  not the lesson-id swap the earlier `bubble-sort` fix used.** Every
+  `ArrayView` lesson has now migrated, so there is no lightweight
+  lesson left to route a jsdom test away from a 3D renderer. Added a
+  general `window.matchMedia` polyfill to the shared jsdom
+  `test-setup.ts` (jsdom never implements it, and every 3D renderer's
+  reduced-motion hook calls it), and mocked `@cs/viz-3d`'s renderer
+  exports in this specific test file, since jsdom cannot create a real
+  WebGL context for `@react-three/fiber`'s `<Canvas>` at all — matching
+  this project's own established practice of never unit-testing a 3D
+  renderer's actual canvas output.

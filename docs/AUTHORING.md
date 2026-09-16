@@ -680,10 +680,24 @@ Field by field:
     "DOM assertions can't see into WebGL" lesson `graph-intro`'s crowding bug and
     `dijkstra`'s weight labels already taught this project). Same accessible-interaction
     pattern as its three siblings — a focusable per-slot button strip below the canvas
-    plus a live-region summary — because the WebGL canvas itself is `aria-hidden`. Used
-    by `bubble-sort`, `insertion-sort`, `selection-sort`, `merge-sort`, and `quick-sort`;
-    see `docs/superpowers/plans/2026-09-16-barview-3d.md` for the migration that moved
-    all 5 off `ArrayView`.
+    plus a live-region summary — because the WebGL canvas itself is `aria-hidden`. Also
+    supports `(number | null)[]` state — a `null` slot renders as a fixed-height
+    wireframe marker (never scaled by any value, so it can't be mistaken for a real
+    small value), the 3D equivalent of `ArrayView`'s dashed empty cell; a slot's length
+    can also change frame to frame within a single run (`heap`'s array starts empty and
+    grows one insert at a time, `recursion`'s call stack ends empty once everything
+    returns) — nothing about `BarView3D` special-cases "no bars at all" as a dead end,
+    unlike `TreeView3D`/`GraphView3D`/`HierarchyView3D`, whose graphs are fixed for a
+    whole run and never legitimately empty. **`ArrayView` has no lessons left using it**
+    — every lesson that ever did now uses `BarView3D`: `bubble-sort`, `insertion-sort`,
+    `selection-sort`, `merge-sort`, `quick-sort`, `binary-search`, `linear-search`,
+    `two-pointer`, `sliding-window`, `array-basics`, `heap`, `amortized-growth`,
+    `greedy-coins`, `queue`, `stack`, `hash-table`, `dp-fibonacci`, and `recursion`. See
+    `docs/superpowers/plans/2026-09-16-barview-3d.md` (the original 5-lesson migration)
+    and `docs/superpowers/plans/2026-09-16-barview3d-full-migration.md` (the null-slot
+    extension and the remaining 13 — including why `binary-search`/`linear-search`/
+    `sliding-window`/`two-pointer`'s `arr` cap dropped from 64 to 32, a real legibility
+    margin measured via `barProjection.test.ts`, not assumed).
 - `label` — a short string, used as the `aria-label` on the rendered `ArrayView` /
   `TreeView` and as the `<noscript>` fallback text in `Viz.astro`. Write something a
   screen-reader user or a JS-disabled reader can act on.
