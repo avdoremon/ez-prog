@@ -9,7 +9,7 @@ import { buildBarSummary, resolveBarMarks } from './barSummary.js';
 import { colorForMarks, INK_COLOR } from './markColors.js';
 
 export interface BarView3DProps {
-  state: number[];
+  state: (number | null)[];
   marks?: Mark[];
   label: string;
 }
@@ -85,8 +85,9 @@ export function BarView3D({ state, marks = NO_MARKS, label }: BarView3DProps) {
   const hasFocusedBar = focusedIndex !== null && state[focusedIndex] !== undefined;
   const focusedBar = hasFocusedBar ? (bars.get(focusedIndex!) ?? null) : null;
   const focusedKinds = hasFocusedBar ? (resolved.get(focusedIndex!) ?? []) : [];
+  const focusedValue = hasFocusedBar ? state[focusedIndex!] : null;
   const focusedAnnouncement = hasFocusedBar
-    ? `Slot ${focusedIndex}, value ${state[focusedIndex!]}` +
+    ? `Slot ${focusedIndex}, ${focusedValue === null ? 'empty' : `value ${focusedValue}`}` +
       `${focusedKinds.length ? `, ${focusedKinds.join(' ')}` : ''}.`
     : null;
   const displayed = focusedAnnouncement ?? summary;
@@ -114,17 +115,23 @@ export function BarView3D({ state, marks = NO_MARKS, label }: BarView3DProps) {
               <group key={i} position={[bar.x, bar.y, bar.z]}>
                 <mesh>
                   <boxGeometry args={[BAR_WIDTH, bar.height, BAR_WIDTH]} />
-                  <meshStandardMaterial color={color} />
+                  {bar.isEmpty ? (
+                    <meshStandardMaterial color={color} wireframe />
+                  ) : (
+                    <meshStandardMaterial color={color} />
+                  )}
                 </mesh>
-                <Text
-                  position={[0, (bar.sign * bar.height) / 2 + bar.sign * 0.35, 0]}
-                  fontSize={0.32}
-                  color={INK_COLOR}
-                  anchorX="center"
-                  font="/fonts/IBMPlexMono-Regular.ttf"
-                >
-                  {String(value)}
-                </Text>
+                {!bar.isEmpty && (
+                  <Text
+                    position={[0, (bar.sign * bar.height) / 2 + bar.sign * 0.35, 0]}
+                    fontSize={0.32}
+                    color={INK_COLOR}
+                    anchorX="center"
+                    font="/fonts/IBMPlexMono-Regular.ttf"
+                  >
+                    {String(value)}
+                  </Text>
+                )}
               </group>
             );
           })}
@@ -134,17 +141,18 @@ export function BarView3D({ state, marks = NO_MARKS, label }: BarView3DProps) {
       <div className="bar-view-3d__bars" role="group" aria-label={label}>
         {state.map((value, i) => {
           const kinds = resolved.get(i) ?? [];
+          const described = value === null ? 'empty' : `value ${value}`;
           return (
             <button
               key={i}
               type="button"
               className="bar-view-3d__bar-button"
-              aria-label={`Slot ${i}, value ${value}${kinds.length ? `, ${kinds.join(' ')}` : ''}`}
+              aria-label={`Slot ${i}, ${described}${kinds.length ? `, ${kinds.join(' ')}` : ''}`}
               onFocus={() => setFocusedIndex(i)}
               onBlur={() => setFocusedIndex(null)}
               onClick={() => setFocusedIndex(i)}
             >
-              {value}
+              {value === null ? '·' : value}
             </button>
           );
         })}

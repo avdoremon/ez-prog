@@ -45,7 +45,7 @@ export function layoutBar3D(values: (number | null)[]): Map<number, Bar3D> {
     const value = values[i];
     const x = (i - (n - 1) / 2) * BAR_PITCH;
 
-    if (value === null) {
+    if (value == null) {
       bars.set(i, { x, y: EMPTY_BAR_HEIGHT / 2, z: 0, height: EMPTY_BAR_HEIGHT, sign: 1, isEmpty: true });
       continue;
     }
