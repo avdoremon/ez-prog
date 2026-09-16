@@ -325,7 +325,7 @@ const registry = {
     code: () => import('./code/graph-intro/index.js'),
   },
   'hash-table': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Hash table slots, empty ones shown as gaps, with the key being placed',
     // Chosen so the run shows all three cases in order: four keys landing
     // directly in a free slot, then 19 colliding at slot 5 and probing 5 -> 6
@@ -438,7 +438,7 @@ const registry = {
     code: () => import('./code/trie/index.js'),
   },
   'dp-fibonacci': {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Fibonacci table, filled in bottom-up, one cell at a time',
     // n = 5 gives the table [0, 1, 1, 2, 3, 5]: two base cases plus three
     // computed cells, small enough to read at a glance.
@@ -456,7 +456,7 @@ const registry = {
     code: () => import('./code/dp-fibonacci/index.js'),
   },
   recursion: {
-    renderer: 'ArrayView',
+    renderer: 'BarView3D',
     label: 'Call stack for factorial(n), one frame per pending call',
     // Small enough that every frame's value stays a few digits, large enough
     // that the stack visibly grows before it drains: 4 calls, a base case,
